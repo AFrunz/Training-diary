@@ -11,7 +11,7 @@ import {
   setProgramItems,
   suggestProgramColor,
 } from './usecases/library'
-import { monthStats } from './usecases/stats'
+import { monthStats, yearStats } from './usecases/stats'
 import {
   addAdHocExercise,
   addSet,
@@ -49,6 +49,7 @@ export const createServices = (ports: Ports) => ({
   deleteAbsence: deleteAbsence(ports),
 
   monthStats: monthStats(ports),
+  yearStats: yearStats(ports),
   exportAll: exportAll(ports),
   importAll: importAll(ports),
   exportToFile: exportToFile(ports),

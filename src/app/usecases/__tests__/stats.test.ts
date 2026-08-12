@@ -2,7 +2,7 @@ import { OUTLIER_THRESHOLD_MS } from '../../../domain/rules/duration'
 import { id, instant, localDate } from '../../../domain/model/types'
 import { createFakePorts } from '../../testing/fakes'
 import type { FakePorts } from '../../testing/fakes'
-import { monthStats } from '../stats'
+import { monthStats, yearStats } from '../stats'
 
 const at = (iso: string) => instant(Date.parse(iso))
 const d = (s: string) => localDate(s)
@@ -196,5 +196,62 @@ describe('monthStats (FR-6.2)', () => {
 
     const stats = await monthStats(ports)({ anyDateOfMonth: AUGUST, today: d('2026-08-26') })
     expect(stats.streak.current).toBe(2)
+  })
+})
+
+describe('yearStats (FR-6.1)', () => {
+  it('считает весь год одним периодом', async () => {
+    const ports = setup()
+    for (const date of ['2026-01-05', '2026-06-10', '2026-08-03', '2026-12-28']) {
+      addWorkout(ports, { date, durationMs: hour })
+    }
+    addWorkout(ports, { date: '2025-12-30', durationMs: hour })
+
+    const stats = await yearStats(ports)({ anyDateOfYear: d('2026-08-11'), today: d('2026-12-31') })
+
+    expect(stats.workouts).toBe(4)
+  })
+
+  it('серия недель не рвётся на границе месяцев', async () => {
+    const ports = setup()
+    // четыре недели подряд, две из которых в разных месяцах
+    for (const date of ['2026-07-20', '2026-07-27', '2026-08-03', '2026-08-10']) {
+      addWorkout(ports, { date, durationMs: hour })
+    }
+
+    const stats = await yearStats(ports)({ anyDateOfYear: d('2026-08-11'), today: d('2026-08-12') })
+
+    expect(stats.streak.current).toBe(4)
+  })
+
+  it('месячная сводка того же периода видит только свой месяц', async () => {
+    const ports = setup()
+    for (const date of ['2026-07-20', '2026-07-27', '2026-08-03', '2026-08-10']) {
+      addWorkout(ports, { date, durationMs: hour })
+    }
+
+    const month = await monthStats(ports)({ anyDateOfMonth: d('2026-08-11'), today: d('2026-08-12') })
+
+    expect(month.workouts).toBe(2)
+    expect(month.streak.current).toBe(2)
+  })
+
+  it('среднее в неделю считается по неделям года, а не по среднему из месяцев', async () => {
+    const ports = setup()
+    for (const date of ['2026-01-05', '2026-01-12']) addWorkout(ports, { date, durationMs: hour })
+
+    const stats = await yearStats(ports)({ anyDateOfYear: d('2026-01-01'), today: d('2026-12-31') })
+
+    // 2026 год укладывается в 53 недели при начале недели с понедельника
+    expect(stats.perWeek).toBeCloseTo(2 / 53, 4)
+  })
+
+  it('пустой год не ломается', async () => {
+    const ports = setup()
+    const stats = await yearStats(ports)({ anyDateOfYear: d('2026-08-11'), today: d('2026-12-31') })
+
+    expect(stats.workouts).toBe(0)
+    expect(stats.averageDurationMs).toBeNull()
+    expect(stats.byProgram).toEqual([])
   })
 })

@@ -6,12 +6,11 @@ import { localDate } from '../../../domain/model/types'
 import { addDays, isWithin, weeksOfRange } from '../../../domain/rules/dates'
 
 /**
- * Данные экрана статистики: сводка сценария monthStats плюс разбивка по столбцам
- * графика. Расчётов здесь нет — только сборка уже посчитанных значений.
+ * Данные экрана статистики: сводка из сценариев monthStats и yearStats плюс
+ * разбивка по столбцам графика. Расчётов здесь нет — только сборка.
  *
- * Годовой режим складывается из двенадцати месячных сводок: отдельного сценария
- * yearStats в app пока нет, поэтому средние берутся взвешенными по числу
- * тренировок, а серия — из месяца, в который попадает сегодняшний день.
+ * Год считается сценарием одним периодом, поэтому серия недель не рвётся на
+ * границах месяцев; помесячные сводки нужны только для столбцов графика.
  */
 
 export type StatsMode = 'month' | 'year'
@@ -110,55 +109,13 @@ const loadYear = async (
 ): Promise<PeriodData> => {
   const year = yearOf(input.anchor)
   const anchors = Array.from({ length: 12 }, (_, index) => localDate(`${year}-${pad2(index + 1)}-01`))
-  const monthly = await Promise.all(
-    anchors.map((anchor) => services.monthStats({ anyDateOfMonth: anchor, today: input.today })),
-  )
 
-  const workouts = monthly.reduce((sum, month) => sum + month.workouts, 0)
-
-  /** Среднее по месяцам, взвешенное числом тренировок: длинный месяц весит больше. */
-  const weighted = (pick: (month: PeriodStats) => number | null): number | null => {
-    let sum = 0
-    let weight = 0
-    for (const month of monthly) {
-      const value = pick(month)
-      if (value === null || month.workouts === 0) continue
-      sum += value * month.workouts
-      weight += month.workouts
-    }
-    return weight === 0 ? null : sum / weight
-  }
-
-  const perWeekValues = monthly
-    .map((month) => month.perWeek)
-    .filter((value): value is number => value !== null)
-
-  const byProgram = new Map<string, { programId: string; name: string; color: string; count: number }>()
-  for (const month of monthly) {
-    for (const program of month.byProgram) {
-      const existing = byProgram.get(program.programId)
-      if (existing) existing.count += program.count
-      else byProgram.set(program.programId, { ...program })
-    }
-  }
-
-  const currentIndex = yearOf(input.today) === year ? monthOf(input.today) - 1 : 11
-
-  const stats: PeriodStats = {
-    workouts,
-    perWeek:
-      perWeekValues.length === 0
-        ? null
-        : perWeekValues.reduce((sum, value) => sum + value, 0) / perWeekValues.length,
-    averageDurationMs: weighted((month) => month.averageDurationMs),
-    completionRate: weighted((month) => month.completionRate),
-    streak: {
-      current: monthly[currentIndex]?.streak.current ?? 0,
-      record: monthly.reduce((max, month) => Math.max(max, month.streak.record), 0),
-    },
-    byProgram: [...byProgram.values()].sort((a, b) => b.count - a.count),
-    absenceDays: monthly.reduce((sum, month) => sum + month.absenceDays, 0),
-  }
+  // сводка считается по всему году сразу: серия недель не рвётся на границах месяцев
+  const [stats, monthly] = await Promise.all([
+    services.yearStats({ anyDateOfYear: input.anchor, today: input.today }),
+    // помесячная разбивка нужна только для столбцов графика
+    Promise.all(anchors.map((anchor) => services.monthStats({ anyDateOfMonth: anchor, today: input.today }))),
+  ])
 
   const columns = anchors.map((anchor, index) => ({
     key: anchor,
