@@ -26,7 +26,8 @@ export type DurationReason = 'ok' | 'no-completion' | 'backdated' | 'invalid-ran
 export const OUTLIER_THRESHOLD_MS = 6 * 60 * 60 * 1000
 
 export interface CompletableItem {
-  readonly completedAt: Instant | null
+  /** Поле необязательное: в записях из базы отметки может не быть вовсе. */
+  readonly completedAt?: Instant | null
 }
 
 export interface DurationInput {
@@ -48,9 +49,8 @@ export interface DurationResult {
 export function deriveFinishedAt(items: readonly CompletableItem[]): Instant | null {
   let latest: Instant | null = null
   for (const item of items) {
-    if (item.completedAt !== null && (latest === null || item.completedAt > latest)) {
-      latest = item.completedAt
-    }
+    const at = item.completedAt ?? null
+    if (at !== null && (latest === null || at > latest)) latest = at
   }
   return latest
 }

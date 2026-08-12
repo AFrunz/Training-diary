@@ -192,6 +192,10 @@ export const createFakePorts = (options?: {
         state.programItems = state.programItems.filter((i) => i.programId !== programId)
         state.programItems.push(...items)
       },
+      async remove(id) {
+        state.programs = state.programs.filter((p) => p.id !== id)
+        state.programItems = state.programItems.filter((i) => i.programId !== id)
+      },
     },
 
     exercises: {

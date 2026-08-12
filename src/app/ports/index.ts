@@ -60,6 +60,8 @@ export interface ProgramRepo {
   insert(program: Program, items: readonly ProgramItem[]): Promise<void>
   update(program: Program): Promise<void>
   replaceItems(programId: Id, items: readonly ProgramItem[]): Promise<void>
+  /** Нужно импорту в режиме «Заменить всё»: в интерфейсе программы только архивируются. */
+  remove(id: Id): Promise<void>
 }
 
 export interface ExerciseRepo {

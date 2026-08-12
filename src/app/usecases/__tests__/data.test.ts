@@ -143,6 +143,28 @@ describe('importAll — режим «Дополнить»', () => {
     expect(summary.added).toBe(0)
     expect(ports.state.workouts).toHaveLength(1)
   })
+
+  it('импорт не задваивает записи всех коллекций, а не только тренировок', async () => {
+    const ports = setup()
+    ports.state.absences.push({
+      id: id('a-1'),
+      startDate: localDate('2026-08-17'),
+      endDate: localDate('2026-08-23'),
+      type: 'vacation',
+      ...stamps,
+    })
+    const bundle = JSON.parse(JSON.stringify(await exportAll(ports)()))
+
+    await importAll(ports)({ raw: bundle, mode: 'merge' })
+    await importAll(ports)({ raw: bundle, mode: 'merge' })
+
+    expect(ports.state.exercises).toHaveLength(1)
+    expect(ports.state.programs).toHaveLength(1)
+    expect(ports.state.programItems).toHaveLength(1)
+    expect(ports.state.workoutItems).toHaveLength(1)
+    expect(ports.state.workoutSets).toHaveLength(1)
+    expect(ports.state.absences).toHaveLength(1)
+  })
 })
 
 describe('importAll — испорченные файлы', () => {

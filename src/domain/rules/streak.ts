@@ -44,7 +44,9 @@ export function computeStreaks(input: StreakInput): StreakResult {
 
   let record = 0
   let run = 0
-  for (const kind of kinds) {
+  for (const [index, kind] of kinds.entries()) {
+    // недели, которые ещё не наступили, пропуском не считаются
+    if (weeks[index]!.start > input.today) break
     if (kind === 'worked') {
       run += 1
       record = Math.max(record, run)
@@ -58,6 +60,8 @@ export function computeStreaks(input: StreakInput): StreakResult {
     const week = weeks[i]!
     const kind = kinds[i]!
 
+    // будущие недели ещё не наступили
+    if (week.start > input.today) continue
     if (kind === 'absent') continue
     if (kind === 'worked') {
       current += 1
