@@ -1,4 +1,5 @@
 import type { Id, LocalDate, WeightKg } from '../model/types'
+import { daysBetween } from '../rules/dates'
 
 /**
  * Проверки ввода. Возвращают код ошибки, а не готовый текст: тексты живут в словаре
@@ -18,45 +19,66 @@ export type ValidationCode =
   | 'range-too-long'
   | 'exercise-duplicate-in-program'
 
-export type ValidationResult = { readonly ok: true } | { readonly ok: false; readonly code: ValidationCode }
+export type ValidationResult =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly code: ValidationCode }
 
-/** Названия длиннее не помещаются ни в одну строку интерфейса и обрезаются везде. */
 export const MAX_NAME_LENGTH = 60
-/** Больше повторов в одном подходе — почти наверняка опечатка. */
 export const MAX_REPS = 999
-/** Мировой рекорд в приседе меньше, значит это опечатка в поле ввода. */
 export const MAX_WEIGHT_KG = 1000
-/** Отсутствие длиннее года — тоже опечатка при выборе дат. */
 export const MAX_ABSENCE_DAYS = 365
 
-const notImplemented = (name: string): never => {
-  throw new Error(`${name} не реализована`)
+const ok: ValidationResult = { ok: true }
+const fail = (code: ValidationCode): ValidationResult => ({ ok: false, code })
+
+/** Краевые пробелы не значимы, внутренние — значимы: «Жим  лёжа» и «Жим лёжа» разные. */
+const normalize = (name: string): string => name.trim()
+
+const checkName = (name: string): ValidationResult => {
+  const trimmed = normalize(name)
+  if (trimmed.length === 0) return fail('name-empty')
+  if (trimmed.length > MAX_NAME_LENGTH) return fail('name-too-long')
+  return ok
 }
 
-/**
- * Название упражнения: обязательное, уникальное без учёта регистра и краевых пробелов (FR-2.1).
- * `existingNames` — названия других упражнений, включая архивные.
- */
-export function validateExerciseName(_name: string, _existingNames: readonly string[]): ValidationResult {
-  return notImplemented('validateExerciseName')
+export function validateExerciseName(
+  name: string,
+  existingNames: readonly string[],
+): ValidationResult {
+  const basic = checkName(name)
+  if (!basic.ok) return basic
+
+  const candidate = normalize(name).toLowerCase()
+  const isDuplicate = existingNames.some((existing) => normalize(existing).toLowerCase() === candidate)
+  return isDuplicate ? fail('name-duplicate') : ok
 }
 
-/** Название программы: обязательное, но повторы разрешены — это дело пользователя (FR-3.1). */
-export function validateProgramName(_name: string): ValidationResult {
-  return notImplemented('validateProgramName')
+/** Названия программ повторяться могут: это дело пользователя (FR-3.1). */
+export function validateProgramName(name: string): ValidationResult {
+  return checkName(name)
 }
 
-/** Подход: повторы обязательны, вес — нет (упражнения без веса). */
-export function validateSet(_set: { weightKg?: WeightKg | null; reps: number }): ValidationResult {
-  return notImplemented('validateSet')
+export function validateSet(set: { weightKg?: WeightKg | null; reps: number }): ValidationResult {
+  if (!Number.isInteger(set.reps) || set.reps <= 0) return fail('reps-not-positive-integer')
+  if (set.reps > MAX_REPS) return fail('reps-too-large')
+
+  const weight = set.weightKg ?? null
+  if (weight !== null) {
+    if (!Number.isFinite(weight)) return fail('weight-not-finite')
+    if (weight < 0) return fail('weight-negative')
+    if (weight > MAX_WEIGHT_KG) return fail('weight-too-large')
+  }
+  return ok
 }
 
-/** Отсутствие: конец не раньше начала, разумная длина. */
-export function validateAbsenceRange(_from: LocalDate, _to: LocalDate): ValidationResult {
-  return notImplemented('validateAbsenceRange')
+export function validateAbsenceRange(from: LocalDate, to: LocalDate): ValidationResult {
+  if (to < from) return fail('range-inverted')
+  if (daysBetween(from, to) + 1 > MAX_ABSENCE_DAYS) return fail('range-too-long')
+  return ok
 }
 
-/** Состав программы: одно упражнение не может входить в неё дважды (FR-3.3). */
-export function validateProgramItems(_exerciseIds: readonly Id[]): ValidationResult {
-  return notImplemented('validateProgramItems')
+export function validateProgramItems(exerciseIds: readonly Id[]): ValidationResult {
+  return new Set(exerciseIds).size === exerciseIds.length
+    ? ok
+    : fail('exercise-duplicate-in-program')
 }

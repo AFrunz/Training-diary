@@ -1,49 +1,58 @@
 import type { WeightKg, WeightUnit } from '../model/types'
+import { toDisplayWeight } from './units'
 
 /**
  * Форматирование значений для интерфейса. Чистые функции: ни времени, ни локали
- * из окружения — всё приходит параметрами, иначе тесты станут недетерминированными.
+ * из окружения — всё приходит параметрами.
  *
- * Формат длительности взят из макетов: «47 мин» без часов и «1 ч 08 мин» с часами,
- * то есть при наличии часов минуты дополняются нулём.
+ * Формат длительности взят из макетов: «47 мин» без часов и «1 ч 08 мин» с часами.
  */
 
 export type Locale = 'ru' | 'en'
 
-/** Показывается вместо значения, когда данных нет (FR-6.4). */
 export const EMPTY_VALUE = '—'
 
-const notImplemented = (name: string): never => {
-  throw new Error(`${name} не реализована`)
+const WORDS = {
+  ru: { hour: 'ч', minute: 'мин', kg: 'кг', lb: 'lb' },
+  en: { hour: 'h', minute: 'min', kg: 'kg', lb: 'lb' },
+} as const
+
+const pad2 = (value: number): string => String(value).padStart(2, '0')
+
+/** Число без хвостовых нулей: 80 вместо 80.0, но 82.5 сохраняется. */
+const formatNumber = (value: number): string => String(value)
+
+export function formatDuration(ms: number | null, locale: Locale): string {
+  if (ms === null) return EMPTY_VALUE
+
+  const words = WORDS[locale]
+  const totalMinutes = Math.floor(Math.max(0, ms) / 60_000)
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
+
+  return hours > 0
+    ? `${hours} ${words.hour} ${pad2(minutes)} ${words.minute}`
+    : `${totalMinutes} ${words.minute}`
 }
 
-/** Длительность в человекочитаемом виде. null → «—». */
-export function formatDuration(_ms: number | null, _locale: Locale): string {
-  return notImplemented('formatDuration')
+export function formatElapsed(startedAt: number, now: number, locale: Locale): string {
+  return formatDuration(Math.max(0, now - startedAt), locale)
 }
 
-/** Время, прошедшее с начала тренировки, для счётчика в шапке (FR-4.3). */
-export function formatElapsed(_startedAt: number, _now: number, _locale: Locale): string {
-  return notImplemented('formatElapsed')
-}
-
-/**
- * Подпись подхода: «80 × 8», а для упражнения без веса — «× 12».
- * Разделитель дробной части — точка, как в макетах, независимо от языка.
- */
 export function formatSet(
-  _set: { weightKg?: WeightKg | null; reps: number },
-  _unit: WeightUnit,
+  set: { weightKg?: WeightKg | null; reps: number },
+  unit: WeightUnit,
 ): string {
-  return notImplemented('formatSet')
+  const weight = toDisplayWeight(set.weightKg ?? null, unit)
+  return weight === null ? `× ${set.reps}` : `${formatNumber(weight)} × ${set.reps}`
 }
 
-/** Вес с единицей измерения: «82.5 кг», «182 lb». null → «—». */
-export function formatWeight(_kg: WeightKg | null, _unit: WeightUnit, _locale: Locale): string {
-  return notImplemented('formatWeight')
+export function formatWeight(kg: WeightKg | null, unit: WeightUnit, locale: Locale): string {
+  const weight = toDisplayWeight(kg, unit)
+  if (weight === null) return EMPTY_VALUE
+  return `${formatNumber(weight)} ${WORDS[locale][unit]}`
 }
 
-/** Доля выполненных упражнений для бублика: «3/5». */
-export function formatCompletion(_done: number, _total: number): string {
-  return notImplemented('formatCompletion')
+export function formatCompletion(done: number, total: number): string {
+  return `${done}/${total}`
 }

@@ -1,4 +1,5 @@
 import type { DateRange, FirstDayOfWeek, LocalDate, WeightKg } from '../model/types'
+import { addDays, isWithin, weeksOfRange } from './dates'
 
 /**
  * Правила §5.3 ТЗ.
@@ -8,38 +9,60 @@ import type { DateRange, FirstDayOfWeek, LocalDate, WeightKg } from '../model/ty
  * целиком попавшие в отсутствие, из знаменателя исключаются.
  */
 
-/** Формула Эпли перестаёт быть осмысленной на больших числах повторов. */
 export const ONE_RM_MAX_REPS = 12
 
-const notImplemented = (name: string): never => {
-  throw new Error(`${name} не реализована`)
+export function epley1RM(weightKg: WeightKg | null, reps: number): number | null {
+  if (weightKg === null || !Number.isFinite(weightKg) || weightKg <= 0) return null
+  if (!Number.isInteger(reps) || reps <= 0 || reps > ONE_RM_MAX_REPS) return null
+  // на одном повторе разовый максимум — это и есть поднятый вес; формула его завысила бы
+  if (reps === 1) return weightKg
+  return weightKg * (1 + reps / 30)
 }
 
-/** Оценочный разовый максимум. null, если вес не заполнен или повторы вне допустимого диапазона. */
-export function epley1RM(_weightKg: WeightKg | null, _reps: number): number | null {
-  return notImplemented('epley1RM')
-}
-
-/** Среднее по значениям, где null — «нет данных». Если данных нет вовсе, результат null, а не 0 (FR-6.4). */
-export function averageOrNull(_values: readonly (number | null)[]): number | null {
-  return notImplemented('averageOrNull')
+export function averageOrNull(values: readonly (number | null)[]): number | null {
+  const known = values.filter((value): value is number => value !== null)
+  if (known.length === 0) return null
+  return known.reduce((sum, value) => sum + value, 0) / known.length
 }
 
 export interface WorkoutsPerWeekInput {
   readonly period: DateRange
-  /** Даты проведённых тренировок; вне периода игнорируются. */
   readonly workoutDates: readonly LocalDate[]
-  /** Отрезки отсутствия: отпуск, болезнь. */
   readonly absences: readonly DateRange[]
   readonly firstDayOfWeek: FirstDayOfWeek
 }
 
-/** Среднее число тренировок в неделю. null, если в периоде не осталось ни одной «зачётной» недели. */
-export function workoutsPerWeek(_input: WorkoutsPerWeekInput): number | null {
-  return notImplemented('workoutsPerWeek')
+/** Дни, попавшие хотя бы в одно отсутствие. Пересекающиеся отрезки не удваиваются. */
+const absentDays = (absences: readonly DateRange[]): Set<string> => {
+  const days = new Set<string>()
+  for (const absence of absences) {
+    if (absence.from > absence.to) continue
+    for (let day = absence.from; day <= absence.to; day = addDays(day, 1)) {
+      days.add(day)
+    }
+  }
+  return days
 }
 
-/** Сколько недель периода идут в знаменатель: недели целиком внутри отсутствия исключаются. */
-export function countEligibleWeeks(_input: Omit<WorkoutsPerWeekInput, 'workoutDates'>): number {
-  return notImplemented('countEligibleWeeks')
+export function countEligibleWeeks(input: Omit<WorkoutsPerWeekInput, 'workoutDates'>): number {
+  const weeks = weeksOfRange(input.period.from, input.period.to, input.firstDayOfWeek)
+  const absent = absentDays(input.absences)
+
+  return weeks.filter((week) => {
+    for (let day = week.start; day <= week.end; day = addDays(day, 1)) {
+      if (!absent.has(day)) return true
+    }
+    return false
+  }).length
+}
+
+export function workoutsPerWeek(input: WorkoutsPerWeekInput): number | null {
+  const eligibleWeeks = countEligibleWeeks(input)
+  if (eligibleWeeks === 0) return null
+
+  const workouts = input.workoutDates.filter((date) =>
+    isWithin(date, input.period.from, input.period.to),
+  ).length
+
+  return workouts / eligibleWeeks
 }

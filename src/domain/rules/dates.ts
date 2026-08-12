@@ -1,50 +1,88 @@
 import type { FirstDayOfWeek, Instant, LocalDate, WeekRange, WeekdayNumber } from '../model/types'
+import { localDate } from '../model/types'
 
-const notImplemented = (name: string): never => {
-  throw new Error(`${name} не реализована`)
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+const formatters = new Map<string, Intl.DateTimeFormat>()
+
+const formatterFor = (timeZone: string): Intl.DateTimeFormat => {
+  let formatter = formatters.get(timeZone)
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    formatters.set(timeZone, formatter)
+  }
+  return formatter
 }
 
-/** Календарная дата момента в указанной зоне. Принадлежность дню считается по локальной дате, а не по UTC (§5.3). */
-export function toLocalDate(_at: Instant, _timeZone: string): LocalDate {
-  return notImplemented('toLocalDate')
+/** Разбирает `YYYY-MM-DD` в числа без обращения к таймзонам. */
+const parts = (date: LocalDate): [number, number, number] => {
+  const [year, month, day] = date.split('-').map(Number)
+  return [year!, month!, day!]
 }
 
-/** Попадают ли два момента в один локальный день. */
-export function isSameLocalDay(_a: Instant, _b: Instant, _timeZone: string): boolean {
-  return notImplemented('isSameLocalDay')
+/** Календарная арифметика идёт через UTC-полночь: перевод часов на неё не влияет. */
+const toEpochDay = (date: LocalDate): number => {
+  const [year, month, day] = parts(date)
+  return Date.UTC(year, month - 1, day) / MS_PER_DAY
 }
 
-/** День недели по ISO: 1 — понедельник … 7 — воскресенье. */
-export function weekdayOf(_date: LocalDate): WeekdayNumber {
-  return notImplemented('weekdayOf')
+const fromEpochDay = (epochDay: number): LocalDate => {
+  const at = new Date(epochDay * MS_PER_DAY)
+  const year = String(at.getUTCFullYear()).padStart(4, '0')
+  const month = String(at.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(at.getUTCDate()).padStart(2, '0')
+  return localDate(`${year}-${month}-${day}`)
 }
 
-/** Начало недели, содержащей дату, с учётом настройки первого дня недели. */
-export function startOfWeek(_date: LocalDate, _firstDay: FirstDayOfWeek): LocalDate {
-  return notImplemented('startOfWeek')
+export function toLocalDate(at: Instant, timeZone: string): LocalDate {
+  // en-CA даёт ровно формат YYYY-MM-DD
+  return localDate(formatterFor(timeZone).format(new Date(at)))
 }
 
-/** Неделя, содержащая дату. */
-export function weekOf(_date: LocalDate, _firstDay: FirstDayOfWeek): WeekRange {
-  return notImplemented('weekOf')
+export function isSameLocalDay(a: Instant, b: Instant, timeZone: string): boolean {
+  return toLocalDate(a, timeZone) === toLocalDate(b, timeZone)
 }
 
-/** Все недели, пересекающиеся с отрезком дат, по возрастанию. Границы включительно. */
-export function weeksOfRange(_from: LocalDate, _to: LocalDate, _firstDay: FirstDayOfWeek): WeekRange[] {
-  return notImplemented('weeksOfRange')
+export function weekdayOf(date: LocalDate): WeekdayNumber {
+  const [year, month, day] = parts(date)
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+  return (weekday === 0 ? 7 : weekday) as WeekdayNumber
 }
 
-/** Разница в календарных днях: b − a. Для одной и той же даты — 0. */
-export function daysBetween(_a: LocalDate, _b: LocalDate): number {
-  return notImplemented('daysBetween')
+export function startOfWeek(date: LocalDate, firstDay: FirstDayOfWeek): LocalDate {
+  const offset = (weekdayOf(date) - firstDay + 7) % 7
+  return addDays(date, -offset)
 }
 
-/** Сдвиг даты на указанное число дней. */
-export function addDays(_date: LocalDate, _days: number): LocalDate {
-  return notImplemented('addDays')
+export function weekOf(date: LocalDate, firstDay: FirstDayOfWeek): WeekRange {
+  const start = startOfWeek(date, firstDay)
+  return { start, end: addDays(start, 6) }
 }
 
-/** Пересекается ли дата с отрезком, границы включительно. */
-export function isWithin(_date: LocalDate, _from: LocalDate, _to: LocalDate): boolean {
-  return notImplemented('isWithin')
+export function weeksOfRange(from: LocalDate, to: LocalDate, firstDay: FirstDayOfWeek): WeekRange[] {
+  if (from > to) return []
+  const weeks: WeekRange[] = []
+  let start = startOfWeek(from, firstDay)
+  while (start <= to) {
+    weeks.push({ start, end: addDays(start, 6) })
+    start = addDays(start, 7)
+  }
+  return weeks
+}
+
+export function daysBetween(a: LocalDate, b: LocalDate): number {
+  return toEpochDay(b) - toEpochDay(a)
+}
+
+export function addDays(date: LocalDate, days: number): LocalDate {
+  return fromEpochDay(toEpochDay(date) + days)
+}
+
+export function isWithin(date: LocalDate, from: LocalDate, to: LocalDate): boolean {
+  return date >= from && date <= to
 }

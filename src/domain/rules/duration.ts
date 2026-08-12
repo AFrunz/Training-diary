@@ -1,4 +1,5 @@
 import type { Instant, LocalDate } from '../model/types'
+import { toLocalDate } from './dates'
 
 /**
  * Правила §5.1 ТЗ.
@@ -11,10 +12,12 @@ import type { Instant, LocalDate } from '../model/types'
  *  - не отмечено ни одного упражнения        → 'no-completion'
  *  - тренировка заведена задним числом       → 'backdated'
  *  - конец раньше начала                     → 'invalid-range'
- *  - получилось больше порога выброса (6 ч)  → 'outlier'
  *
- * Ручные значения времени приоритетнее вычисленных и снимают проверку на «задним числом»:
- * пользователь заполнил их осознанно.
+ * Выброс (больше шести часов) значение сохраняет: на экране показывается,
+ * из средних исключается.
+ *
+ * Ручные значения времени приоритетнее вычисленных и снимают проверку на
+ * «задним числом»: пользователь заполнил их осознанно.
  */
 
 export type DurationReason = 'ok' | 'no-completion' | 'backdated' | 'invalid-range' | 'outlier'
@@ -27,37 +30,58 @@ export interface CompletableItem {
 }
 
 export interface DurationInput {
-  /** Календарная дата тренировки. */
   readonly date: LocalDate
-  /** Момент создания записи. */
   readonly startedAt: Instant | null
-  /** Последняя отметка о выполнении; null, если ничего не отмечено. */
   readonly finishedAt: Instant | null
   readonly manualStartedAt?: Instant | null
   readonly manualFinishedAt?: Instant | null
-  /** Зона пользователя — нужна, чтобы понять, заведена ли тренировка задним числом. */
   readonly timeZone: string
 }
 
 export interface DurationResult {
-  /** Длительность в миллисекундах или null, если недостоверна. */
   readonly ms: number | null
   readonly reason: DurationReason
-  /** Использованы введённые вручную границы. */
   readonly isManual: boolean
-  /** Длительность посчиталась, но признана выбросом: в средние не входит, на экране показывается. */
   readonly isOutlier: boolean
 }
 
-const notImplemented = (name: string): never => {
-  throw new Error(`${name} не реализована`)
+export function deriveFinishedAt(items: readonly CompletableItem[]): Instant | null {
+  let latest: Instant | null = null
+  for (const item of items) {
+    if (item.completedAt !== null && (latest === null || item.completedAt > latest)) {
+      latest = item.completedAt
+    }
+  }
+  return latest
 }
 
-/** Момент окончания тренировки: самая поздняя отметка о выполнении. */
-export function deriveFinishedAt(_items: readonly CompletableItem[]): Instant | null {
-  return notImplemented('deriveFinishedAt')
-}
+export function computeDuration(input: DurationInput): DurationResult {
+  const manualStartedAt = input.manualStartedAt ?? null
+  const manualFinishedAt = input.manualFinishedAt ?? null
+  const isManual = manualStartedAt !== null || manualFinishedAt !== null
 
-export function computeDuration(_input: DurationInput): DurationResult {
-  return notImplemented('computeDuration')
+  const startedAt = manualStartedAt ?? input.startedAt
+  const finishedAt = manualFinishedAt ?? input.finishedAt
+
+  const fail = (reason: DurationReason): DurationResult => ({
+    ms: null,
+    reason,
+    isManual,
+    isOutlier: false,
+  })
+
+  if (startedAt === null) return fail('invalid-range')
+  if (finishedAt === null) return fail('no-completion')
+  if (!isManual && toLocalDate(startedAt, input.timeZone) !== input.date) return fail('backdated')
+
+  const ms = finishedAt - startedAt
+  if (ms < 0) return fail('invalid-range')
+
+  const isOutlier = ms > OUTLIER_THRESHOLD_MS
+  return {
+    ms,
+    reason: isOutlier ? 'outlier' : 'ok',
+    isManual,
+    isOutlier,
+  }
 }

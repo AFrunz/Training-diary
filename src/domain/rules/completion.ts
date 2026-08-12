@@ -22,11 +22,23 @@ export interface CompletionItem {
 export interface CompletionResult {
   readonly done: number
   readonly total: number
-  /** Доля от 0 до 1. Для тренировки без упражнений — 0. */
   readonly ratio: number
   readonly tone: CompletionTone
 }
 
-export function computeCompletion(_items: readonly CompletionItem[]): CompletionResult {
-  throw new Error('computeCompletion не реализована')
+export function computeCompletion(items: readonly CompletionItem[]): CompletionResult {
+  const total = items.length
+  const done = items.filter((item) => item.completedAt !== null).length
+  const ratio = total === 0 ? 0 : done / total
+
+  const tone: CompletionTone = (() => {
+    if (total === 0) return 'muted'
+    if (done === total) return 'success'
+    if (ratio >= 0.5) return 'warning'
+    // ничего не отмечено и ни одного подхода — тренировка даже не начата
+    if (done === 0 && items.every((item) => item.setCount === 0)) return 'muted'
+    return 'danger'
+  })()
+
+  return { done, total, ratio, tone }
 }

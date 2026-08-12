@@ -9,34 +9,38 @@ import type { WeightKg, WeightUnit } from '../model/types'
 
 export const LB_PER_KG = 2.20462262185
 
-const notImplemented = (name: string): never => {
-  throw new Error(`${name} не реализована`)
+const assertNonNegative = (value: number): void => {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new RangeError(`вес не может быть отрицательным: ${value}`)
+  }
 }
 
-export function kgToLb(_kg: WeightKg): number {
-  return notImplemented('kgToLb')
+export function kgToLb(kg: WeightKg): number {
+  assertNonNegative(kg)
+  return kg * LB_PER_KG
 }
 
-export function lbToKg(_lb: number): WeightKg {
-  return notImplemented('lbToKg')
+export function lbToKg(lb: number): WeightKg {
+  assertNonNegative(lb)
+  return lb / LB_PER_KG
 }
 
-/** Округление к шагу отображения: 0.5 для килограммов, 1 для фунтов. */
-export function roundForUnit(_value: number, _unit: WeightUnit): number {
-  return notImplemented('roundForUnit')
+export function roundForUnit(value: number, unit: WeightUnit): number {
+  // умножение на 2 и деление обратно даёт точные половины без хвостов вида 82.50000000000001
+  return unit === 'kg' ? Math.round(value * 2) / 2 : Math.round(value)
 }
 
-/** Вес в выбранных единицах, готовый к показу. null для упражнений без веса — подпись рисуется отдельно. */
-export function toDisplayWeight(_kg: WeightKg | null, _unit: WeightUnit): number | null {
-  return notImplemented('toDisplayWeight')
+export function toDisplayWeight(kg: WeightKg | null, unit: WeightUnit): number | null {
+  if (kg === null) return null
+  return roundForUnit(unit === 'kg' ? kg : kgToLb(kg), unit)
 }
 
-/** Значение из поля ввода в килограммы для хранения. */
-export function fromInputWeight(_value: number | null, _unit: WeightUnit): WeightKg | null {
-  return notImplemented('fromInputWeight')
+export function fromInputWeight(value: number | null, unit: WeightUnit): WeightKg | null {
+  if (value === null) return null
+  // округление живёт только на отображении: в базу уходит точное значение
+  return unit === 'kg' ? value : lbToKg(value)
 }
 
-/** Шаг кнопок «−» и «+» рядом с полем веса. */
-export function stepForUnit(_unit: WeightUnit): number {
-  return notImplemented('stepForUnit')
+export function stepForUnit(unit: WeightUnit): number {
+  return unit === 'kg' ? 2.5 : 5
 }
