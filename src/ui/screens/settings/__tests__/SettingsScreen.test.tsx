@@ -61,6 +61,8 @@ describe('экран настроек', () => {
       'settings-wipe',
     ]) {
       expect(screen.getByTestId(testID)).toBeOnTheScreen()
+      // в плашке слева стоит иконка из инвентаря макета, а не текстовая заглушка
+      expect(screen.getByTestId(`${testID}-icon`)).toBeOnTheScreen()
     }
 
     expect(screen.getByText('Данные')).toBeOnTheScreen()

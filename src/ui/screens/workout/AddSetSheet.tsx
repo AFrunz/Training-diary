@@ -4,10 +4,11 @@ import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import type { Id, WeightUnit } from '../../../domain/model/types'
 import { formatSet } from '../../../domain/rules/format'
 import { fromInputWeight, roundForUnit, stepForUnit, toDisplayWeight } from '../../../domain/rules/units'
+import { Icon } from '../../components/Icon'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { palette, radii } from '../../theme/tokens'
+import { numFont, palette, radii, uiFont } from '../../theme/tokens'
 
 /**
  * Шит добавления подхода (фрейм «04 · Добавление подхода»). Начальные значения
@@ -119,15 +120,19 @@ export function AddSetSheet({
         })
       : null
 
-  const roundButton = (label: string, testID: string, onPress: () => void) => (
+  /**
+   * Знак остаётся подписью для вспомогательных технологий: он не переводится,
+   * поэтому в словаре ему места нет.
+   */
+  const roundButton = (direction: 'minus' | 'plus', testID: string, onPress: () => void) => (
     <Pressable
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={direction === 'plus' ? '+' : '−'}
       onPress={onPress}
       style={[styles.round, { backgroundColor: colors.surface2 }]}
     >
-      <Text style={[styles.roundLabel, { color: colors.textPrimary }]}>{label}</Text>
+      <Icon name={direction} size={18} color={colors.textPrimary} />
     </Pressable>
   )
 
@@ -177,7 +182,7 @@ export function AddSetSheet({
                 {t(unit === 'kg' ? 'set.weight' : 'set.weightLb')}
               </Text>
               <View style={styles.controls}>
-                {roundButton('−', 'set-weight-minus', () => bumpWeight(-step))}
+                {roundButton('minus', 'set-weight-minus', () => bumpWeight(-step))}
                 <TextInput
                   testID="set-weight-input"
                   value={weightText}
@@ -185,14 +190,14 @@ export function AddSetSheet({
                   keyboardType="numeric"
                   style={[styles.value, { color: colors.textPrimary }]}
                 />
-                {roundButton('+', 'set-weight-plus', () => bumpWeight(step))}
+                {roundButton('plus', 'set-weight-plus', () => bumpWeight(step))}
               </View>
             </View>
 
             <View style={styles.stepper}>
               <Text style={[styles.label, { color: colors.textMuted }]}>{t('set.reps')}</Text>
               <View style={styles.controls}>
-                {roundButton('−', 'set-reps-minus', () => bumpReps(-1))}
+                {roundButton('minus', 'set-reps-minus', () => bumpReps(-1))}
                 <TextInput
                   testID="set-reps-input"
                   value={repsText}
@@ -200,7 +205,7 @@ export function AddSetSheet({
                   keyboardType="number-pad"
                   style={[styles.value, { color: colors.textPrimary }]}
                 />
-                {roundButton('+', 'set-reps-plus', () => bumpReps(1))}
+                {roundButton('plus', 'set-reps-plus', () => bumpReps(1))}
               </View>
             </View>
           </View>
@@ -246,19 +251,19 @@ const styles = StyleSheet.create({
   grabberWrap: { alignItems: 'center' },
   grabber: { width: 40, height: 4, borderRadius: radii.pill },
   titles: { gap: 2 },
-  title: { fontSize: 18, fontWeight: '700' },
-  subtitle: { fontSize: 12, fontWeight: '500' },
+  title: { fontFamily: uiFont('700'), fontSize: 18, fontWeight: '700' },
+  subtitle: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
   steppers: { flexDirection: 'row', gap: 14 },
   stepper: { flex: 1, gap: 6 },
-  label: { fontSize: 11, fontWeight: '500' },
+  label: { fontFamily: uiFont('500'), fontSize: 11, fontWeight: '500' },
   controls: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   round: { width: 38, height: 38, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
-  roundLabel: { fontSize: 18, fontWeight: '600' },
-  value: { flex: 1, fontSize: 26, fontWeight: '700', textAlign: 'center', padding: 0 },
+  // вес и повторы — числа: Space Grotesk и в поле ввода, и в быстрых чипах
+  value: { fontFamily: numFont('700'), flex: 1, fontSize: 26, fontWeight: '700', textAlign: 'center', padding: 0 },
   quickChips: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   quickChip: { borderRadius: radii.sm, paddingVertical: 6, paddingHorizontal: 10 },
-  quickChipLabel: { fontSize: 12, fontWeight: '600' },
-  hint: { fontSize: 12, fontWeight: '500' },
+  quickChipLabel: { fontFamily: numFont('600'), fontSize: 12, fontWeight: '600' },
+  hint: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
   submit: { borderRadius: radii.md, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
-  submitLabel: { fontSize: 15, fontWeight: '700' },
+  submitLabel: { fontFamily: uiFont('700'), fontSize: 15, fontWeight: '700' },
 })

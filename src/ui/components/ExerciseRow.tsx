@@ -3,7 +3,8 @@ import type { WeightKg, WeightUnit } from '../../domain/model/types'
 import { formatSet } from '../../domain/rules/format'
 import { useT } from '../i18n/I18nProvider'
 import { useTheme } from '../theme/ThemeProvider'
-import { radii } from '../theme/tokens'
+import { numFont, radii, uiFont } from '../theme/tokens'
+import { Icon } from './Icon'
 
 export interface ExerciseRowSet {
   readonly id: string
@@ -58,7 +59,7 @@ export function ExerciseRow({
               : { borderColor: colors.border },
           ]}
         >
-          {done ? <Text style={[styles.check, { color: colors.onAccent }]}>✓</Text> : null}
+          {done ? <Icon name="check" size={15} color={colors.onAccent} /> : null}
         </Pressable>
 
         <View style={styles.titles}>
@@ -85,7 +86,7 @@ export function ExerciseRow({
           onPress={onOpenHistory}
           style={[styles.historyButton, { backgroundColor: colors.surface2 }]}
         >
-          <Text style={{ color: colors.textMuted }}>⟲</Text>
+          <Icon name="history" size={18} color={colors.textMuted} />
         </Pressable>
       </View>
 
@@ -102,9 +103,10 @@ export function ExerciseRow({
           testID={`add-set-${index}`}
           accessibilityRole="button"
           onPress={onAddSet}
-          style={[styles.chip, { backgroundColor: colors.accentSoft }]}
+          style={[styles.chip, styles.addSet, { backgroundColor: colors.accentSoft }]}
         >
-          <Text style={[styles.chipText, { color: colors.accent }]}>{t('workout.addSet')}</Text>
+          <Icon name="plus" size={13} color={colors.accent} />
+          <Text style={[styles.addSetLabel, { color: colors.accent }]}>{t('workout.addSet')}</Text>
         </Pressable>
       </View>
     </View>
@@ -123,13 +125,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  check: { fontSize: 13, fontWeight: '700' },
   titles: { flex: 1, gap: 2 },
-  name: { fontSize: 15, fontWeight: '600' },
+  name: { fontFamily: uiFont('600'), fontSize: 15, fontWeight: '600' },
   nameDone: { textDecorationLine: 'line-through' },
-  target: { fontSize: 11, fontWeight: '500' },
+  target: { fontFamily: uiFont('500'), fontSize: 11, fontWeight: '500' },
   historyButton: { width: 30, height: 30, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
   sets: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   chip: { borderRadius: radii.sm, paddingVertical: 5, paddingHorizontal: 9 },
-  chipText: { fontSize: 12, fontWeight: '600' },
+  // вес и повторы — числа, поэтому Space Grotesk
+  chipText: { fontFamily: numFont('600'), fontSize: 12, fontWeight: '600' },
+  addSet: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  addSetLabel: { fontFamily: uiFont('600'), fontSize: 12, fontWeight: '600' },
 })

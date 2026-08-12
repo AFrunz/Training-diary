@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { PROGRAM_PALETTE } from '../../../app/usecases/library'
 import type { Id } from '../../../domain/model/types'
+import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { programColors, radii } from '../../theme/tokens'
+import { numFont, programColors, radii, uiFont } from '../../theme/tokens'
 import { useExerciseSummaries } from './data'
 import { ExercisePickerSheet } from './ExercisePickerSheet'
 
@@ -109,6 +110,7 @@ export function NewProgramScreen({ onBack, onCreated, onCreateExercise }: NewPro
 
           {chosen.length === 0 ? (
             <View testID="program-empty" style={[styles.empty, { backgroundColor: colors.surface2 }]}>
+              <Icon name="dumbbell" size={24} color={colors.textMuted} />
               <Text style={[styles.emptyTitle, { color: colors.textSecondary }]}>{t('program.empty')}</Text>
               <Text style={[styles.emptyHint, { color: colors.textMuted }]}>{t('program.emptyHint')}</Text>
               <Pressable
@@ -117,6 +119,7 @@ export function NewProgramScreen({ onBack, onCreated, onCreateExercise }: NewPro
                 onPress={() => setPickerOpen(true)}
                 style={[styles.addButton, { backgroundColor: colors.accentSoft }]}
               >
+                <Icon name="plus" size={16} color={colors.accent} />
                 <Text style={[styles.addLabel, { color: colors.accent }]}>{t('workout.addExercise')}</Text>
               </Pressable>
             </View>
@@ -140,6 +143,7 @@ export function NewProgramScreen({ onBack, onCreated, onCreateExercise }: NewPro
                 onPress={() => setPickerOpen(true)}
                 style={[styles.addButton, { backgroundColor: colors.accentSoft }]}
               >
+                <Icon name="plus" size={16} color={colors.accent} />
                 <Text style={[styles.addLabel, { color: colors.accent }]}>{t('workout.addExercise')}</Text>
               </Pressable>
             </View>
@@ -187,10 +191,10 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   body: { gap: 22, paddingTop: 6, paddingHorizontal: 20, paddingBottom: 24 },
   field: { gap: 7 },
-  label: { fontSize: 12, fontWeight: '600' },
+  label: { fontSize: 12, fontFamily: uiFont('600'), fontWeight: '600' },
   input: { borderRadius: radii.md, borderWidth: 1.5, paddingVertical: 13, paddingHorizontal: 14 },
-  inputText: { fontSize: 15, fontWeight: '500', padding: 0 },
-  hint: { fontSize: 11, fontWeight: '500', lineHeight: 15 },
+  inputText: { fontSize: 15, fontFamily: uiFont('500'), fontWeight: '500', padding: 0 },
+  hint: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500', lineHeight: 15 },
 
   colorBlock: { gap: 9 },
   swatches: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -205,26 +209,29 @@ const styles = StyleSheet.create({
   swatchDot: { width: 30, height: 30, borderRadius: radii.pill },
 
   empty: { borderRadius: radii.lg, alignItems: 'center', gap: 8, paddingVertical: 26, paddingHorizontal: 20 },
-  emptyTitle: { fontSize: 14, fontWeight: '600' },
-  emptyHint: { fontSize: 11, fontWeight: '500', textAlign: 'center', lineHeight: 15 },
+  emptyTitle: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
+  emptyHint: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500', textAlign: 'center', lineHeight: 15 },
   addButton: {
+    flexDirection: 'row',
+    gap: 8,
     borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 11,
     paddingHorizontal: 16,
   },
-  addLabel: { fontSize: 13, fontWeight: '600' },
+  addLabel: { fontSize: 13, fontFamily: uiFont('600'), fontWeight: '600' },
 
   composition: { gap: 9 },
   card: { borderRadius: radii.lg, borderWidth: 1, overflow: 'hidden' },
   divider: { height: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 13, paddingHorizontal: 14 },
-  rowOrder: { fontSize: 12, fontWeight: '600' },
-  rowName: { flex: 1, fontSize: 15, fontWeight: '500' },
+  // порядковый номер — числовая гарнитура
+  rowOrder: { fontSize: 12, fontFamily: numFont('600'), fontWeight: '600' },
+  rowName: { flex: 1, fontSize: 15, fontFamily: uiFont('500'), fontWeight: '500' },
 
   bottomBar: { borderTopWidth: 1, gap: 8, paddingTop: 14, paddingHorizontal: 20, paddingBottom: 20 },
   createButton: { borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 14 },
-  createLabel: { fontSize: 15, fontWeight: '700' },
-  note: { fontSize: 11, fontWeight: '500', textAlign: 'center' },
+  createLabel: { fontSize: 15, fontFamily: uiFont('700'), fontWeight: '700' },
+  note: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500', textAlign: 'center' },
 })

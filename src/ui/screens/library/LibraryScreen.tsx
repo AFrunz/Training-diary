@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { Id } from '../../../domain/model/types'
 import { Chip } from '../../components/Chip'
+import { Icon } from '../../components/Icon'
 import { useT } from '../../i18n/I18nProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { programColors, radii } from '../../theme/tokens'
+import { numFont, programColors, radii, uiFont } from '../../theme/tokens'
 import type { SortMode } from './data'
 import {
   formatRecord,
@@ -93,7 +94,11 @@ export function LibraryScreen({
         <Text
           style={[
             styles.segmentLabel,
-            { color: active ? colors.textPrimary : colors.textSecondary, fontWeight: active ? '600' : '500' },
+            {
+              color: active ? colors.textPrimary : colors.textSecondary,
+              fontFamily: uiFont(active ? '600' : '500'),
+              fontWeight: active ? '600' : '500',
+            },
           ]}
         >
           {label}
@@ -113,7 +118,7 @@ export function LibraryScreen({
           onPress={isExercises ? onCreateExercise : onCreateProgram}
           style={[styles.addButton, { backgroundColor: colors.accent }]}
         >
-          <Text style={[styles.addIcon, { color: colors.onAccent }]}>＋</Text>
+          <Icon name="plus" size={20} color={colors.onAccent} />
         </Pressable>
       </View>
 
@@ -126,7 +131,7 @@ export function LibraryScreen({
 
       <View style={styles.searchWrap}>
         <View style={[styles.searchField, { backgroundColor: colors.surface2 }]}>
-          <Text style={[styles.searchIcon, { color: colors.textMuted }]}>⌕</Text>
+          <Icon name="search" size={17} color={colors.textMuted} />
           <TextInput
             testID="library-search"
             value={query}
@@ -195,7 +200,7 @@ export function LibraryScreen({
                           <Text style={[styles.rowValue, { color: colors.textPrimary }]}>
                             {formatRecord(summary, unit, locale)}
                           </Text>
-                          <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
+                          <Icon name="chevron-right" size={17} color={colors.textMuted} />
                         </View>
                       </Pressable>
                     </View>
@@ -234,7 +239,7 @@ export function LibraryScreen({
                     <Text style={[styles.rowMeta, { color: colors.textMuted }]}>
                       {count('exercises', summary.exerciseCount)}
                     </Text>
-                    <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
+                    <Icon name="chevron-right" size={17} color={colors.textMuted} />
                   </View>
                 </Pressable>
               </View>
@@ -255,9 +260,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
-  title: { fontSize: 26, fontWeight: '700' },
+  title: { fontSize: 26, fontFamily: uiFont('700'), fontWeight: '700' },
   addButton: { width: 36, height: 36, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
-  addIcon: { fontSize: 17, fontWeight: '600' },
 
   segmentWrap: { paddingHorizontal: 20, paddingBottom: 10 },
   segmented: { flexDirection: 'row', gap: 2, padding: 3, borderRadius: radii.sm },
@@ -273,14 +277,13 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     paddingHorizontal: 13,
   },
-  searchIcon: { fontSize: 15 },
-  searchInput: { flex: 1, fontSize: 14, fontWeight: '500', padding: 0 },
+  searchInput: { flex: 1, fontSize: 14, fontFamily: uiFont('500'), fontWeight: '500', padding: 0 },
 
   sortChips: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 20, paddingBottom: 12 },
 
   list: { paddingHorizontal: 20, paddingBottom: 24, gap: 12 },
   group: { gap: 6 },
-  groupTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6 },
+  groupTitle: { fontSize: 12, fontFamily: uiFont('700'), fontWeight: '700', letterSpacing: 0.6 },
   card: { borderRadius: radii.lg, borderWidth: 1, overflow: 'hidden' },
   divider: { height: 1 },
   row: {
@@ -293,13 +296,13 @@ const styles = StyleSheet.create({
   rowInfo: { flex: 1, gap: 3 },
   programInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 10, height: 10, borderRadius: radii.pill },
-  rowName: { fontSize: 15, fontWeight: '500' },
-  rowMeta: { fontSize: 11, fontWeight: '500' },
+  rowName: { fontSize: 15, fontFamily: uiFont('500'), fontWeight: '500' },
+  rowMeta: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
   rowRecord: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  rowValue: { fontSize: 14, fontWeight: '600' },
-  chevron: { fontSize: 17 },
+  // рекорд — числовая гарнитура ($font-num в макете)
+  rowValue: { fontSize: 14, fontFamily: numFont('600'), fontWeight: '600' },
 
   empty: { borderRadius: radii.lg, alignItems: 'center', gap: 8, paddingVertical: 26, paddingHorizontal: 20 },
-  emptyTitle: { fontSize: 14, fontWeight: '600' },
-  emptyHint: { fontSize: 11, fontWeight: '500', textAlign: 'center' },
+  emptyTitle: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
+  emptyHint: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500', textAlign: 'center' },
 })

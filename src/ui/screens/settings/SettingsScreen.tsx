@@ -5,11 +5,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { LanguageMode, Settings, ThemeMode } from '../../../domain/model/entities'
 import type { FirstDayOfWeek, WeightUnit } from '../../../domain/model/types'
 import { toLocalDate } from '../../../domain/rules/dates'
+import { Icon } from '../../components/Icon'
+import type { IconName } from '../../components/Icon'
 import { useT } from '../../i18n/I18nProvider'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { radii } from '../../theme/tokens'
+import { radii, uiFont } from '../../theme/tokens'
 
 /**
  * Экран «10 · Настройки» из макета: секции «Данные», «Предпочтения»
@@ -110,7 +112,7 @@ export function SettingsScreen({
         <Section title={t('settings.data')}>
           <Row
             testID="settings-export"
-            glyph="↑"
+            icon="upload"
             title={t('settings.export')}
             subtitle={
               exported ? t('settings.exportDone') : t('settings.exportHint', { date: today })
@@ -121,7 +123,7 @@ export function SettingsScreen({
           <Divider />
           <Row
             testID="settings-import"
-            glyph="↓"
+            icon="download"
             title={t('settings.import')}
             subtitle={t('settings.importHint')}
             onPress={onImportRequested}
@@ -130,7 +132,7 @@ export function SettingsScreen({
           <Divider />
           <Row
             testID="settings-backups"
-            glyph="↻"
+            icon="history"
             title={t('settings.backups')}
             subtitle={t('settings.backupsHint')}
             right={<Chevron />}
@@ -140,7 +142,7 @@ export function SettingsScreen({
         <Section title={t('settings.preferences')}>
           <Row
             testID="settings-units"
-            glyph="≡"
+            icon="scale"
             title={t('settings.units')}
             right={
               <Segmented
@@ -156,7 +158,7 @@ export function SettingsScreen({
           <Divider />
           <Row
             testID="settings-first-day"
-            glyph="▦"
+            icon="calendar"
             title={t('settings.firstDay')}
             onPress={() =>
               void save({ firstDayOfWeek: (settings.firstDayOfWeek === 1 ? 7 : 1) as FirstDayOfWeek })
@@ -171,7 +173,7 @@ export function SettingsScreen({
           <Divider />
           <Row
             testID="settings-language"
-            glyph="A"
+            icon="languages"
             title={t('settings.language')}
             onPress={() => void save({ language: nextLanguage[settings.language] })}
             right={
@@ -181,7 +183,7 @@ export function SettingsScreen({
           <Divider />
           <Row
             testID="settings-theme"
-            glyph="◐"
+            icon="moon"
             title={t('settings.theme')}
             onPress={() => void save({ theme: nextTheme[settings.theme] })}
             right={<Value testID="settings-theme-value" text={t(themeKey[settings.theme])} />}
@@ -191,7 +193,7 @@ export function SettingsScreen({
         <Section title={t('settings.dangerZone')}>
           <Row
             testID="settings-wipe"
-            glyph="✕"
+            icon="trash-2"
             danger
             title={t('settings.wipe')}
             subtitle={wipeArmed ? t('settings.wipeConfirm') : t('settings.wipeHint')}
@@ -228,8 +230,8 @@ function Section({ title, children }: { readonly title: string; readonly childre
 
 interface RowProps {
   readonly testID: string
-  /** Иконок в проекте пока нет: в плашке стоит символ-заглушка. */
-  readonly glyph: string
+  /** Иконка строки из инвентаря макета: в плашке слева, 16 px. */
+  readonly icon: IconName
   readonly title: string
   readonly subtitle?: string
   readonly right?: ReactNode
@@ -237,15 +239,18 @@ interface RowProps {
   readonly danger?: boolean
 }
 
-function Row({ testID, glyph, title, subtitle, right, onPress, danger = false }: RowProps) {
+function Row({ testID, icon, title, subtitle, right, onPress, danger = false }: RowProps) {
   const { colors } = useTheme()
 
   const content = (
     <>
       <View style={[styles.iconPlate, { backgroundColor: colors.surface2 }]}>
-        <Text style={[styles.iconGlyph, { color: danger ? colors.danger : colors.textSecondary }]}>
-          {glyph}
-        </Text>
+        <Icon
+          testID={`${testID}-icon`}
+          name={icon}
+          size={16}
+          color={danger ? colors.danger : colors.textSecondary}
+        />
       </View>
 
       <View style={styles.rowTexts}>
@@ -285,7 +290,7 @@ function Divider() {
 
 function Chevron() {
   const { colors } = useTheme()
-  return <Text style={[styles.chevron, { color: colors.textMuted }]}>›</Text>
+  return <Icon name="chevron-right" size={18} color={colors.textMuted} />
 }
 
 function Value({ text, testID }: { readonly text: string; readonly testID: string }) {
@@ -329,6 +334,7 @@ function Segmented<T extends string>({ value, options, onChange }: SegmentedProp
                 {
                   color: selected ? colors.textPrimary : colors.textSecondary,
                   fontWeight: selected ? '600' : '500',
+                  fontFamily: uiFont(selected ? '600' : '500'),
                 },
               ]}
             >
@@ -344,29 +350,33 @@ function Segmented<T extends string>({ value, options, onChange }: SegmentedProp
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   header: { paddingTop: 8, paddingBottom: 14, paddingHorizontal: 20 },
-  title: { fontSize: 26, fontWeight: '700' },
+  title: { fontSize: 26, fontWeight: '700', fontFamily: uiFont('700') },
 
   sections: { paddingHorizontal: 16, paddingBottom: 16, gap: 18 },
   section: { gap: 8 },
   sectionHeader: { paddingHorizontal: 6 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontFamily: uiFont('700'),
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
   card: { borderRadius: radii.lg, borderWidth: 1, overflow: 'hidden' },
 
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14 },
   iconPlate: { width: 30, height: 30, borderRadius: radii.sm, alignItems: 'center', justifyContent: 'center' },
-  iconGlyph: { fontSize: 14, fontWeight: '600' },
   rowTexts: { flex: 1, gap: 2 },
-  rowTitle: { fontSize: 15, fontWeight: '500' },
-  rowSubtitle: { fontSize: 11 },
+  rowTitle: { fontSize: 15, fontWeight: '500', fontFamily: uiFont('500') },
+  rowSubtitle: { fontSize: 11, fontFamily: uiFont() },
   divider: { height: 1 },
-  chevron: { fontSize: 18, lineHeight: 18 },
   value: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  valueText: { fontSize: 13 },
+  valueText: { fontSize: 13, fontFamily: uiFont() },
 
   segmented: { flexDirection: 'row', gap: 2, padding: 3, borderRadius: radii.sm },
   segment: { paddingVertical: 4, paddingHorizontal: 9, borderRadius: 7 },
   segmentLabel: { fontSize: 11 },
 
   footer: { alignItems: 'center', gap: 3, paddingTop: 4 },
-  footerText: { fontSize: 11 },
+  footerText: { fontSize: 11, fontFamily: uiFont() },
 })

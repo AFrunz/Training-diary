@@ -8,12 +8,13 @@ import { computeDuration } from '../../../domain/rules/duration'
 import { formatDuration, formatElapsed } from '../../../domain/rules/format'
 import { Donut } from '../../components/Donut'
 import { ExerciseRow } from '../../components/ExerciseRow'
+import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { radii } from '../../theme/tokens'
+import { numFont, radii, uiFont } from '../../theme/tokens'
 import { AddSetSheet } from './AddSetSheet'
 
 /**
@@ -186,7 +187,7 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
             onPress={onAddExercise}
             style={[styles.addExerciseButton, { borderColor: colors.border }]}
           >
-            <Text style={[styles.addExerciseLabel, { color: colors.textSecondary }]}>＋</Text>
+            <Icon name="plus" size={15} color={colors.textSecondary} />
             <Text style={[styles.addExerciseLabel, { color: colors.textSecondary }]}>
               {t('workout.addExercise')}
             </Text>
@@ -222,8 +223,9 @@ const styles = StyleSheet.create({
   timerLeft: { gap: 2 },
   timerValueRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   liveDot: { width: 7, height: 7, borderRadius: radii.pill },
-  elapsed: { fontSize: 30, fontWeight: '700' },
-  startedAt: { fontSize: 12, fontWeight: '500' },
+  // длительность — метрика, в макете она набрана Space Grotesk
+  elapsed: { fontFamily: numFont('700'), fontSize: 30, fontWeight: '700' },
+  startedAt: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
   list: { gap: 8, paddingHorizontal: 16, paddingTop: 14 },
   addExerciseSection: { paddingHorizontal: 16, paddingTop: 12 },
   addExerciseButton: {
@@ -235,5 +237,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 12,
   },
-  addExerciseLabel: { fontSize: 14, fontWeight: '600' },
+  addExerciseLabel: { fontFamily: uiFont('600'), fontSize: 14, fontWeight: '600' },
 })

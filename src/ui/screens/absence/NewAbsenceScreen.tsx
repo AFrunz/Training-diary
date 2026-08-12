@@ -11,7 +11,7 @@ import { ScreenHeader } from '../../components/ScreenHeader'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { radii } from '../../theme/tokens'
+import { radii, uiFont } from '../../theme/tokens'
 
 export interface NewAbsenceScreenProps {
   /** День, с которого начали заводить отсутствие: календарь передаёт выбранный. */
@@ -182,11 +182,18 @@ const styles = StyleSheet.create({
   field: { gap: 7 },
   grow: { flex: 1 },
   row: { flexDirection: 'row', gap: 12 },
-  label: { fontSize: 12, fontWeight: '600' },
+  label: { fontSize: 12, fontWeight: '600', fontFamily: uiFont('600') },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  input: { borderRadius: radii.md, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15 },
-  hint: { fontSize: 11, fontWeight: '500', lineHeight: 15 },
+  input: {
+    borderRadius: radii.md,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    fontSize: 15,
+    fontFamily: uiFont(),
+  },
+  hint: { fontSize: 11, fontWeight: '500', fontFamily: uiFont('500'), lineHeight: 15 },
   bottom: { padding: 20, borderTopWidth: 1 },
   button: { borderRadius: radii.md, paddingVertical: 14, alignItems: 'center' },
-  buttonLabel: { fontSize: 15, fontWeight: '700' },
+  buttonLabel: { fontSize: 15, fontWeight: '700', fontFamily: uiFont('700') },
 })

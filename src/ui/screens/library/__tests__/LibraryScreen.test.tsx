@@ -73,7 +73,7 @@ describe('Библиотека', () => {
     expect(within(await screen.findByTestId('library-empty')).getByText('Программ пока нет')).toBeTruthy()
   })
 
-  it('кнопка «＋» заводит упражнение или программу в зависимости от вкладки', async () => {
+  it('кнопка добавления заводит упражнение или программу в зависимости от вкладки', async () => {
     const { services } = createTestServices()
     const onCreateExercise = jest.fn()
     const onCreateProgram = jest.fn()
@@ -82,10 +82,14 @@ describe('Библиотека', () => {
       services,
     })
 
-    fireEvent.press(await screen.findByTestId('add-button'))
+    const button = await screen.findByTestId('add-button')
+    // кнопка без подписи: назначение читается по метке доступности
+    expect(button.props.accessibilityLabel).toBe('Новое упражнение')
+    fireEvent.press(button)
     expect(onCreateExercise).toHaveBeenCalled()
 
     fireEvent.press(screen.getByTestId('library-segment-programs'))
+    expect(screen.getByTestId('add-button').props.accessibilityLabel).toBe('Новая программа')
     fireEvent.press(screen.getByTestId('add-button'))
     expect(onCreateProgram).toHaveBeenCalled()
   })

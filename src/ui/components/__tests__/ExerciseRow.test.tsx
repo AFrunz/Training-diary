@@ -152,7 +152,7 @@ describe('ExerciseRow', () => {
     expect(onToggleDone).toHaveBeenCalledWith(false)
   })
 
-  it('кнопка «＋ подход» вызывает обработчик', () => {
+  it('кнопка добавления подхода вызывает обработчик', () => {
     const onAddSet = jest.fn()
     render(
       <ExerciseRow
@@ -169,6 +169,25 @@ describe('ExerciseRow', () => {
 
     fireEvent.press(screen.getByTestId('add-set-1'))
     expect(onAddSet).toHaveBeenCalled()
+  })
+
+  it('подпись кнопки — только слово: знак «плюс» рисует иконка', () => {
+    render(
+      <ExerciseRow
+        index={0}
+        name="Жим лёжа"
+        sets={[]}
+        done={false}
+        unit="kg"
+        onToggleDone={jest.fn()}
+        onAddSet={jest.fn()}
+        onOpenHistory={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('add-set-0')).toHaveTextContent('подход')
+    // глиф из словаря в разметку не попадает — иначе плюс нарисуется дважды
+    expect(screen.getByTestId('add-set-0')).not.toHaveTextContent('＋')
   })
 
   it('история открывается отдельной кнопкой, а не сразу (FR-5.1)', () => {

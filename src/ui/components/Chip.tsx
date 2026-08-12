@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '../theme/ThemeProvider'
-import { radii } from '../theme/tokens'
+import { radii, uiFont } from '../theme/tokens'
 
 export interface ChipProps {
   readonly label: string
@@ -22,7 +22,12 @@ export function Chip({ label, selected = false, dotColor, onPress, testID }: Chi
       <Text
         style={[
           styles.label,
-          { color: selected ? colors.bg : colors.textSecondary, fontWeight: selected ? '600' : '500' },
+          {
+            color: selected ? colors.bg : colors.textSecondary,
+            // начертание идёт парой с насыщенностью: в RN это отдельные файлы шрифта
+            fontFamily: uiFont(selected ? '600' : '500'),
+            fontWeight: selected ? '600' : '500',
+          },
         ]}
       >
         {label}

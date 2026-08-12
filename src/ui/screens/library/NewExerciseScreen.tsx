@@ -4,12 +4,13 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import type { Id } from '../../../domain/model/types'
 import { validateExerciseName } from '../../../domain/validation/rules'
 import type { ValidationCode } from '../../../domain/validation/rules'
+import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { radii } from '../../theme/tokens'
+import { radii, uiFont } from '../../theme/tokens'
 import type { MuscleGroupKey } from './data'
 import { MUSCLE_GROUPS, muscleGroupLabel } from './data'
 
@@ -95,14 +96,15 @@ export function NewExerciseScreen({ onBack, onCreated }: NewExerciseScreenProps)
 
           {typed && check.ok ? (
             <View testID="name-free" style={styles.validation}>
-              <Text style={[styles.validationIcon, { color: colors.success }]}>✓</Text>
+              <Icon name="circle-check" size={14} color={colors.success} />
               <Text style={[styles.validationText, { color: colors.success }]}>{t('exercise.nameFree')}</Text>
             </View>
           ) : null}
 
           {typed && errorKey ? (
             <View testID="name-error" style={styles.validation}>
-              <Text style={[styles.validationIcon, { color: colors.danger }]}>!</Text>
+              {/* зеркало «имя свободно»: тот же размер, но крестик и красный тон */}
+              <Icon name="x" size={14} color={colors.danger} />
               <Text style={[styles.validationText, { color: colors.danger }]}>{t(errorKey)}</Text>
             </View>
           ) : null}
@@ -129,7 +131,11 @@ export function NewExerciseScreen({ onBack, onCreated }: NewExerciseScreenProps)
                     <Text
                       style={[
                         styles.chipLabel,
-                        { color: selected ? colors.bg : colors.textSecondary, fontWeight: selected ? '600' : '500' },
+                        {
+                          color: selected ? colors.bg : colors.textSecondary,
+                          fontFamily: uiFont(selected ? '600' : '500'),
+                          fontWeight: selected ? '600' : '500',
+                        },
                       ]}
                     >
                       {muscleGroupLabel(key, t)}
@@ -160,7 +166,7 @@ export function NewExerciseScreen({ onBack, onCreated }: NewExerciseScreenProps)
         </View>
 
         <View style={[styles.noteRow, { backgroundColor: colors.surface2 }]}>
-          <Text style={[styles.noteIcon, { color: colors.textMuted }]}>ⓘ</Text>
+          <Icon name="info" size={15} color={colors.textMuted} />
           <Text style={[styles.noteText, { color: colors.textSecondary }]}>{t('exercise.weightHint')}</Text>
         </View>
       </ScrollView>
@@ -188,13 +194,12 @@ const styles = StyleSheet.create({
   body: { gap: 22, paddingTop: 6, paddingHorizontal: 20, paddingBottom: 24 },
   field: { gap: 7 },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  label: { fontSize: 12, fontWeight: '600' },
-  optional: { fontSize: 11, fontWeight: '500' },
+  label: { fontSize: 12, fontFamily: uiFont('600'), fontWeight: '600' },
+  optional: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
   input: { borderRadius: radii.md, borderWidth: 1.5, paddingVertical: 13, paddingHorizontal: 14 },
-  inputText: { fontSize: 15, fontWeight: '500', padding: 0 },
+  inputText: { fontSize: 15, fontFamily: uiFont('500'), fontWeight: '500', padding: 0 },
   validation: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  validationIcon: { fontSize: 12, fontWeight: '700' },
-  validationText: { fontSize: 11, fontWeight: '500' },
+  validationText: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
 
   groupField: { gap: 9 },
   chipRow: { flexDirection: 'row', gap: 7 },
@@ -202,13 +207,19 @@ const styles = StyleSheet.create({
   chipLabel: { fontSize: 13 },
 
   textarea: { height: 84, borderRadius: radii.md, borderWidth: 1, padding: 13 },
-  textareaText: { flex: 1, fontSize: 13, fontWeight: '500', padding: 0, textAlignVertical: 'top' },
+  textareaText: {
+    flex: 1,
+    fontSize: 13,
+    fontFamily: uiFont('500'),
+    fontWeight: '500',
+    padding: 0,
+    textAlignVertical: 'top',
+  },
 
   noteRow: { flexDirection: 'row', gap: 8, borderRadius: radii.md, padding: 12 },
-  noteIcon: { fontSize: 13 },
-  noteText: { flex: 1, fontSize: 11, fontWeight: '500', lineHeight: 15 },
+  noteText: { flex: 1, fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500', lineHeight: 15 },
 
   bottomBar: { borderTopWidth: 1, paddingTop: 14, paddingHorizontal: 20, paddingBottom: 20 },
   createButton: { borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', paddingVertical: 14 },
-  createLabel: { fontSize: 15, fontWeight: '700' },
+  createLabel: { fontSize: 15, fontFamily: uiFont('700'), fontWeight: '700' },
 })

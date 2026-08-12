@@ -8,11 +8,12 @@ import { computeCompletion } from '../../../domain/rules/completion'
 import { addDays, toLocalDate, weeksOfRange } from '../../../domain/rules/dates'
 import { computeDuration } from '../../../domain/rules/duration'
 import { EMPTY_VALUE, formatCompletion, formatDuration, formatElapsed } from '../../../domain/rules/format'
+import { Icon } from '../../components/Icon'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { programColors, radii } from '../../theme/tokens'
+import { numFont, programColors, radii, uiFont } from '../../theme/tokens'
 
 /**
  * Экран «01 · Календарь — месяц» из макета: сетка месяца с точками программ,
@@ -211,7 +212,7 @@ export function CalendarScreen({
             onPress={() => setMonthStart((current) => addMonths(current, -1))}
             style={styles.monthArrow}
           >
-            <Text style={[styles.monthArrowGlyph, { color: colors.textSecondary }]}>‹</Text>
+            <Icon name="chevron-left" size={18} color={colors.textSecondary} />
           </Pressable>
           <Pressable
             testID="calendar-next-month"
@@ -220,7 +221,7 @@ export function CalendarScreen({
             onPress={() => setMonthStart((current) => addMonths(current, 1))}
             style={styles.monthArrow}
           >
-            <Text style={[styles.monthArrowGlyph, { color: colors.textSecondary }]}>›</Text>
+            <Icon name="chevron-right" size={18} color={colors.textSecondary} />
           </Pressable>
         </View>
 
@@ -238,8 +239,8 @@ export function CalendarScreen({
                 style={[
                   styles.segmentLabel,
                   mode === segment
-                    ? { color: colors.textPrimary, fontWeight: '600' }
-                    : { color: colors.textSecondary, fontWeight: '500' },
+                    ? { color: colors.textPrimary, fontWeight: '600', fontFamily: uiFont('600') }
+                    : { color: colors.textSecondary, fontWeight: '500', fontFamily: uiFont('500') },
                 ]}
               >
                 {t(segment === 'month' ? 'calendar.month' : 'calendar.year')}
@@ -291,7 +292,14 @@ export function CalendarScreen({
                       >
                         <Text
                           testID={`calendar-day-${date}-num`}
-                          style={[styles.dayNumber, { color: numberColor, fontWeight: isToday ? '700' : '500' }]}
+                          style={[
+                            styles.dayNumber,
+                            {
+                              color: numberColor,
+                              fontWeight: isToday ? '700' : '500',
+                              fontFamily: numFont(isToday ? '700' : '500'),
+                            },
+                          ]}
                         >
                           {dayOf(date)}
                         </Text>
@@ -398,6 +406,7 @@ export function CalendarScreen({
                 onPress={() => onContinueWorkout?.(todayWorkout.id)}
                 style={[styles.todayButton, { backgroundColor: colors.accent }]}
               >
+                <Icon name="arrow-right" size={17} color={colors.onAccent} />
                 <Text style={[styles.todayButtonLabel, { color: colors.onAccent }]}>
                   {t('calendar.continueWorkout')}
                 </Text>
@@ -436,9 +445,8 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 22, fontWeight: '700' },
+  title: { fontSize: 22, fontWeight: '700', fontFamily: uiFont('700') },
   monthArrow: { width: 18, height: 18, alignItems: 'center', justifyContent: 'center' },
-  monthArrowGlyph: { fontSize: 16, fontWeight: '600' },
 
   segmented: { flexDirection: 'row', gap: 2, borderRadius: radii.sm, padding: 3 },
   segment: { borderRadius: 7, paddingVertical: 5, paddingHorizontal: 11 },
@@ -448,7 +456,7 @@ const styles = StyleSheet.create({
 
   weekdays: { flexDirection: 'row', paddingHorizontal: 16, paddingBottom: 6 },
   weekdayCell: { flex: 1, alignItems: 'center' },
-  weekdayLabel: { fontSize: 11, fontWeight: '500' },
+  weekdayLabel: { fontSize: 11, fontWeight: '500', fontFamily: uiFont('500') },
 
   grid: { gap: 2, paddingHorizontal: 16 },
   week: { flexDirection: 'row', gap: 2 },
@@ -477,8 +485,8 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   legendDot: { width: 8, height: 8, borderRadius: radii.pill },
   legendDotAbsence: { opacity: 0.5 },
-  legendLabel: { fontSize: 11, fontWeight: '600' },
-  legendLabelAbsence: { fontWeight: '500' },
+  legendLabel: { fontSize: 11, fontWeight: '600', fontFamily: uiFont('600') },
+  legendLabelAbsence: { fontWeight: '500', fontFamily: uiFont('500') },
 
   miniStats: { flexDirection: 'row', gap: 10, paddingTop: 4, paddingHorizontal: 20 },
   statCard: {
@@ -489,8 +497,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
   },
-  statValue: { fontSize: 18, fontWeight: '700' },
-  statLabel: { fontSize: 11, fontWeight: '500' },
+  statValue: { fontSize: 18, fontWeight: '700', fontFamily: numFont('700') },
+  statLabel: { fontSize: 11, fontWeight: '500', fontFamily: uiFont('500') },
 
   todayWrap: { paddingVertical: 16, paddingHorizontal: 20 },
   todayCard: { gap: 14, borderRadius: radii.lg, borderWidth: 1, padding: 16 },
@@ -498,10 +506,17 @@ const styles = StyleSheet.create({
   todayLeft: { flexDirection: 'row', alignItems: 'center', gap: 9, flexShrink: 1 },
   todayDot: { width: 10, height: 10, borderRadius: radii.pill },
   todayTexts: { gap: 2, flexShrink: 1 },
-  todayTitle: { fontSize: 14, fontWeight: '600' },
-  todaySub: { fontSize: 12, fontWeight: '500' },
+  todayTitle: { fontSize: 14, fontWeight: '600', fontFamily: uiFont('600') },
+  todaySub: { fontSize: 12, fontWeight: '500', fontFamily: uiFont('500') },
   todayBadge: { borderRadius: radii.pill, paddingVertical: 5, paddingHorizontal: 10 },
-  todayBadgeLabel: { fontSize: 12, fontWeight: '600' },
-  todayButton: { borderRadius: radii.md, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
-  todayButtonLabel: { fontSize: 14, fontWeight: '600' },
+  todayBadgeLabel: { fontSize: 12, fontWeight: '600', fontFamily: numFont('600') },
+  todayButton: {
+    flexDirection: 'row',
+    gap: 8,
+    borderRadius: radii.md,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  todayButtonLabel: { fontSize: 14, fontWeight: '600', fontFamily: uiFont('600') },
 })

@@ -3,7 +3,7 @@ import Svg, { Circle } from 'react-native-svg'
 import type { CompletionTone } from '../../domain/rules/completion'
 import { formatCompletion } from '../../domain/rules/format'
 import { useTheme } from '../theme/ThemeProvider'
-import { toneColor } from '../theme/tokens'
+import { numFont, toneColor } from '../theme/tokens'
 
 export interface DonutProps {
   readonly done: number
@@ -60,5 +60,6 @@ export function Donut({ done, total, tone, size = 46, testID = 'workout-donut' }
 
 const styles = StyleSheet.create({
   label: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
-  text: { fontWeight: '700' },
+  // подпись бублика — Space Grotesk, как все числа в макете
+  text: { fontFamily: numFont('700'), fontWeight: '700' },
 })

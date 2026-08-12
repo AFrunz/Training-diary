@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { Id } from '../../../domain/model/types'
+import { Icon } from '../../components/Icon'
 import { useT } from '../../i18n/I18nProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { radii } from '../../theme/tokens'
+import { numFont, radii, uiFont } from '../../theme/tokens'
 import {
   formatRecord,
   groupByMuscle,
@@ -99,7 +100,7 @@ export function ExercisePickerSheet({
         </View>
 
         <View style={[styles.searchField, { backgroundColor: colors.surface2 }]}>
-          <Text style={[styles.searchIcon, { color: colors.textMuted }]}>⌕</Text>
+          <Icon name="search" size={17} color={colors.textMuted} />
           <TextInput
             testID="exercise-picker-search"
             value={query}
@@ -141,7 +142,7 @@ export function ExercisePickerSheet({
                               : { borderColor: colors.border },
                           ]}
                         >
-                          {checked ? <Text style={[styles.check, { color: colors.onAccent }]}>✓</Text> : null}
+                          {checked ? <Icon name="check" size={14} color={colors.onAccent} /> : null}
                         </View>
 
                         <Text style={[styles.name, { color: colors.textPrimary }]}>{summary.exercise.name}</Text>
@@ -162,6 +163,7 @@ export function ExercisePickerSheet({
             onPress={onCreateExercise}
             style={[styles.createNew, { backgroundColor: colors.accentSoft }]}
           >
+            <Icon name="plus" size={16} color={colors.accent} />
             <Text style={[styles.createNewLabel, { color: colors.accent }]}>{t('library.notFound')}</Text>
           </Pressable>
         </ScrollView>
@@ -187,10 +189,10 @@ const styles = StyleSheet.create({
   handle: { width: 40, height: 4, borderRadius: radii.pill },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   titleLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { fontSize: 18, fontWeight: '700' },
+  title: { fontSize: 18, fontFamily: uiFont('700'), fontWeight: '700' },
   counter: { borderRadius: radii.pill, paddingVertical: 3, paddingHorizontal: 8 },
-  counterLabel: { fontSize: 11, fontWeight: '700' },
-  done: { fontSize: 14, fontWeight: '600' },
+  counterLabel: { fontSize: 11, fontFamily: numFont('700'), fontWeight: '700' },
+  done: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
 
   searchField: {
     flexDirection: 'row',
@@ -200,12 +202,11 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     paddingHorizontal: 13,
   },
-  searchIcon: { fontSize: 15 },
-  searchInput: { flex: 1, fontSize: 14, fontWeight: '500', padding: 0 },
+  searchInput: { flex: 1, fontSize: 14, fontFamily: uiFont('500'), fontWeight: '500', padding: 0 },
 
   list: { gap: 14, paddingBottom: 4 },
   group: { gap: 8 },
-  caption: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6 },
+  caption: { fontSize: 11, fontFamily: uiFont('700'), fontWeight: '700', letterSpacing: 0.6 },
   card: { borderRadius: radii.lg, borderWidth: 1, overflow: 'hidden' },
   divider: { height: 1 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 11, paddingHorizontal: 13 },
@@ -217,15 +218,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  check: { fontSize: 12, fontWeight: '700' },
-  name: { flex: 1, fontSize: 14, fontWeight: '500' },
-  value: { fontSize: 12, fontWeight: '600' },
+  name: { flex: 1, fontSize: 14, fontFamily: uiFont('500'), fontWeight: '500' },
+  // рекорд в строке — числовая гарнитура ($font-num в макете)
+  value: { fontSize: 12, fontFamily: numFont('600'), fontWeight: '600' },
 
   createNew: {
+    flexDirection: 'row',
+    gap: 8,
     borderRadius: radii.md,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
   },
-  createNewLabel: { fontSize: 13, fontWeight: '600' },
+  createNewLabel: { fontSize: 13, fontFamily: uiFont('600'), fontWeight: '600' },
 })

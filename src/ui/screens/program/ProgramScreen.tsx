@@ -5,11 +5,12 @@ import type { ProgramWithItems } from '../../../app/ports'
 import { PROGRAM_PALETTE } from '../../../app/usecases/library'
 import type { Id } from '../../../domain/model/types'
 import { localDate } from '../../../domain/model/types'
+import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { programColors, radii } from '../../theme/tokens'
+import { programColors, radii, uiFont } from '../../theme/tokens'
 
 export interface ProgramScreenProps {
   readonly programId: Id
@@ -169,13 +170,13 @@ export function ProgramScreen({
                 {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
 
                 <View testID={`program-item-${index}`} style={styles.row}>
-                  <Text
+                  <View
                     testID={`program-item-handle-${index}`}
                     accessibilityLabel={t('program.dragHandle')}
-                    style={[styles.grip, { color: colors.textMuted }]}
+                    style={styles.grip}
                   >
-                    ⣿
-                  </Text>
+                    <Icon name="grip-vertical" size={18} color={colors.textMuted} />
+                  </View>
 
                   <View style={styles.rowTexts}>
                     <Text style={[styles.rowName, { color: colors.textPrimary }]}>
@@ -198,7 +199,7 @@ export function ProgramScreen({
                     onPress={() => removeItem.mutate(item.exerciseId)}
                     style={[styles.removeButton, { backgroundColor: colors.surface2 }]}
                   >
-                    <Text style={[styles.removeIcon, { color: colors.textMuted }]}>×</Text>
+                    <Icon name="x" size={15} color={colors.textMuted} />
                   </Pressable>
                 </View>
               </Fragment>
@@ -212,7 +213,7 @@ export function ProgramScreen({
           onPress={onAddExercise}
           style={[styles.addButton, { backgroundColor: colors.accentSoft }]}
         >
-          <Text style={[styles.addIcon, { color: colors.accent }]}>＋</Text>
+          <Icon name="plus" size={16} color={colors.accent} />
           <Text style={[styles.addLabel, { color: colors.accent }]}>{t('workout.addExercise')}</Text>
         </Pressable>
 
@@ -223,7 +224,7 @@ export function ProgramScreen({
             onPress={() => duplicate.mutate()}
             style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
           >
-            <Text style={[styles.actionIcon, { color: colors.textSecondary }]}>⧉</Text>
+            <Icon name="copy" size={15} color={colors.textSecondary} />
             <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>
               {t('program.duplicate')}
             </Text>
@@ -235,7 +236,7 @@ export function ProgramScreen({
             onPress={() => archive.mutate()}
             style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
           >
-            <Text style={[styles.actionIcon, { color: colors.danger }]}>⇩</Text>
+            <Icon name="archive" size={15} color={colors.danger} />
             <Text style={[styles.actionLabel, { color: colors.danger }]}>{t('program.archive')}</Text>
           </Pressable>
         </View>
@@ -249,7 +250,7 @@ const styles = StyleSheet.create({
   content: { paddingTop: 8, paddingHorizontal: 20, paddingBottom: 24, gap: 18 },
 
   block: { gap: 9 },
-  blockLabel: { fontSize: 12, fontWeight: '600' },
+  blockLabel: { fontSize: 12, fontFamily: uiFont('600'), fontWeight: '600' },
 
   swatches: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   swatchSlot: {
@@ -264,16 +265,16 @@ const styles = StyleSheet.create({
   swatchDot: { width: 30, height: 30, borderRadius: radii.pill },
 
   listHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  listHint: { fontSize: 11, fontWeight: '400' },
+  listHint: { fontSize: 11, fontFamily: uiFont('400'), fontWeight: '400' },
 
   card: { borderRadius: radii.lg, borderWidth: 1, overflow: 'hidden' },
   divider: { height: 1 },
 
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14 },
-  grip: { fontSize: 14, width: 18, textAlign: 'center' },
+  grip: { width: 18, alignItems: 'center', justifyContent: 'center' },
   rowTexts: { flex: 1, gap: 3 },
-  rowName: { fontSize: 15, fontWeight: '500' },
-  rowPlan: { fontSize: 11, fontWeight: '400' },
+  rowName: { fontSize: 15, fontFamily: uiFont('500'), fontWeight: '500' },
+  rowPlan: { fontSize: 11, fontFamily: uiFont('400'), fontWeight: '400' },
   removeButton: {
     width: 28,
     height: 28,
@@ -281,11 +282,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  removeIcon: { fontSize: 15, fontWeight: '500', lineHeight: 17 },
-
   empty: { padding: 14, gap: 3 },
-  emptyTitle: { fontSize: 15, fontWeight: '600' },
-  emptyHint: { fontSize: 11, fontWeight: '400' },
+  emptyTitle: { fontSize: 15, fontFamily: uiFont('600'), fontWeight: '600' },
+  emptyHint: { fontSize: 11, fontFamily: uiFont('400'), fontWeight: '400' },
 
   addButton: {
     flexDirection: 'row',
@@ -295,8 +294,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     paddingVertical: 13,
   },
-  addIcon: { fontSize: 14, fontWeight: '600' },
-  addLabel: { fontSize: 14, fontWeight: '600' },
+  addLabel: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
 
   actions: { flexDirection: 'row', gap: 12 },
   actionButton: {
@@ -309,6 +307,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 12,
   },
-  actionIcon: { fontSize: 13 },
-  actionLabel: { fontSize: 13, fontWeight: '600' },
+  actionLabel: { fontSize: 13, fontFamily: uiFont('600'), fontWeight: '600' },
 })

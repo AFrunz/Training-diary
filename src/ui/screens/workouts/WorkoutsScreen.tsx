@@ -10,11 +10,12 @@ import { computeDuration } from '../../../domain/rules/duration'
 import { formatDuration, formatElapsed } from '../../../domain/rules/format'
 import { Chip } from '../../components/Chip'
 import { Donut } from '../../components/Donut'
+import { Icon } from '../../components/Icon'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { programColors, radii } from '../../theme/tokens'
+import { programColors, radii, uiFont } from '../../theme/tokens'
 
 /**
  * Экран «05 · Тренировки» из макета: шапка с кнопкой создания, ряд фильтров по
@@ -144,7 +145,7 @@ export function WorkoutsScreen({ onCreateWorkout, onOpenWorkout }: WorkoutsScree
           onPress={onCreateWorkout}
           style={[styles.addButton, { backgroundColor: colors.accent }]}
         >
-          <Text style={[styles.addGlyph, { color: colors.onAccent }]}>＋</Text>
+          <Icon name="plus" size={20} color={colors.onAccent} />
         </Pressable>
       </View>
 
@@ -272,9 +273,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 14,
   },
-  title: { fontSize: 26, fontWeight: '700' },
+  title: { fontSize: 26, fontWeight: '700', fontFamily: uiFont('700') },
   addButton: { width: 36, height: 36, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
-  addGlyph: { fontSize: 18, fontWeight: '600' },
 
   filters: { paddingBottom: 14 },
   filtersRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20 },
@@ -291,9 +291,15 @@ const styles = StyleSheet.create({
   },
   activeInfo: { gap: 7, flexShrink: 1 },
   badge: { alignSelf: 'flex-start', borderRadius: radii.pill, paddingVertical: 3, paddingHorizontal: 7 },
-  badgeLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 0.5, textTransform: 'uppercase' },
-  activeName: { fontSize: 16, fontWeight: '700' },
-  activeMeta: { fontSize: 12, fontWeight: '600' },
+  badgeLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    fontFamily: uiFont('700'),
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  activeName: { fontSize: 16, fontWeight: '700', fontFamily: uiFont('700') },
+  activeMeta: { fontSize: 12, fontWeight: '600', fontFamily: uiFont('600') },
 
   list: { gap: 10, paddingHorizontal: 20 },
   card: {
@@ -307,11 +313,11 @@ const styles = StyleSheet.create({
   cardInfo: { gap: 5, flexShrink: 1 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   programDot: { width: 9, height: 9, borderRadius: radii.pill },
-  cardName: { fontSize: 15, fontWeight: '600' },
-  cardMeta: { fontSize: 12, fontWeight: '500' },
-  cardNote: { fontSize: 11, fontWeight: '500' },
+  cardName: { fontSize: 15, fontWeight: '600', fontFamily: uiFont('600') },
+  cardMeta: { fontSize: 12, fontWeight: '500', fontFamily: uiFont('500') },
+  cardNote: { fontSize: 11, fontWeight: '500', fontFamily: uiFont('500') },
 
   empty: { paddingHorizontal: 20, paddingTop: 40, gap: 6, alignItems: 'center' },
-  emptyTitle: { fontSize: 15, fontWeight: '600' },
-  emptyHint: { fontSize: 12, fontWeight: '500', textAlign: 'center' },
+  emptyTitle: { fontSize: 15, fontWeight: '600', fontFamily: uiFont('600') },
+  emptyHint: { fontSize: 12, fontWeight: '500', fontFamily: uiFont('500'), textAlign: 'center' },
 })

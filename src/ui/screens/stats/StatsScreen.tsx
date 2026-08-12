@@ -4,11 +4,12 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { LocalDate } from '../../../domain/model/types'
 import { toLocalDate } from '../../../domain/rules/dates'
 import { EMPTY_VALUE, formatDuration } from '../../../domain/rules/format'
+import { Icon } from '../../components/Icon'
 import { useT } from '../../i18n/I18nProvider'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { programColors, radii } from '../../theme/tokens'
+import { numFont, programColors, radii, uiFont } from '../../theme/tokens'
 import type { StatsColumn, StatsMode } from './periodData'
 import { isSamePeriod, loadPeriod, shiftPeriod } from './periodData'
 
@@ -136,6 +137,7 @@ export function StatsScreen() {
                     {
                       color: selected ? colors.textPrimary : colors.textSecondary,
                       fontWeight: selected ? '600' : '500',
+                      fontFamily: uiFont(selected ? '600' : '500'),
                     },
                   ]}
                 >
@@ -155,7 +157,7 @@ export function StatsScreen() {
           onPress={() => setAnchor(shiftPeriod(anchor, mode, -1))}
           style={styles.arrow}
         >
-          <Text style={[styles.arrowGlyph, { color: colors.textSecondary }]}>‹</Text>
+          <Icon name="chevron-left" size={18} color={colors.textSecondary} />
         </Pressable>
 
         <Text testID="stats-period" style={[styles.period, { color: colors.textPrimary }]}>
@@ -170,11 +172,11 @@ export function StatsScreen() {
           onPress={() => setAnchor(shiftPeriod(anchor, mode, 1))}
           style={styles.arrow}
         >
-          <Text
-            style={[styles.arrowGlyph, { color: atCurrentPeriod ? colors.textMuted : colors.textSecondary }]}
-          >
-            ›
-          </Text>
+          <Icon
+            name="chevron-right"
+            size={18}
+            color={atCurrentPeriod ? colors.textMuted : colors.textSecondary}
+          />
         </Pressable>
       </View>
 
@@ -280,7 +282,7 @@ export function StatsScreen() {
                   {t('stats.streakValue', { value: count('weeks', data.stats.streak.current) })}
                 </Text>
               </View>
-              <Text style={[styles.streakGlyph, { color: colors.accent }]}>▲</Text>
+              <Icon name="flame" size={26} color={colors.accent} />
             </View>
 
             <Text testID="stat-streak-record" style={[styles.streakNote, { color: colors.textSecondary }]}>
@@ -334,7 +336,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     paddingHorizontal: 20,
   },
-  title: { fontSize: 26, fontWeight: '700' },
+  title: { fontSize: 26, fontWeight: '700', fontFamily: uiFont('700') },
   segmented: { flexDirection: 'row', gap: 2, padding: 3, borderRadius: radii.sm },
   segment: { paddingVertical: 5, paddingHorizontal: 11, borderRadius: 7 },
   segmentLabel: { fontSize: 12 },
@@ -347,35 +349,33 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   arrow: { width: 18, height: 18, alignItems: 'center', justifyContent: 'center' },
-  arrowGlyph: { fontSize: 18, lineHeight: 18 },
-  period: { flex: 1, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  period: { flex: 1, textAlign: 'center', fontSize: 14, fontWeight: '600', fontFamily: uiFont('600') },
 
   content: { paddingHorizontal: 16, paddingBottom: 16, gap: 10 },
   metricsRow: { flexDirection: 'row', gap: 10 },
   metricCard: { flex: 1, borderRadius: radii.lg, borderWidth: 1, padding: 16, gap: 4 },
-  metricLabel: { fontSize: 11 },
-  metricValue: { fontSize: 26, fontWeight: '700' },
-  metricCompare: { fontSize: 11 },
+  metricLabel: { fontSize: 11, fontFamily: uiFont() },
+  metricValue: { fontSize: 26, fontWeight: '700', fontFamily: numFont('700') },
+  metricCompare: { fontSize: 11, fontFamily: uiFont() },
 
   card: { borderRadius: radii.lg, borderWidth: 1, padding: 16, gap: 12 },
-  cardTitle: { fontSize: 14, fontWeight: '600' },
+  cardTitle: { fontSize: 14, fontWeight: '600', fontFamily: uiFont('600') },
   plot: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, height: PLOT_HEIGHT },
   column: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', gap: 6 },
   bar: { alignSelf: 'stretch', borderRadius: 6 },
   vacation: { alignSelf: 'stretch', height: 26, borderRadius: 6 },
-  columnLabel: { fontSize: 9 },
+  columnLabel: { fontSize: 9, fontFamily: uiFont() },
 
   splitBar: { flexDirection: 'row', height: 12, borderRadius: radii.pill, overflow: 'hidden' },
   legend: { flexDirection: 'row', flexWrap: 'wrap', rowGap: 7, columnGap: 10 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6, width: '47%' },
   legendDot: { width: 8, height: 8, borderRadius: radii.pill },
-  legendLabel: { flex: 1, fontSize: 12 },
+  legendLabel: { flex: 1, fontSize: 12, fontFamily: uiFont() },
 
   streakCard: { borderRadius: radii.lg, padding: 16, gap: 10 },
   streakRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   streakTexts: { gap: 2 },
-  streakLabel: { fontSize: 12 },
-  streakValue: { fontSize: 18, fontWeight: '700' },
-  streakGlyph: { fontSize: 22 },
-  streakNote: { fontSize: 11 },
+  streakLabel: { fontSize: 12, fontFamily: uiFont() },
+  streakValue: { fontSize: 18, fontWeight: '700', fontFamily: uiFont('700') },
+  streakNote: { fontSize: 11, fontFamily: uiFont() },
 })

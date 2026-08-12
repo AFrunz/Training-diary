@@ -13,7 +13,7 @@ import { useT } from '../../i18n/I18nProvider'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { radii } from '../../theme/tokens'
+import { numFont, radii, uiFont } from '../../theme/tokens'
 
 export interface ExerciseHistoryScreenProps {
   readonly exerciseId: Id
@@ -398,35 +398,43 @@ const styles = StyleSheet.create({
 
   recordsRow: { flexDirection: 'row', gap: 12 },
   recordCard: { flex: 1, padding: 14, gap: 4 },
-  recordLabel: { fontSize: 11, fontWeight: '500' },
-  recordValue: { fontSize: 22, fontWeight: '700' },
-  recordNote: { fontSize: 11, fontWeight: '500' },
+  recordLabel: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
+  // значение рекорда — числовая гарнитура ($font-num в макете)
+  recordValue: { fontSize: 22, fontFamily: numFont('700'), fontWeight: '700' },
+  recordNote: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
 
   chartCard: { padding: 16, gap: 14 },
   chartHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  chartTitle: { fontSize: 14, fontWeight: '600' },
+  chartTitle: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
   segment: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   segmentChip: { borderRadius: 7, paddingVertical: 4, paddingHorizontal: 9 },
-  segmentLabel: { fontSize: 11, fontWeight: '600' },
+  segmentLabel: { fontSize: 11, fontFamily: uiFont('600'), fontWeight: '600' },
 
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 130 },
   barColumn: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', gap: 6 },
-  barPeak: { fontSize: 10, fontWeight: '700' },
+  barPeak: { fontSize: 10, fontFamily: numFont('700'), fontWeight: '700' },
   bar: { width: '100%', borderRadius: 6 },
-  barDate: { fontSize: 9, fontWeight: '500' },
+  barDate: { fontSize: 9, fontFamily: uiFont('500'), fontWeight: '500' },
 
   workoutsBlock: { gap: 10 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, textTransform: 'uppercase' },
+  sectionTitle: {
+    fontSize: 12,
+    fontFamily: uiFont('700'),
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
   workoutCard: { padding: 14, gap: 10 },
   workoutTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  workoutDate: { fontSize: 14, fontWeight: '600' },
+  workoutDate: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
   deltaChip: { borderRadius: radii.pill, paddingVertical: 3, paddingHorizontal: 8 },
-  deltaLabel: { fontSize: 11, fontWeight: '600' },
+  deltaLabel: { fontSize: 11, fontFamily: uiFont('600'), fontWeight: '600' },
   setsRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 7 },
   setChip: { borderRadius: radii.sm, paddingVertical: 5, paddingHorizontal: 9 },
-  setLabel: { fontSize: 12, fontWeight: '600' },
+  // подписи подходов — числовая гарнитура
+  setLabel: { fontSize: 12, fontFamily: numFont('600'), fontWeight: '600' },
 
   emptyCard: { padding: 16, gap: 4 },
-  emptyTitle: { fontSize: 15, fontWeight: '600' },
-  emptyHint: { fontSize: 12, fontWeight: '400' },
+  emptyTitle: { fontSize: 15, fontFamily: uiFont('600'), fontWeight: '600' },
+  emptyHint: { fontSize: 12, fontFamily: uiFont('400'), fontWeight: '400' },
 })

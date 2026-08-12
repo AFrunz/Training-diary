@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
 import { useTheme } from '../theme/ThemeProvider'
-import { radii } from '../theme/tokens'
+import { radii, uiFont } from '../theme/tokens'
+import { Icon } from './Icon'
 
 export interface ScreenHeaderProps {
   readonly title: string
@@ -25,7 +26,7 @@ export function ScreenHeader({ title, subtitle, onBack, action, testID = 'screen
           onPress={onBack}
           style={[styles.round, { backgroundColor: colors.surface2 }]}
         >
-          <Text style={{ color: colors.textPrimary }}>‹</Text>
+          <Icon name="chevron-left" size={19} color={colors.textPrimary} />
         </Pressable>
       ) : null}
 
@@ -49,6 +50,6 @@ const styles = StyleSheet.create({
   root: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, height: 56 },
   round: { width: 34, height: 34, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
   titles: { flex: 1, gap: 1 },
-  title: { fontSize: 17, fontWeight: '700' },
-  subtitle: { fontSize: 12, fontWeight: '500' },
+  title: { fontFamily: uiFont('700'), fontSize: 17, fontWeight: '700' },
+  subtitle: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
 })

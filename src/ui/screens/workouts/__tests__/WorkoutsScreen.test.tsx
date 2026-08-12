@@ -277,7 +277,7 @@ describe('Экран «Тренировки»', () => {
     expect(await screen.findByTestId('workout-meta-2026-08-04')).toHaveTextContent('4 августа · —')
   })
 
-  it('кнопка «＋» сообщает о создании тренировки', async () => {
+  it('кнопка добавления сообщает о создании тренировки', async () => {
     const world = await buildWorld()
     const onCreateWorkout = jest.fn()
     render(<WorkoutsScreen onCreateWorkout={onCreateWorkout} />, { services: world.services })

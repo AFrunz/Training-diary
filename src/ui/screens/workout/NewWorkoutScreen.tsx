@@ -7,7 +7,7 @@ import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { useTheme } from '../../theme/ThemeProvider'
-import { programColors, radii } from '../../theme/tokens'
+import { programColors, radii, uiFont } from '../../theme/tokens'
 
 export interface NewWorkoutScreenProps {
   /** Дата тренировки; по умолчанию сегодня (FR-4.1). */
@@ -20,7 +20,7 @@ export interface NewWorkoutScreenProps {
 
 /**
  * Выбор программы для новой тренировки. Отдельного фрейма в макете нет:
- * это шаг между кнопкой «＋» и экраном тренировки.
+ * это шаг между кнопкой добавления и экраном тренировки.
  */
 export function NewWorkoutScreen({ date, onBack, onCreated, onOpenExisting }: NewWorkoutScreenProps) {
   const { colors } = useTheme()
@@ -103,10 +103,10 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   dot: { width: 10, height: 10, borderRadius: radii.pill },
-  name: { fontSize: 16, fontWeight: '600' },
-  empty: { fontSize: 13, fontWeight: '500', textAlign: 'center', paddingVertical: 24 },
+  name: { fontFamily: uiFont('600'), fontSize: 16, fontWeight: '600' },
+  empty: { fontFamily: uiFont('500'), fontSize: 13, fontWeight: '500', textAlign: 'center', paddingVertical: 24 },
   notice: { marginHorizontal: 20, borderRadius: radii.md, padding: 14, gap: 6 },
-  noticeText: { fontSize: 13, fontWeight: '600' },
-  noticeAction: { fontSize: 13, fontWeight: '700' },
-  hint: { fontSize: 11, fontWeight: '500', textAlign: 'center', paddingBottom: 20 },
+  noticeText: { fontFamily: uiFont('600'), fontSize: 13, fontWeight: '600' },
+  noticeAction: { fontFamily: uiFont('700'), fontSize: 13, fontWeight: '700' },
+  hint: { fontFamily: uiFont('500'), fontSize: 11, fontWeight: '500', textAlign: 'center', paddingBottom: 20 },
 })
