@@ -1,0 +1,41 @@
+appId: com.trainingdiary.app
+name: Экспорт, полная очистка, импорт (критерий приёмки 10)
+---
+- runFlow: fixtures/seed-workout.yaml
+
+# Запоминаем, что было до выгрузки
+- tapOn:
+    id: 'tab-workouts'
+- assertVisible: 'Грудь + трицепс'
+- assertVisible: '80 × 8'
+
+# Выгружаем файл
+- tapOn:
+    id: 'tab-settings'
+- tapOn:
+    id: 'settings-export'
+- assertVisible: 'training-diary'
+
+# Стираем всё
+- tapOn:
+    id: 'settings-wipe'
+- tapOn: 'Удалить'
+- tapOn:
+    id: 'tab-workouts'
+- assertNotVisible: 'Грудь + трицепс'
+
+# Возвращаем из файла
+- tapOn:
+    id: 'tab-settings'
+- tapOn:
+    id: 'settings-import'
+- tapOn: 'Заменить всё'
+- tapOn: 'Импортировать'
+
+# Состояние совпадает с исходным, включая длительность и подходы
+- tapOn:
+    id: 'tab-workouts'
+- assertVisible: 'Грудь + трицепс'
+- tapOn:
+    id: 'workout-card-today'
+- assertVisible: '80 × 8'

@@ -1,0 +1,98 @@
+appId: com.trainingdiary.app
+name: От пустого приложения до статистики
+---
+- launchApp:
+    clearState: true
+
+# Два упражнения в библиотеке
+- tapOn:
+    id: 'tab-library'
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Жим лёжа'
+- tapOn:
+    id: 'create-button'
+- assertVisible: 'Жим лёжа'
+
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Разводка гантелей'
+- tapOn:
+    id: 'create-button'
+- assertVisible: 'Разводка гантелей'
+
+# Программа из этих упражнений
+- tapOn:
+    id: 'library-segment-programs'
+- tapOn:
+    id: 'add-button'
+# пока название пустое, создать нельзя (FR-3.1.1)
+- assertVisible:
+    id: 'create-button'
+    enabled: false
+- tapOn:
+    id: 'name-input'
+- inputText: 'Грудь + трицепс'
+- tapOn:
+    id: 'exercise-picker-open'
+- tapOn:
+    id: 'exercise-row-Жим лёжа'
+- tapOn:
+    id: 'exercise-row-Разводка гантелей'
+- tapOn:
+    id: 'exercise-picker-done'
+- tapOn:
+    id: 'create-button'
+- assertVisible: 'Грудь + трицепс'
+
+# Тренировка на сегодня
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'add-button'
+- tapOn: 'Грудь + трицепс'
+- assertVisible:
+    id: 'workout-timer'
+
+# Подход к первому упражнению
+- tapOn:
+    id: 'add-set-0'
+- tapOn:
+    id: 'set-weight-input'
+- inputText: '80'
+- tapOn:
+    id: 'set-reps-input'
+- inputText: '8'
+- tapOn:
+    id: 'set-submit'
+- assertVisible: '80 × 8'
+
+# Отмечено одно упражнение из двух
+- tapOn:
+    id: 'item-checkbox-0'
+- tapOn:
+    id: 'tab-workouts'
+- assertVisible: '1/2'
+
+# Отмечаем второе — тренировка завершена
+- tapOn:
+    id: 'workout-card-today'
+- tapOn:
+    id: 'item-checkbox-1'
+- tapOn:
+    id: 'tab-workouts'
+- assertVisible: '2/2'
+
+# Тренировка видна в календаре и в статистике
+- tapOn:
+    id: 'tab-calendar'
+- assertVisible:
+    id: 'calendar-day-today'
+- tapOn:
+    id: 'tab-stats'
+- assertVisible:
+    id: 'stat-workouts'

@@ -1,0 +1,37 @@
+appId: com.trainingdiary.app
+name: Отпуск не портит регулярность (§5.3, критерий приёмки 7)
+---
+- runFlow: fixtures/seed-workout.yaml
+
+# Запоминаем регулярность до отпуска
+- tapOn:
+    id: 'tab-stats'
+- assertVisible:
+    id: 'stat-per-week'
+- copyTextFrom:
+    id: 'stat-per-week'
+- evalScript: ${output.perWeekBefore = maestro.copiedText}
+
+# Заводим отпуск на две недели
+- tapOn:
+    id: 'tab-calendar'
+- longPressOn:
+    id: 'calendar-day-plus-7'
+- tapOn: 'Отпуск'
+- tapOn:
+    id: 'absence-end-date'
+- tapOn:
+    id: 'calendar-day-plus-20'
+- tapOn: 'Сохранить'
+
+# Дни отпуска видны серым, а не как пропуск
+- assertVisible:
+    id: 'calendar-day-plus-7'
+- assertVisible: 'Отпуск'
+
+# Регулярность не просела: отпускные недели исключены из знаменателя
+- tapOn:
+    id: 'tab-stats'
+- copyTextFrom:
+    id: 'stat-per-week'
+- assertTrue: ${maestro.copiedText >= output.perWeekBefore}

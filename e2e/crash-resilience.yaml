@@ -1,0 +1,50 @@
+appId: com.trainingdiary.app
+name: Подходы переживают убийство процесса (§7.1)
+---
+- runFlow: fixtures/seed-program.yaml
+
+# Начинаем тренировку и записываем два подхода
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'add-button'
+- tapOn: 'Грудь + трицепс'
+
+- tapOn:
+    id: 'add-set-0'
+- tapOn:
+    id: 'set-weight-input'
+- inputText: '80'
+- tapOn:
+    id: 'set-reps-input'
+- inputText: '8'
+- tapOn:
+    id: 'set-submit'
+
+- tapOn:
+    id: 'add-set-0'
+- tapOn:
+    id: 'set-weight-input'
+- inputText: '82.5'
+- tapOn:
+    id: 'set-reps-input'
+- inputText: '6'
+- tapOn:
+    id: 'set-submit'
+
+- assertVisible: '82.5 × 6'
+
+# Убиваем процесс без каких-либо «сохранить»
+- stopApp
+- launchApp:
+    clearState: false
+
+# Тренировка на месте, оба подхода целы, счётчик продолжает идти
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'workout-card-today'
+- assertVisible: '80 × 8'
+- assertVisible: '82.5 × 6'
+- assertVisible:
+    id: 'workout-timer'

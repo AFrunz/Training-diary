@@ -3,12 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "NODE_OPTIONS=--experimental-sqlite jest",
+    "test:watch": "NODE_OPTIONS=--experimental-sqlite jest --watch",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/jest": "^29.5.14",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.45.2",
     "fast-check": "^3.23.2",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",

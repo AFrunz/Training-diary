@@ -1,0 +1,26 @@
+appId: com.trainingdiary.app
+name: Подготовка — проведённая тренировка
+---
+- runFlow: seed-program.yaml
+
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'add-button'
+- tapOn: 'Грудь + трицепс'
+
+- tapOn:
+    id: 'add-set-0'
+- tapOn:
+    id: 'set-weight-input'
+- inputText: '80'
+- tapOn:
+    id: 'set-reps-input'
+- inputText: '8'
+- tapOn:
+    id: 'set-submit'
+
+- tapOn:
+    id: 'item-checkbox-0'
+- tapOn:
+    id: 'item-checkbox-1'

@@ -1,0 +1,34 @@
+appId: com.trainingdiary.app
+name: Смена языка на лету (FR-7.6)
+---
+- runFlow: fixtures/seed-workout.yaml
+
+- tapOn:
+    id: 'tab-settings'
+- assertVisible: 'Настройки'
+
+# Переключаем на английский
+- tapOn:
+    id: 'settings-language'
+- tapOn: 'English'
+
+# Интерфейс сменился без перезапуска
+- assertVisible: 'Settings'
+- assertNotVisible: 'Настройки'
+- tapOn:
+    id: 'tab-workouts'
+- assertVisible: 'Workouts'
+
+# Пользовательские данные остались как их вводили
+- assertVisible: 'Грудь + трицепс'
+- tapOn:
+    id: 'workout-card-today'
+- assertVisible: 'Жим лёжа'
+
+# Возврат на русский
+- tapOn:
+    id: 'tab-settings'
+- tapOn:
+    id: 'settings-language'
+- tapOn: 'Русский'
+- assertVisible: 'Настройки'

@@ -1,0 +1,41 @@
+appId: com.trainingdiary.app
+name: Подготовка — упражнения и программа
+---
+- launchApp:
+    clearState: true
+
+- tapOn:
+    id: 'tab-library'
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Жим лёжа'
+- tapOn:
+    id: 'create-button'
+
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Разводка гантелей'
+- tapOn:
+    id: 'create-button'
+
+- tapOn:
+    id: 'library-segment-programs'
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Грудь + трицепс'
+- tapOn:
+    id: 'exercise-picker-open'
+- tapOn:
+    id: 'exercise-row-Жим лёжа'
+- tapOn:
+    id: 'exercise-row-Разводка гантелей'
+- tapOn:
+    id: 'exercise-picker-done'
+- tapOn:
+    id: 'create-button'
