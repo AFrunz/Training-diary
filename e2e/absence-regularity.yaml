@@ -1,37 +1,52 @@
 appId: com.trainingdiary.app
 name: Отпуск не портит регулярность (§5.3, критерий приёмки 7)
 ---
+# ВНИМАНИЕ: сценарий не запускается — ввода отсутствия в интерфейсе нет вообще.
+# Календарь только показывает готовые периоды (серый день и легенда
+# `legend-absence`), а завести отпуск нечем: у дня календаря нет долгого нажатия,
+# экрана отсутствия с выбором типа и даты окончания не существует, в src/app нет
+# и сценария создания отсутствия. Файл держим как контракт к будущему экрану:
+# `absence-end-date` и подписи типов отсутствия ниже — то, чего ждём.
 - runFlow: fixtures/seed-workout.yaml
 
-# Запоминаем регулярность до отпуска
+# Дни календаря именуются датой, поэтому границы отпуска считаются заранее:
+# отпуск на две недели, с +7 по +20 день от сегодня.
+- evalScript: ${output.absenceFrom = new Date(Date.now() + 7 * 86400000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+- evalScript: ${output.absenceTo = new Date(Date.now() + 20 * 86400000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+
+# Запоминаем регулярность до отпуска. Подпись и значение плитки лежат в разных
+# узлах, копировать нужно значение.
 - tapOn:
     id: 'tab-stats'
 - assertVisible:
     id: 'stat-per-week'
 - copyTextFrom:
-    id: 'stat-per-week'
+    id: 'stat-per-week-value'
 - evalScript: ${output.perWeekBefore = maestro.copiedText}
 
-# Заводим отпуск на две недели
+# Заводим отпуск на две недели.
+# Обе даты должны попасть в сетку текущего месяца, иначе перед нажатием нужен
+# переход стрелкой `calendar-next-month`.
 - tapOn:
     id: 'tab-calendar'
 - longPressOn:
-    id: 'calendar-day-plus-7'
+    id: 'calendar-day-${output.absenceFrom}'
 - tapOn: 'Отпуск'
 - tapOn:
     id: 'absence-end-date'
 - tapOn:
-    id: 'calendar-day-plus-20'
+    id: 'calendar-day-${output.absenceTo}'
 - tapOn: 'Сохранить'
 
 # Дни отпуска видны серым, а не как пропуск
 - assertVisible:
-    id: 'calendar-day-plus-7'
-- assertVisible: 'Отпуск'
+    id: 'calendar-day-${output.absenceFrom}'
+- assertVisible:
+    id: 'legend-absence'
 
 # Регулярность не просела: отпускные недели исключены из знаменателя
 - tapOn:
     id: 'tab-stats'
 - copyTextFrom:
-    id: 'stat-per-week'
+    id: 'stat-per-week-value'
 - assertTrue: ${maestro.copiedText >= output.perWeekBefore}

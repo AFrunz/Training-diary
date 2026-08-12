@@ -77,11 +77,18 @@ interface TodayCardData {
 
 export interface CalendarScreenProps {
   readonly onOpenDay?: (date: LocalDate) => void
+  /** Долгое нажатие по дню заводит отсутствие (FR-1.6). */
+  readonly onAddAbsence?: (date: LocalDate) => void
   readonly onContinueWorkout?: (workoutId: Id) => void
   readonly onCreateWorkout?: (date: LocalDate) => void
 }
 
-export function CalendarScreen({ onOpenDay, onContinueWorkout, onCreateWorkout }: CalendarScreenProps = {}) {
+export function CalendarScreen({
+  onOpenDay,
+  onAddAbsence,
+  onContinueWorkout,
+  onCreateWorkout,
+}: CalendarScreenProps = {}) {
   const services = useServices()
   const { ports } = services
   const { t, locale } = useT()
@@ -279,6 +286,7 @@ export function CalendarScreen({ onOpenDay, onContinueWorkout, onCreateWorkout }
                         testID={`calendar-day-${date}`}
                         accessibilityRole="button"
                         onPress={() => onOpenDay?.(date)}
+                        onLongPress={() => onAddAbsence?.(date)}
                         style={[styles.day, { backgroundColor: background }]}
                       >
                         <Text

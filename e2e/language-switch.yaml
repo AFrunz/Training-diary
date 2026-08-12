@@ -3,14 +3,30 @@ name: Смена языка на лету (FR-7.6)
 ---
 - runFlow: fixtures/seed-workout.yaml
 
+# Карточка тренировки именуется датой, поэтому она считается заранее
+- evalScript: ${output.today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+
+# Сценарий рассчитан на устройство с русским языком: в системном режиме словарь
+# берётся из локали устройства.
 - tapOn:
     id: 'tab-settings'
 - assertVisible: 'Настройки'
+- assertVisible:
+    id: 'settings-language-value'
+    text: 'Системный'
 
-# Переключаем на английский
+# Строка языка перебирает значения по кругу: системный → русский → английский.
+# Отдельного списка языков нет, поэтому два нажатия по самой строке.
 - tapOn:
     id: 'settings-language'
-- tapOn: 'English'
+- assertVisible:
+    id: 'settings-language-value'
+    text: 'Русский'
+- tapOn:
+    id: 'settings-language'
+- assertVisible:
+    id: 'settings-language-value'
+    text: 'English'
 
 # Интерфейс сменился без перезапуска
 - assertVisible: 'Settings'
@@ -19,16 +35,20 @@ name: Смена языка на лету (FR-7.6)
     id: 'tab-workouts'
 - assertVisible: 'Workouts'
 
-# Пользовательские данные остались как их вводили
-- assertVisible: 'Грудь + трицепс'
+# Пользовательские данные остались как их вводили («+» в названии экранируется)
+- assertVisible: 'Грудь \+ трицепс'
 - tapOn:
-    id: 'workout-card-today'
+    id: 'workout-card-${output.today}'
 - assertVisible: 'Жим лёжа'
+- tapOn:
+    id: 'header-back'
 
-# Возврат на русский
+# Возврат к системному языку: следующее нажатие снова отдаёт словарь устройству
 - tapOn:
     id: 'tab-settings'
 - tapOn:
     id: 'settings-language'
-- tapOn: 'Русский'
 - assertVisible: 'Настройки'
+- assertVisible:
+    id: 'settings-language-value'
+    text: 'Системный'

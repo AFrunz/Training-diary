@@ -292,3 +292,25 @@ describe('Экран «Календарь»', () => {
     expect(onOpenDay).toHaveBeenCalledWith(localDate('2026-08-14'))
   })
 })
+
+describe('CalendarScreen — заведение отсутствия (FR-1.6)', () => {
+  it('долгое нажатие по дню отдаёт его дату', async () => {
+    const { services } = createTestServices()
+    const onAddAbsence = jest.fn()
+    render(<CalendarScreen onAddAbsence={onAddAbsence} />, { services })
+
+    fireEvent(await screen.findByTestId('calendar-day-2026-08-17'), 'longPress')
+
+    expect(onAddAbsence).toHaveBeenCalledWith('2026-08-17')
+  })
+
+  it('обычное нажатие по дню отсутствие не заводит', async () => {
+    const { services } = createTestServices()
+    const onAddAbsence = jest.fn()
+    render(<CalendarScreen onAddAbsence={onAddAbsence} />, { services })
+
+    fireEvent.press(await screen.findByTestId('calendar-day-2026-08-17'))
+
+    expect(onAddAbsence).not.toHaveBeenCalled()
+  })
+})

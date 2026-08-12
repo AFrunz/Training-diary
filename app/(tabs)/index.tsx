@@ -6,6 +6,7 @@ export default function CalendarTab() {
     <CalendarScreen
       onContinueWorkout={(workoutId) => router.push(`/workout/${workoutId}`)}
       onOpenDay={(date) => router.push(`/workout/new?date=${date}`)}
+      onAddAbsence={(date) => router.push(`/absence/new?date=${date}`)}
       onCreateWorkout={(date) => router.push(`/workout/new?date=${date}`)}
     />
   )

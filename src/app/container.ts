@@ -1,4 +1,5 @@
 import type { Ports } from './ports'
+import { createAbsence, deleteAbsence } from './usecases/absences'
 import { exportAll, importAll } from './usecases/data'
 import {
   archiveProgram,
@@ -42,6 +43,9 @@ export const createServices = (ports: Ports) => ({
   setProgramItems: setProgramItems(ports),
   archiveProgram: archiveProgram(ports),
   suggestProgramColor: suggestProgramColor(ports),
+
+  createAbsence: createAbsence(ports),
+  deleteAbsence: deleteAbsence(ports),
 
   monthStats: monthStats(ports),
   exportAll: exportAll(ports),

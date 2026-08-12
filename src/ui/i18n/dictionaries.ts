@@ -206,6 +206,18 @@ export const ru = {
 
   'workout.chooseProgram': 'Выберите программу',
 
+  'absence.new': 'Отсутствие',
+  'absence.type': 'Причина',
+  'absence.from': 'С какого дня',
+  'absence.to': 'По какой день',
+  'absence.note': 'Заметка',
+  'absence.notePlaceholder': 'Например, куда уезжаете',
+  'absence.create': 'Сохранить',
+  'absence.hint': 'Дни отсутствия не считаются пропуском: недели отпуска исключаются из регулярности',
+  'absence.errorInverted': 'Конец раньше начала',
+  'absence.errorTooLong': 'Слишком длинный период: не больше года',
+  'absence.days': 'подряд',
+
   'common.cancel': 'Отмена',
   'common.save': 'Сохранить',
   'common.done': 'Готово',
@@ -462,6 +474,18 @@ export const en: Record<keyof typeof ru, string> = {
   'date.weekday.7': 'Sunday',
 
   'workout.chooseProgram': 'Choose a program',
+
+  'absence.new': 'Time off',
+  'absence.type': 'Reason',
+  'absence.from': 'From',
+  'absence.to': 'Until',
+  'absence.note': 'Note',
+  'absence.notePlaceholder': 'For example, where you are going',
+  'absence.create': 'Save',
+  'absence.hint': 'Days off are not counted as missed: vacation weeks drop out of the regularity math',
+  'absence.errorInverted': 'End is before the start',
+  'absence.errorTooLong': 'Period is too long: one year at most',
+  'absence.days': 'in a row',
 
   'common.cancel': 'Cancel',
   'common.save': 'Save',
