@@ -1,24 +1,40 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "jsx": "react-jsx",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["jest", "node"],
+    "types": [
+      "jest",
+      "node"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@domain/*": ["src/domain/*"],
-      "@app/*": ["src/app/*"],
-      "@ui/*": ["src/ui/*"]
+      "@domain/*": [
+        "src/domain/*"
+      ],
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@ui/*": [
+        "src/ui/*"
+      ]
     },
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "app/**/*.tsx"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "app/**/*.tsx"
+  ],
+  "extends": "expo/tsconfig.base"
 }

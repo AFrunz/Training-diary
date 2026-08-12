@@ -19,6 +19,11 @@ module.exports = {
       displayName: 'логика',
       preset: 'ts-jest',
       testEnvironment: 'node',
+      // приложение собирается бандлером в ESM, а тесты логики гоняются в Node:
+      // им нужен CommonJS, поэтому разрешение модулей здесь своё
+      transform: {
+        '^.+\\.tsx?$': ['ts-jest', { tsconfig: { module: 'CommonJS', moduleResolution: 'node' } }],
+      },
       roots: ['<rootDir>/src/domain', '<rootDir>/src/app', '<rootDir>/src/infra'],
       moduleNameMapper,
       clearMocks: true,
