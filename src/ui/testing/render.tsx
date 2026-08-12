@@ -51,7 +51,14 @@ export const renderWithProviders = (
   options: ProviderOptions & Omit<RenderOptions, 'wrapper'> = {},
 ) => {
   const { language, systemLanguage, theme, services, ...renderOptions } = options
-  return render(withProviders(ui, { language, systemLanguage, theme, services }), renderOptions)
+  const providerOptions = { language, systemLanguage, theme, services }
+  const result = render(withProviders(ui, providerOptions), renderOptions)
+
+  return {
+    ...result,
+    // штатный rerender подменяет корень и выбрасывает провайдеры — оборачиваем заново
+    rerender: (next: ReactElement) => result.rerender(withProviders(next, providerOptions)),
+  }
 }
 
 /** Готовый контейнер над фейковыми портами: экранные тесты работают с ним как с настоящим. */
