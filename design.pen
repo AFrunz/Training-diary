@@ -423,7 +423,7 @@
               "name": "Icon",
               "width": 19,
               "height": 19,
-              "icon": "more-horizontal",
+              "icon": "ellipsis",
               "library": "lucide",
               "fill": "$text-primary"
             }
@@ -38167,6 +38167,3669 @@
                   "fontFamily": "$font-ui",
                   "fontSize": 13,
                   "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "IeUM4",
+      "x": -1520,
+      "y": 0,
+      "name": "16 · Иконки интерфейса",
+      "width": 700,
+      "fill": "$bg",
+      "layout": "vertical",
+      "gap": 24,
+      "padding": 32,
+      "children": [
+        {
+          "type": "frame",
+          "id": "ixU8W",
+          "name": "Header",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 5,
+          "children": [
+            {
+              "type": "text",
+              "id": "sscXJ",
+              "name": "Title",
+              "fill": "$text-primary",
+              "content": "Иконки интерфейса",
+              "fontFamily": "$font-ui",
+              "fontSize": 26,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "UQN1a",
+              "name": "Sub",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Набор lucide, обводка 2 px. Размеры: 22 — таббар, 18–19 — шапки и строки, 16 — кнопки, 14–15 — подписи.",
+              "lineHeight": 1.4,
+              "fontFamily": "$font-ui",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "T8dzVw",
+          "name": "Section НАВИГАЦИЯ · ТАББАР",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "zqAio",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "НАВИГАЦИЯ · ТАББАР",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "frame",
+              "id": "X1Wcu2",
+              "name": "Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "PLdYg",
+                  "name": "Icon calendar",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "v2j4h5",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "calendar",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "GCUXn",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "calendar",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "BG8bQ",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "календарь",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kLLkB",
+                  "name": "Icon dumbbell",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "p3tpaQ",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "dumbbell",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Q0v6W",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "dumbbell",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "LgbJf",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "тренировки",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ReFdN",
+                  "name": "Icon list",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "eRQE7",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "list",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "DI33k",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "list",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "T91avZ",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "библиотека",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "tiaTg",
+                  "name": "Icon activity",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Gp9kJ",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "activity",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "V8Bhd",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "activity",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "a1vSGG",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "статистика",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UtSAh",
+                  "name": "Icon settings",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "DpPwv",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "settings",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "J8j8R5",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "settings",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "T9Hiwa",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "настройки",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ZNpjz",
+          "name": "Section НАВИГАЦИЯ И СТРУКТУРА",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "ZHkSX",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "НАВИГАЦИЯ И СТРУКТУРА",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "frame",
+              "id": "ab8H4",
+              "name": "Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "U5Yhf",
+                  "name": "Icon chevron-left",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "yu0xM",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "chevron-left",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yo914",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "chevron-left",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "GOUbg",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "назад",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Q5Klyb",
+                  "name": "Icon chevron-right",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "hA7s6",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "chevron-right",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "oo7ba",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "chevron-right",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "DRvuX",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "переход в раздел",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xU8mF",
+                  "name": "Icon chevron-down",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "qLrxF",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SYMwc",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "chevron-down",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Xo2RL",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "выбор месяца",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AVh9z",
+                  "name": "Icon more-horizontal",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "KhNtL",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "ellipsis",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "NLBnu",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "ellipsis",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "cYhxD",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "меню экрана",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "VafEw",
+                  "name": "Icon arrow-right",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "K7r29",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "arrow-right",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ahXh6",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "arrow-right",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rXVGU",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "продолжить тренировку",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "R5VaH",
+              "name": "Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xdhFX",
+                  "name": "Icon grip-vertical",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "I5coQ",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "grip-vertical",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "u2pmk1",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "grip-vertical",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "wpzHN",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "перетаскивание",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "aNsxq",
+                  "name": "Icon x",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "i6jz3N",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "x",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ggX5h",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "x",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "EymEh",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "убрать из программы",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xipHA",
+                  "name": "Icon search",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "D1Pgz",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "search",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pmJGq",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "search",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "TW0rf",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "поиск",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RFMKt",
+                  "name": "Icon info",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "d2WAM",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "info",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rMAzD",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "info",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "XWLEL",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "подсказка",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xYdYp",
+                  "name": "Icon circle-check",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "OJrpS",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "circle-check",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "h3M7FB",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "circle-check",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "EJjVh",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "имя свободно",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "acpUj",
+          "name": "Section ДЕЙСТВИЯ",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "RqfPo",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "ДЕЙСТВИЯ",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "frame",
+              "id": "aZ1uO",
+              "name": "Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "JzYpf",
+                  "name": "Icon plus",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "xpts5",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "tQXNE",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "plus",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "fLmwh",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "добавить подход, упражнение, программу",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ycYmD",
+                  "name": "Icon minus",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "APBfY",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "minus",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SSFL4",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "minus",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dQgmu",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "уменьшить вес и повторы",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Jy8Id",
+                  "name": "Icon check",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "AQt4E",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "check",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "cO6dI",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "check",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "N1KEEb",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "отметка выполнено",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "e9HO5V",
+                  "name": "Icon copy",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Fs2Au",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "copy",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "uGBVx",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "copy",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "v9hFuh",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "дублировать программу",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UF5y8",
+                  "name": "Icon archive",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "SYRR2",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "archive",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "hvX95",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "archive",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "M8l2o",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "в архив",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "rAzmI",
+              "name": "Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "omYLA",
+                  "name": "Icon trash-2",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Eqj7x",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "trash-2",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "m5UPI",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "trash-2",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "bFSqC",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "удалить все данные",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qEu0n",
+                  "name": "Icon history",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Qnzi9",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "history",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "knzPq",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "history",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "NIpJB",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "история упражнения",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Rr19d",
+                  "name": "Icon upload",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "ESbk7",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "upload",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "f9el3",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "upload",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yjrr8",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "экспорт",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QS4QY",
+                  "name": "Icon download",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "G1oHA",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "download",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lG1bu",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "download",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZDQm9",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "импорт",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Ntolb",
+                  "name": "Icon flame",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "q3z9P",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "flame",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Z6suw",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "flame",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pPFft",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "серия недель",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "DR3n6",
+          "name": "Section НАСТРОЙКИ",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "WCixV",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "НАСТРОЙКИ",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "frame",
+              "id": "Wf7tL",
+              "name": "Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "E2ZRdN",
+                  "name": "Icon scale",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HjGYK",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "scale",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "W2bSY8",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "scale",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "NCAU2",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "единицы веса",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "x59bNH",
+                  "name": "Icon moon",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "mAIJw",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "moon",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Vdkoj",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "moon",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "n7d9zf",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "тема",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "b7LX6",
+                  "name": "Icon calendar",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "XAWts",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "calendar",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZwrFX",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "calendar",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "g8AHq",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "первый день недели",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RW3pm",
+                  "name": "Filler",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "ElkKK",
+                  "name": "Filler",
+                  "width": "fill_container",
+                  "height": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CHgUa",
+          "name": "Section ТОЛЬКО ДЛЯ МАКЕТОВ · СТАТУС-БАР",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "DQJEz",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "ТОЛЬКО ДЛЯ МАКЕТОВ · СТАТУС-БАР",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "frame",
+              "id": "Z6jN3",
+              "name": "Row",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "hoAXo",
+                  "name": "Icon signal",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "XhydN",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "signal",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "n7Lqz",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "signal",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dq6Zn",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "сотовая сеть",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "osl0M",
+                  "name": "Icon wifi",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "k0sKaH",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "wifi",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "R0Dc8",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "wifi",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "OBVO4",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "wi-fi",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xLXHX",
+                  "name": "Icon battery-full",
+                  "width": "fill_container",
+                  "fill": "$surface",
+                  "cornerRadius": "$r-md",
+                  "stroke": "$border",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    14,
+                    6
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "hxEXE",
+                      "name": "Glyph",
+                      "width": 22,
+                      "height": 22,
+                      "icon": "battery-full",
+                      "library": "lucide",
+                      "fill": "$text-primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "C19NKb",
+                      "name": "Name",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "battery-full",
+                      "textAlign": "center",
+                      "fontFamily": "$font-num",
+                      "fontSize": 9,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "EhDit",
+                      "name": "Use",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "заряд",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 9,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "onNlP",
+                  "name": "Filler",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "w8AWQ",
+                  "name": "Filler",
+                  "width": "fill_container",
+                  "height": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Lc1to",
+      "x": 5720,
+      "y": 0,
+      "name": "15 · Экран запуска",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "i5FKg",
+          "name": "Spacer Top",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "I47pe",
+          "name": "App Icon",
+          "clip": true,
+          "width": 132,
+          "height": 132,
+          "fill": "#5A5AF0",
+          "cornerRadius": 99,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 4.22,
+              "id": "uSysU",
+              "x": 49.11,
+              "y": 61.78,
+              "name": "Part 1",
+              "fill": "#FFFFFF",
+              "width": 33.78,
+              "height": 8.44
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 4.22,
+              "id": "Zae5v",
+              "x": 42.78,
+              "y": 51.22,
+              "name": "Part 2",
+              "fill": "#FFFFFF",
+              "width": 8.44,
+              "height": 29.56
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 4.22,
+              "id": "W4VrMC",
+              "x": 80.78,
+              "y": 51.22,
+              "name": "Part 3",
+              "fill": "#FFFFFF",
+              "width": 8.44,
+              "height": 29.56
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 3.17,
+              "id": "Eh9QC",
+              "x": 34.33,
+              "y": 56.5,
+              "name": "Part 4",
+              "fill": "#FFFFFF",
+              "width": 6.33,
+              "height": 19
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 3.17,
+              "id": "otm9F",
+              "x": 91.33,
+              "y": 56.5,
+              "name": "Part 5",
+              "fill": "#FFFFFF",
+              "width": 6.33,
+              "height": 19
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "U80or",
+          "name": "Spacer Bottom",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "Ni5L8",
+          "name": "Branding",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 5,
+          "padding": [
+            0,
+            0,
+            64,
+            0
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "sYced",
+              "name": "Name",
+              "fill": "$text-secondary",
+              "content": "Дневник тренировок",
+              "fontFamily": "$font-ui",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "x4VNMH",
+              "name": "Note",
+              "fill": "$text-muted",
+              "content": "работает без интернета",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "JS436",
+      "x": 5720,
+      "y": 940,
+      "name": "15 · Экран запуска · тёмная",
+      "theme": {
+        "mode": "dark"
+      },
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg",
+      "layout": "vertical",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "bLazM",
+          "name": "Spacer Top",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "lWXY2",
+          "name": "App Icon",
+          "clip": true,
+          "width": 132,
+          "height": 132,
+          "fill": "#5A5AF0",
+          "cornerRadius": 99,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 4.22,
+              "id": "CIl7i",
+              "x": 49.11,
+              "y": 61.78,
+              "name": "Part 1",
+              "fill": "#FFFFFF",
+              "width": 33.78,
+              "height": 8.44
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 4.22,
+              "id": "q6aI7l",
+              "x": 42.78,
+              "y": 51.22,
+              "name": "Part 2",
+              "fill": "#FFFFFF",
+              "width": 8.44,
+              "height": 29.56
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 4.22,
+              "id": "js2As",
+              "x": 80.78,
+              "y": 51.22,
+              "name": "Part 3",
+              "fill": "#FFFFFF",
+              "width": 8.44,
+              "height": 29.56
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 3.17,
+              "id": "KMpXK",
+              "x": 34.33,
+              "y": 56.5,
+              "name": "Part 4",
+              "fill": "#FFFFFF",
+              "width": 6.33,
+              "height": 19
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 3.17,
+              "id": "e67Th",
+              "x": 91.33,
+              "y": 56.5,
+              "name": "Part 5",
+              "fill": "#FFFFFF",
+              "width": 6.33,
+              "height": 19
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "a77DDM",
+          "name": "Spacer Bottom",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "WI2SX",
+          "name": "Branding",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 5,
+          "padding": [
+            0,
+            0,
+            64,
+            0
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "zYkIb",
+              "name": "Name",
+              "fill": "$text-secondary",
+              "content": "Дневник тренировок",
+              "fontFamily": "$font-ui",
+              "fontSize": 14,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "GHL1x",
+              "name": "Note",
+              "fill": "$text-muted",
+              "content": "работает без интернета",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "n5w9gK",
+      "x": -760,
+      "y": 1150,
+      "name": "14 · Иконка приложения",
+      "width": 660,
+      "fill": "$bg",
+      "layout": "vertical",
+      "gap": 26,
+      "padding": 32,
+      "children": [
+        {
+          "type": "frame",
+          "id": "fx9vL",
+          "name": "Header",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 5,
+          "children": [
+            {
+              "type": "text",
+              "id": "Jr1SS",
+              "name": "Title",
+              "fill": "$text-primary",
+              "content": "Иконка приложения",
+              "fontFamily": "$font-ui",
+              "fontSize": 26,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "ss07z",
+              "name": "Sub",
+              "fill": "$text-secondary",
+              "content": "Android adaptive icon · 108 dp, безопасная зона 66 dp",
+              "fontFamily": "$font-ui",
+              "fontSize": 13,
+              "fontWeight": "500"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "hv6mW",
+          "name": "Знак · 120 px",
+          "width": 120,
+          "height": 120,
+          "fill": "#5A5AF0",
+          "cornerRadius": 26,
+          "layout": "none",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 6.67,
+              "id": "Vb0JR",
+              "x": 33.33,
+              "y": 53.33,
+              "name": "Part 1",
+              "fill": "#FFFFFF",
+              "width": 53.33,
+              "height": 13.33
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 6.67,
+              "id": "jfaVS",
+              "x": 23.33,
+              "y": 36.67,
+              "name": "Part 2",
+              "fill": "#FFFFFF",
+              "width": 13.33,
+              "height": 46.67
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 6.67,
+              "id": "Q99J7",
+              "x": 83.33,
+              "y": 36.67,
+              "name": "Part 3",
+              "fill": "#FFFFFF",
+              "width": 13.33,
+              "height": 46.67
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 5,
+              "id": "ZJRkU",
+              "x": 10,
+              "y": 45,
+              "name": "Part 4",
+              "fill": "#FFFFFF",
+              "width": 10,
+              "height": 30
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 5,
+              "id": "c9Ih6u",
+              "x": 100,
+              "y": 45,
+              "name": "Part 5",
+              "fill": "#FFFFFF",
+              "width": 10,
+              "height": 30
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CQrJP",
+          "name": "Section СЛОИ ADAPTIVE ICON",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "JGQrG",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "СЛОИ ADAPTIVE ICON",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "text",
+              "id": "Wo6r9",
+              "name": "Note",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Фон и передний план — отдельные слои 108 dp. Систему интересует только центральный круг 66 dp, всё за его пределами может быть срезано маской устройства.",
+              "lineHeight": 1.4,
+              "fontFamily": "$font-ui",
+              "fontSize": 12,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "b17nR",
+              "name": "Layers",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "K5IS3",
+                  "name": "Tile Фон · 108 dp",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "O9CAy",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "#5A5AF0",
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "text",
+                      "id": "CU3Mk",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Фон · 108 dp",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KuAZQ",
+                  "name": "Tile Передний план · глиф 72 dp",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ze5IT",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "#9A9AA6",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "DYGW6",
+                          "name": "Glyph Slot FG",
+                          "width": 72,
+                          "height": 72,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "iOJO5",
+                              "x": 20,
+                              "y": 32,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 32,
+                              "height": 8
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "T56b4",
+                              "x": 14,
+                              "y": 22,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "u0ECFH",
+                              "x": 50,
+                              "y": 22,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "WohH7",
+                              "x": 6,
+                              "y": 27,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "MLLtR",
+                              "x": 60,
+                              "y": 27,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "u2VIj",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Передний план · глиф 72 dp",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KZ6rQ",
+                  "name": "Tile Результат · круглая маска",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "FRY89",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "#5A5AF0",
+                      "cornerRadius": 99,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "C3Tjmu",
+                          "name": "Glyph Slot Result",
+                          "width": 72,
+                          "height": 72,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "LGUTE",
+                              "x": 20,
+                              "y": 32,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 32,
+                              "height": 8
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "EFBxx",
+                              "x": 14,
+                              "y": 22,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "PqZHe",
+                              "x": 50,
+                              "y": 22,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "qh4pm",
+                              "x": 6,
+                              "y": 27,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "MFech",
+                              "x": 60,
+                              "y": 27,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "tGhfX",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Результат · круглая маска",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "j9Cyvw",
+                  "name": "Tile Безопасная зона 66 dp",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "mYpFJ",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "#5A5AF0",
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "x1u2X",
+                          "x": 27,
+                          "y": 27,
+                          "name": "Safe Zone",
+                          "opacity": 0.55,
+                          "width": 66,
+                          "height": 66,
+                          "stroke": "#FFFFFF",
+                          "strokeWidth": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ohA1o",
+                          "x": 24,
+                          "y": 24,
+                          "name": "Glyph Slot Safe",
+                          "width": 72,
+                          "height": 72,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "aRM8M",
+                              "x": 20,
+                              "y": 32,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 32,
+                              "height": 8
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "xYH2m",
+                              "x": 14,
+                              "y": 22,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "BytMO",
+                              "x": 50,
+                              "y": 22,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "Kcd48",
+                              "x": 6,
+                              "y": 27,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "ES8Wy",
+                              "x": 60,
+                              "y": 27,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "BpVEE",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Безопасная зона 66 dp",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ye3h1",
+          "name": "Section РАЗМЕРЫ",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "g4VSTr",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "РАЗМЕРЫ",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "text",
+              "id": "BlKBf",
+              "name": "Note",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "На устройстве иконка живёт в диапазоне от 48 до 192 px. Знак остаётся читаемым на всех, потому что состоит из крупных плашек без тонких линий.",
+              "lineHeight": 1.4,
+              "fontFamily": "$font-ui",
+              "fontSize": 12,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "HjJIN",
+              "name": "Sizes",
+              "width": "fill_container",
+              "gap": 20,
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "r4V2y",
+                  "name": "Size 192",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "OD68a",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 192,
+                      "height": 192,
+                      "fill": "#5A5AF0",
+                      "cornerRadius": 99,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "AFmsk",
+                          "name": "Glyph Slot 192",
+                          "width": 111,
+                          "height": 111,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 6.17,
+                              "id": "L9ift",
+                              "x": 30.83,
+                              "y": 49.33,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 49.33,
+                              "height": 12.33
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 6.17,
+                              "id": "lLyDw",
+                              "x": 21.58,
+                              "y": 33.92,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 12.33,
+                              "height": 43.17
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 6.17,
+                              "id": "P7Zw3l",
+                              "x": 77.08,
+                              "y": 33.92,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 12.33,
+                              "height": 43.17
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4.63,
+                              "id": "dfbpm",
+                              "x": 9.25,
+                              "y": 41.63,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 9.25,
+                              "height": 27.75
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4.63,
+                              "id": "aZpuS",
+                              "x": 92.5,
+                              "y": 41.63,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 9.25,
+                              "height": 27.75
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "qZy4r",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "content": "192 px",
+                      "fontFamily": "$font-num",
+                      "fontSize": 10,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wvXUS",
+                  "name": "Size 96",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Y4vgA2",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 96,
+                      "height": 96,
+                      "fill": "#5A5AF0",
+                      "cornerRadius": 99,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "eXVhl",
+                          "name": "Glyph Slot 96",
+                          "width": 56,
+                          "height": 56,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3.11,
+                              "id": "VVBWo",
+                              "x": 15.56,
+                              "y": 24.89,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 24.89,
+                              "height": 6.22
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3.11,
+                              "id": "ZcCvU",
+                              "x": 10.89,
+                              "y": 17.11,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 6.22,
+                              "height": 21.78
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3.11,
+                              "id": "BPPIk",
+                              "x": 38.89,
+                              "y": 17.11,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 6.22,
+                              "height": 21.78
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2.33,
+                              "id": "CDPxN",
+                              "x": 4.67,
+                              "y": 21,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 4.67,
+                              "height": 14
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2.33,
+                              "id": "SglON",
+                              "x": 46.67,
+                              "y": 21,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 4.67,
+                              "height": 14
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "XOCkA",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "content": "96 px",
+                      "fontFamily": "$font-num",
+                      "fontSize": 10,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "HhH1s",
+                  "name": "Size 72",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "dUd0r",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 72,
+                      "height": 72,
+                      "fill": "#5A5AF0",
+                      "cornerRadius": 99,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Qx8G1",
+                          "name": "Glyph Slot 72",
+                          "width": 42,
+                          "height": 42,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2.33,
+                              "id": "GpR1P",
+                              "x": 11.67,
+                              "y": 18.67,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 18.67,
+                              "height": 4.67
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2.33,
+                              "id": "uftEO",
+                              "x": 8.17,
+                              "y": 12.83,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 4.67,
+                              "height": 16.33
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 2.33,
+                              "id": "b3P1Tk",
+                              "x": 29.17,
+                              "y": 12.83,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 4.67,
+                              "height": 16.33
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1.75,
+                              "id": "ZKwbY",
+                              "x": 3.5,
+                              "y": 15.75,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 3.5,
+                              "height": 10.5
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1.75,
+                              "id": "jzi6b",
+                              "x": 35,
+                              "y": 15.75,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 3.5,
+                              "height": 10.5
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "M5W1fQ",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "content": "72 px",
+                      "fontFamily": "$font-num",
+                      "fontSize": 10,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "s2q8A4",
+                  "name": "Size 48",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "yeScS",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 48,
+                      "height": 48,
+                      "fill": "#5A5AF0",
+                      "cornerRadius": 99,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "f3aXY",
+                          "name": "Glyph Slot 48",
+                          "width": 28,
+                          "height": 28,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1.56,
+                              "id": "Z4WBzT",
+                              "x": 7.78,
+                              "y": 12.44,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 12.44,
+                              "height": 3.11
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1.56,
+                              "id": "xLq4c",
+                              "x": 5.44,
+                              "y": 8.56,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 3.11,
+                              "height": 10.89
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1.56,
+                              "id": "PgNXT",
+                              "x": 19.44,
+                              "y": 8.56,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 3.11,
+                              "height": 10.89
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1.17,
+                              "id": "Rfq7g",
+                              "x": 2.33,
+                              "y": 10.5,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 2.33,
+                              "height": 7
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 1.17,
+                              "id": "HrPr5",
+                              "x": 23.33,
+                              "y": 10.5,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 2.33,
+                              "height": 7
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "A7v3sb",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "content": "48 px",
+                      "fontFamily": "$font-num",
+                      "fontSize": 10,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "vv6Kf",
+          "name": "Section ВАРИАНТЫ",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "children": [
+            {
+              "type": "text",
+              "id": "Saol6",
+              "name": "Caption",
+              "fill": "$text-muted",
+              "content": "ВАРИАНТЫ",
+              "fontFamily": "$font-ui",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 0.7
+            },
+            {
+              "type": "text",
+              "id": "d8FAN",
+              "name": "Note",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Монохромный слой нужен для тем оформления Android 13+, квадратная плитка 512×512 — для Google Play.",
+              "lineHeight": 1.4,
+              "fontFamily": "$font-ui",
+              "fontSize": 12,
+              "fontWeight": "500"
+            },
+            {
+              "type": "frame",
+              "id": "zW6P1",
+              "name": "Variants",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "p80Qjr",
+                  "name": "Tile Монохром",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "FitLb",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "$surface-2",
+                      "cornerRadius": 99,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "a9MK7b",
+                          "name": "Glyph Slot Mono",
+                          "width": 72,
+                          "height": 72,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "gx2vy",
+                              "x": 20,
+                              "y": 32,
+                              "name": "Part 1",
+                              "fill": "$text-primary",
+                              "width": 32,
+                              "height": 8
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "x5AzV",
+                              "x": 14,
+                              "y": 22,
+                              "name": "Part 2",
+                              "fill": "$text-primary",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "G75dRO",
+                              "x": 50,
+                              "y": 22,
+                              "name": "Part 3",
+                              "fill": "$text-primary",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "Q3fUO",
+                              "x": 6,
+                              "y": 27,
+                              "name": "Part 4",
+                              "fill": "$text-primary",
+                              "width": 6,
+                              "height": 18
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "rDXsN",
+                              "x": 60,
+                              "y": 27,
+                              "name": "Part 5",
+                              "fill": "$text-primary",
+                              "width": 6,
+                              "height": 18
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "LsOzd",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Монохром",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "U2YVd",
+                  "name": "Tile Play Store · 512×512",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "c55hw4",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "#5A5AF0",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "L0bMKv",
+                          "name": "Glyph Slot Play",
+                          "width": 76,
+                          "height": 76,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4.22,
+                              "id": "p2fFd",
+                              "x": 21.11,
+                              "y": 33.78,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 33.78,
+                              "height": 8.44
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4.22,
+                              "id": "A11Dh",
+                              "x": 14.78,
+                              "y": 23.22,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 8.44,
+                              "height": 29.56
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4.22,
+                              "id": "aWjMt",
+                              "x": 52.78,
+                              "y": 23.22,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 8.44,
+                              "height": 29.56
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3.17,
+                              "id": "LGeah",
+                              "x": 6.33,
+                              "y": 28.5,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 6.33,
+                              "height": 19
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3.17,
+                              "id": "QtyVX",
+                              "x": 63.33,
+                              "y": 28.5,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 6.33,
+                              "height": 19
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "dv2LM",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Play Store · 512×512",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "M4sKJj",
+                  "name": "Tile На тёмном фоне",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "CIrgO",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "#0D0D10",
+                      "cornerRadius": 99,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "SsFPx",
+                          "name": "Glyph Slot Dark",
+                          "width": 72,
+                          "height": 72,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "xeaPk",
+                              "x": 20,
+                              "y": 32,
+                              "name": "Part 1",
+                              "fill": "#FFFFFF",
+                              "width": 32,
+                              "height": 8
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "S5LQLc",
+                              "x": 14,
+                              "y": 22,
+                              "name": "Part 2",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "d3cBK",
+                              "x": 50,
+                              "y": 22,
+                              "name": "Part 3",
+                              "fill": "#FFFFFF",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "mLH4Z",
+                              "x": 6,
+                              "y": 27,
+                              "name": "Part 4",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "i8u56x",
+                              "x": 60,
+                              "y": 27,
+                              "name": "Part 5",
+                              "fill": "#FFFFFF",
+                              "width": 6,
+                              "height": 18
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "t7iTE",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "На тёмном фоне",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "gggXx",
+                  "name": "Tile На светлом фоне",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "j6o31N",
+                      "name": "Box",
+                      "clip": true,
+                      "width": 120,
+                      "height": 120,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 99,
+                      "stroke": "$border",
+                      "strokeWidth": 1,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "fCq79",
+                          "name": "Glyph Slot Light",
+                          "width": 72,
+                          "height": 72,
+                          "layout": "none",
+                          "children": [
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "WnwaP",
+                              "x": 20,
+                              "y": 32,
+                              "name": "Part 1",
+                              "fill": "#5A5AF0",
+                              "width": 32,
+                              "height": 8
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "mwfDs",
+                              "x": 14,
+                              "y": 22,
+                              "name": "Part 2",
+                              "fill": "#5A5AF0",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 4,
+                              "id": "DsyTT",
+                              "x": 50,
+                              "y": 22,
+                              "name": "Part 3",
+                              "fill": "#5A5AF0",
+                              "width": 8,
+                              "height": 28
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "O5FIi",
+                              "x": 6,
+                              "y": 27,
+                              "name": "Part 4",
+                              "fill": "#5A5AF0",
+                              "width": 6,
+                              "height": 18
+                            },
+                            {
+                              "type": "rectangle",
+                              "cornerRadius": 3,
+                              "id": "KJCkg",
+                              "x": 60,
+                              "y": 27,
+                              "name": "Part 5",
+                              "fill": "#5A5AF0",
+                              "width": 6,
+                              "height": 18
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "kC1Z0",
+                      "name": "Caption",
+                      "fill": "$text-muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "На светлом фоне",
+                      "lineHeight": 1.3,
+                      "textAlign": "center",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 11,
+                      "fontWeight": "500"
+                    }
+                  ]
                 }
               ]
             }
