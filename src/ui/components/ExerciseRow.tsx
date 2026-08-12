@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View, useColorScheme } from 'react-native'
 import type { WeightKg, WeightUnit } from '../../domain/model/types'
 import { formatSet } from '../../domain/rules/format'
+import { useT } from '../i18n/I18nProvider'
 import { palette, radii } from '../theme/tokens'
 
 export interface ExerciseRowSet {
@@ -37,6 +38,7 @@ export function ExerciseRow({
   onOpenHistory,
 }: ExerciseRowProps) {
   const colors = palette[useColorScheme() === 'dark' ? 'dark' : 'light']
+  const { t } = useT()
   const target = targetSets && targetReps ? `${targetSets} × ${targetReps}` : null
 
   return (
@@ -77,7 +79,7 @@ export function ExerciseRow({
         <Pressable
           testID={`open-history-${index}`}
           accessibilityRole="button"
-          accessibilityLabel="История упражнения"
+          accessibilityLabel={t('workout.history')}
           onPress={onOpenHistory}
           style={[styles.historyButton, { backgroundColor: colors.surface2 }]}
         >
@@ -100,7 +102,7 @@ export function ExerciseRow({
           onPress={onAddSet}
           style={[styles.chip, { backgroundColor: colors.accentSoft }]}
         >
-          <Text style={[styles.chipText, { color: colors.accent }]}>＋ подход</Text>
+          <Text style={[styles.chipText, { color: colors.accent }]}>{t('workout.addSet')}</Text>
         </Pressable>
       </View>
     </View>

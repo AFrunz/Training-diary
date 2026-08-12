@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react-native'
+import { fireEvent, screen } from '@testing-library/react-native'
+import { renderWithProviders as render } from '../../testing/render'
 import { ExerciseRow } from '../ExerciseRow'
 
 const sets = [

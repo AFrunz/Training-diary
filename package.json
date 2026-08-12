@@ -21,7 +21,10 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.101.4",
     "expo": "^57.0.12",
+    "expo-router": "^57.0.12",
+    "expo-sqlite": "^57.0.1",
     "react": "^19.2.8",
     "react-native": "^0.84.1"
   }
