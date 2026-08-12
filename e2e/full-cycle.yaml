@@ -4,9 +4,14 @@ name: От пустого приложения до статистики
 - launchApp:
     clearState: true
 
+# Идентификаторы карточек и дней строятся из даты, поэтому она считается заранее
+- evalScript: ${output.today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+
 # Два упражнения в библиотеке
 - tapOn:
     id: 'tab-library'
+- tapOn:
+    id: 'library-segment-exercises'
 - tapOn:
     id: 'add-button'
 - tapOn:
@@ -47,14 +52,21 @@ name: От пустого приложения до статистики
     id: 'exercise-picker-done'
 - tapOn:
     id: 'create-button'
-- assertVisible: 'Грудь + трицепс'
+# созданная программа сразу открывается своим экраном; «+» в названии — метасимвол
+# регулярного выражения, поэтому в селекторах экранируется
+- assertVisible:
+    id: 'program-screen'
+- assertVisible: 'Грудь \+ трицепс'
+- tapOn:
+    id: 'header-back'
 
-# Тренировка на сегодня
+# Тренировка на сегодня: «＋» ведёт на выбор программы
 - tapOn:
     id: 'tab-workouts'
 - tapOn:
     id: 'add-button'
-- tapOn: 'Грудь + трицепс'
+- tapOn:
+    id: 'program-option-Грудь \+ трицепс'
 - assertVisible:
     id: 'workout-timer'
 
@@ -71,27 +83,37 @@ name: От пустого приложения до статистики
     id: 'set-submit'
 - assertVisible: '80 × 8'
 
-# Отмечено одно упражнение из двух
+# Отмечено одно упражнение из двух. Пока отмечены не все, сегодняшняя тренировка
+# закреплена сверху отдельной карточкой, а не лежит в ленте по дате (§5.2).
+# Экран тренировки закрывает таббар, поэтому в список — через «назад».
 - tapOn:
     id: 'item-checkbox-0'
 - tapOn:
-    id: 'tab-workouts'
+    id: 'header-back'
+- assertVisible:
+    id: 'active-workout-card'
 - assertVisible: '1/2'
 
-# Отмечаем второе — тренировка завершена
+# Отмечаем второе — тренировка завершена и уходит в ленту под своей датой
 - tapOn:
-    id: 'workout-card-today'
+    id: 'active-workout-card'
 - tapOn:
     id: 'item-checkbox-1'
 - tapOn:
-    id: 'tab-workouts'
+    id: 'header-back'
+- assertNotVisible:
+    id: 'active-workout-card'
+- assertVisible:
+    id: 'workout-card-${output.today}'
 - assertVisible: '2/2'
 
-# Тренировка видна в календаре и в статистике
+# Тренировка видна в календаре (точка программы в сегодняшнем дне) и в статистике
 - tapOn:
     id: 'tab-calendar'
 - assertVisible:
-    id: 'calendar-day-today'
+    id: 'calendar-day-${output.today}'
+- assertVisible:
+    id: 'calendar-dot-${output.today}'
 - tapOn:
     id: 'tab-stats'
 - assertVisible:

@@ -10,7 +10,8 @@ name: Проведение тренировки — подходы, отметк
     id: 'tab-workouts'
 - tapOn:
     id: 'add-button'
-- tapOn: 'Верх тела'
+- tapOn:
+    id: 'program-option-Верх тела'
 - assertVisible:
     id: 'workout-timer'
 
@@ -67,9 +68,10 @@ name: Проведение тренировки — подходы, отметк
     id: 'item-checkbox-0'
 - tapOn:
     id: 'header-back'
+# подпись лежит в отдельном узле внутри бублика, поэтому id и текст проверяются порознь
 - assertVisible:
     id: 'workout-donut-${output.today}'
-    text: '1/3'
+- assertVisible: '1/3'
 
 # Отмечаем оставшиеся: тренировка завершена, бублик закрыт целиком
 - tapOn:
@@ -86,5 +88,5 @@ name: Проведение тренировки — подходы, отметк
     id: 'workout-card-${output.today}'
 - assertVisible:
     id: 'workout-donut-${output.today}'
-    text: '3/3'
+- assertVisible: '3/3'
 - assertNotVisible: 'не завершена'

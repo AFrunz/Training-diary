@@ -7,6 +7,8 @@ name: Подготовка — упражнения и программа
 - tapOn:
     id: 'tab-library'
 - tapOn:
+    id: 'library-segment-exercises'
+- tapOn:
     id: 'add-button'
 - tapOn:
     id: 'name-input'
@@ -39,3 +41,12 @@ name: Подготовка — упражнения и программа
     id: 'exercise-picker-done'
 - tapOn:
     id: 'create-button'
+
+# Созданная программа открывается через replace, поэтому фикстура возвращается
+# в библиотеку: экран программы лежит поверх таббара и закрывает разделы.
+- assertVisible:
+    id: 'program-screen'
+- tapOn:
+    id: 'header-back'
+- assertVisible:
+    id: 'library-screen'

@@ -22,9 +22,13 @@ export interface ProviderOptions {
   readonly services?: Services
 }
 
-/** Кэш без повторов и без задержек: в тестах ретраи только маскируют ошибки. */
+/**
+ * Кэш настроен так же, как в приложении (`app/_layout.tsx`): данные лежат на
+ * устройстве, поэтому `staleTime: Infinity`. Совпадение с боевыми настройками
+ * важно — иначе тесты не увидят забытую инвалидацию запроса.
+ */
 const createTestQueryClient = () =>
-  new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } })
+  new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } })
 
 export const withProviders = (
   children: ReactNode,

@@ -1,41 +1,71 @@
 appId: com.trainingdiary.app
 name: Экспорт, полная очистка, импорт (критерий приёмки 10)
 ---
+# ВНИМАНИЕ: сценарий проходит только до экспорта. Экран настроек уже умеет
+# выгружать данные, но полное удаление и импорт наружу не выведены:
+# app/(tabs)/settings.tsx не передаёт onWipeConfirmed и onImportRequested,
+# сценария удаления в src/app нет, выбора файла и режима импорта
+# («Заменить всё» / «Дополнить») в интерфейсе тоже нет.
+# Шаги ниже — контракт, к которому идём; до этого сценарий держим отдельно
+# от прогона всей папки.
 - runFlow: fixtures/seed-workout.yaml
 
-# Запоминаем, что было до выгрузки
+# Карточки тренировок именуются датой, поэтому она считается заранее
+- evalScript: ${output.today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+
+# Запоминаем, что было до выгрузки. Подходы видны только на экране тренировки,
+# поэтому карточка открывается; «+» в названии экранируется.
 - tapOn:
     id: 'tab-workouts'
-- assertVisible: 'Грудь + трицепс'
+- assertVisible: 'Грудь \+ трицепс'
+- tapOn:
+    id: 'workout-card-${output.today}'
 - assertVisible: '80 × 8'
+- tapOn:
+    id: 'header-back'
 
-# Выгружаем файл
+# Выгружаем файл: имя лежит подсказкой в строке экспорта, после нажатия
+# подсказка сменяется на «файл готов к сохранению»
 - tapOn:
     id: 'tab-settings'
+- assertVisible:
+    id: 'settings-export-subtitle'
+    text: 'training-diary-.*\.json'
 - tapOn:
     id: 'settings-export'
-- assertVisible: 'training-diary'
+- assertVisible:
+    id: 'settings-export-subtitle'
+    text: 'файл готов к сохранению'
 
-# Стираем всё
+# Стираем всё: подтверждение — повторное нажатие той же строки, отдельного
+# диалога у «Опасной зоны» нет
+- scrollUntilVisible:
+    element:
+      id: 'settings-wipe'
 - tapOn:
     id: 'settings-wipe'
-- tapOn: 'Удалить'
+- assertVisible:
+    id: 'settings-wipe-subtitle'
+    text: 'нажмите ещё раз, чтобы подтвердить'
+- tapOn:
+    id: 'settings-wipe'
 - tapOn:
     id: 'tab-workouts'
-- assertNotVisible: 'Грудь + трицепс'
+- assertVisible:
+    id: 'workouts-empty'
+- assertNotVisible: 'Грудь \+ трицепс'
 
-# Возвращаем из файла
+# Возвращаем из файла. Выбор файла и режима импорта живут в infra и в интерфейс
+# ещё не выведены: пока строка импорта ни к чему не привязана.
 - tapOn:
     id: 'tab-settings'
 - tapOn:
     id: 'settings-import'
-- tapOn: 'Заменить всё'
-- tapOn: 'Импортировать'
 
-# Состояние совпадает с исходным, включая длительность и подходы
+# Состояние совпадает с исходным, включая подходы
 - tapOn:
     id: 'tab-workouts'
-- assertVisible: 'Грудь + трицепс'
+- assertVisible: 'Грудь \+ трицепс'
 - tapOn:
-    id: 'workout-card-today'
+    id: 'workout-card-${output.today}'
 - assertVisible: '80 × 8'

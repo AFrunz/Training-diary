@@ -3,12 +3,17 @@ name: Подходы переживают убийство процесса (§7
 ---
 - runFlow: fixtures/seed-program.yaml
 
-# Начинаем тренировку и записываем два подхода
+# Начинаем тренировку и записываем два подхода.
+# «＋» в списке тренировок ведёт на выбор программы; «+» в названии — метасимвол
+# регулярного выражения, поэтому в селекторе экранируется.
 - tapOn:
     id: 'tab-workouts'
 - tapOn:
     id: 'add-button'
-- tapOn: 'Грудь + трицепс'
+- tapOn:
+    id: 'program-option-Грудь \+ трицепс'
+- assertVisible:
+    id: 'workout-timer'
 
 - tapOn:
     id: 'add-set-0'
@@ -39,11 +44,16 @@ name: Подходы переживают убийство процесса (§7
 - launchApp:
     clearState: false
 
-# Тренировка на месте, оба подхода целы, счётчик продолжает идти
+# Тренировка на месте: ни одно упражнение не отмечено, поэтому она по-прежнему
+# закреплена сверху списка как незавершённая, а не лежит в ленте по дате (§5.2)
 - tapOn:
     id: 'tab-workouts'
+- assertVisible:
+    id: 'active-workout-card'
 - tapOn:
-    id: 'workout-card-today'
+    id: 'active-workout-card'
+
+# Оба подхода целы, счётчик продолжает идти
 - assertVisible: '80 × 8'
 - assertVisible: '82.5 × 6'
 - assertVisible:

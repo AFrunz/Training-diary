@@ -7,7 +7,11 @@ name: Подготовка — проведённая тренировка
     id: 'tab-workouts'
 - tapOn:
     id: 'add-button'
-- tapOn: 'Грудь + трицепс'
+# «＋» ведёт на выбор программы; «+» в названии — метасимвол регулярного выражения
+- tapOn:
+    id: 'program-option-Грудь \+ трицепс'
+- assertVisible:
+    id: 'workout-timer'
 
 - tapOn:
     id: 'add-set-0'
@@ -24,3 +28,10 @@ name: Подготовка — проведённая тренировка
     id: 'item-checkbox-0'
 - tapOn:
     id: 'item-checkbox-1'
+
+# Экран тренировки лежит поверх таббара, поэтому фикстура возвращается в список:
+# иначе следующий шаг сценария не достучится до вкладок.
+- tapOn:
+    id: 'header-back'
+- assertVisible:
+    id: 'workouts-screen'

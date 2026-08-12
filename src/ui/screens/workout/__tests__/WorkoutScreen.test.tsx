@@ -163,3 +163,26 @@ describe('WorkoutScreen', () => {
     expect(screen.getByTestId('add-exercise')).toBeTruthy()
   })
 })
+
+describe('WorkoutScreen — предзаполнение при повторном открытии шита (FR-4.4)', () => {
+  it('второй подход подставляет значения первого, а не остаётся пустым', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('add-set-0'))
+    fireEvent.changeText(await screen.findByTestId('set-weight-input'), '80')
+    fireEvent.changeText(screen.getByTestId('set-reps-input'), '8')
+    fireEvent.press(screen.getByTestId('set-submit'))
+
+    await waitFor(() => expect(fixture.ports.state.workoutSets).toHaveLength(1))
+
+    // тот же шит открывается заново: подсказка должна пересчитаться,
+    // иначе при вечном кэше вернётся пустое значение первого открытия
+    fireEvent.press(await screen.findByTestId('add-set-0'))
+
+    await waitFor(() =>
+      expect(screen.getByTestId('set-weight-input').props.value).toBe('80'),
+    )
+    expect(screen.getByTestId('set-reps-input').props.value).toBe('8')
+  })
+})
