@@ -40,7 +40,8 @@ export const palette = {
   },
 } as const
 
-export type Colors = (typeof palette)['light']
+/** Именно строки, а не литералы: иначе тёмная палитра не подойдёт под тип светлой. */
+export type Colors = { readonly [Token in keyof (typeof palette)['light']]: string }
 
 /** Палитра программ одинакова в обеих темах (§7.3). */
 export const programColors = {

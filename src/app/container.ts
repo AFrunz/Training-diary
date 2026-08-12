@@ -1,0 +1,51 @@
+import type { Ports } from './ports'
+import { exportAll, importAll } from './usecases/data'
+import {
+  archiveProgram,
+  createExercise,
+  createProgram,
+  duplicateProgram,
+  removeExercise,
+  setProgramItems,
+  suggestProgramColor,
+} from './usecases/library'
+import { monthStats } from './usecases/stats'
+import {
+  addAdHocExercise,
+  addSet,
+  createWorkout,
+  deleteWorkout,
+  editWorkoutTimes,
+  suggestNextSet,
+  toggleItemDone,
+} from './usecases/workouts'
+
+/**
+ * Композиционный корень: связывает порты со сценариями. Интерфейс получает
+ * готовый набор функций и не знает ни про SQLite, ни про то, как устроены порты.
+ */
+export const createServices = (ports: Ports) => ({
+  ports,
+
+  createWorkout: createWorkout(ports),
+  addSet: addSet(ports),
+  toggleItemDone: toggleItemDone(ports),
+  addAdHocExercise: addAdHocExercise(ports),
+  editWorkoutTimes: editWorkoutTimes(ports),
+  deleteWorkout: deleteWorkout(ports),
+  suggestNextSet: suggestNextSet(ports),
+
+  createExercise: createExercise(ports),
+  removeExercise: removeExercise(ports),
+  createProgram: createProgram(ports),
+  duplicateProgram: duplicateProgram(ports),
+  setProgramItems: setProgramItems(ports),
+  archiveProgram: archiveProgram(ports),
+  suggestProgramColor: suggestProgramColor(ports),
+
+  monthStats: monthStats(ports),
+  exportAll: exportAll(ports),
+  importAll: importAll(ports),
+})
+
+export type Services = ReturnType<typeof createServices>
