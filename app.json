@@ -15,7 +15,15 @@
       "edgeToEdgeEnabled": true,
       "permissions": []
     },
-    "plugins": ["expo-router", "expo-sqlite"],
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "root": "./app"
+        }
+      ],
+      "expo-sqlite"
+    ],
     "experiments": {
       "typedRoutes": false
     }
