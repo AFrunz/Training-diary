@@ -218,6 +218,8 @@ export const ru = {
   'absence.errorTooLong': 'Слишком длинный период: не больше года',
   'absence.days': 'подряд',
 
+  'settings.importDone': 'Добавлено: {added}, обновлено: {updated}',
+
   'common.cancel': 'Отмена',
   'common.save': 'Сохранить',
   'common.done': 'Готово',
@@ -486,6 +488,8 @@ export const en: Record<keyof typeof ru, string> = {
   'absence.errorInverted': 'End is before the start',
   'absence.errorTooLong': 'Period is too long: one year at most',
   'absence.days': 'in a row',
+
+  'settings.importDone': 'Added: {added}, updated: {updated}',
 
   'common.cancel': 'Cancel',
   'common.save': 'Save',

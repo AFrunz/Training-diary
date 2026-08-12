@@ -80,6 +80,23 @@ export interface AbsenceRepo {
   remove(id: Id): Promise<void>
 }
 
+/**
+ * Работа с файлами (FR-7.1, FR-7.2, FR-7.3). Выбор файла и системное «Поделиться»
+ * живут в infra; сценарии знают только этот интерфейс.
+ */
+export interface FileGateway {
+  /** Сохраняет выгрузку и возвращает путь к файлу. */
+  saveExport(fileName: string, content: unknown): Promise<string>
+  /** Диалог выбора файла. null — пользователь отменил. */
+  pickJson(): Promise<unknown | null>
+  share(path: string): Promise<void>
+  /** Имена автобэкапов, свежие первыми. */
+  listBackups(): Promise<readonly string[]>
+  saveBackup(fileName: string, content: unknown): Promise<void>
+  readBackup(fileName: string): Promise<unknown>
+  removeBackup(fileName: string): Promise<void>
+}
+
 export interface SettingsStore {
   get(): Promise<Settings>
   set(settings: Settings): Promise<void>
@@ -94,6 +111,7 @@ export interface Ports {
   readonly exercises: ExerciseRepo
   readonly absences: AbsenceRepo
   readonly settings: SettingsStore
+  readonly files: FileGateway
   /** Зона устройства: нужна, чтобы отличить «сегодня» от «задним числом». */
   readonly timeZone: string
 }

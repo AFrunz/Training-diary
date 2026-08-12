@@ -137,8 +137,8 @@ describe('экран настроек', () => {
 
   it('экспорт запускает сценарий и подтверждает готовность файла', async () => {
     const { services: base } = createTestServices()
-    const exportAll = jest.fn(base.exportAll)
-    const services: Services = { ...base, exportAll }
+    const exportToFile = jest.fn(base.exportToFile)
+    const services: Services = { ...base, exportToFile }
 
     renderWithProviders(<SettingsScreen />, { services })
 
@@ -153,7 +153,7 @@ describe('экран настроек', () => {
         'файл готов к сохранению',
       ),
     )
-    expect(exportAll).toHaveBeenCalled()
+    expect(exportToFile).toHaveBeenCalled()
   })
 
   it('удаление всех данных требует подтверждения', async () => {
@@ -171,5 +171,27 @@ describe('экран настроек', () => {
 
     fireEvent.press(screen.getByTestId('settings-wipe'))
     expect(onWipeConfirmed).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('SettingsScreen — экспорт в файл (FR-7.1)', () => {
+  it('нажатие сохраняет файл и открывает «Поделиться»', async () => {
+    const { services, ports } = createTestServices()
+    renderWithProviders(<SettingsScreen />, { services })
+
+    fireEvent.press(await screen.findByTestId('settings-export'))
+
+    await waitFor(() => expect(Object.keys(ports.state.files.exports)).toHaveLength(1))
+    expect(ports.state.files.shared).toHaveLength(1)
+  })
+
+  it('имя файла содержит дату выгрузки', async () => {
+    const { services, ports } = createTestServices()
+    renderWithProviders(<SettingsScreen />, { services })
+
+    fireEvent.press(await screen.findByTestId('settings-export'))
+
+    await waitFor(() => expect(Object.keys(ports.state.files.exports)).toHaveLength(1))
+    expect(Object.keys(ports.state.files.exports)[0]).toMatch(/training-diary-\d{4}-\d{2}-\d{2}\.json$/)
   })
 })

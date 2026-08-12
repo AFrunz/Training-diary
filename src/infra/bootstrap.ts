@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto'
 import type { Ports } from '../app/ports'
 import { id as makeId, instant } from '../domain/model/types'
 import { createExpoSqlDriver } from './db/expoSqlite'
+import { createExpoFileGateway } from './files/expoFileGateway'
 import { applyMigrations } from './db/migrations'
 import { createSqliteRepositories } from './db/repositories'
 
@@ -16,6 +17,7 @@ export const createAppPorts = async (databaseName?: string): Promise<Ports> => {
 
   return {
     ...repositories,
+    files: createExpoFileGateway(),
     clock: { now: () => instant(Date.now()) },
     ids: { uuid: () => makeId(Crypto.randomUUID()) },
     // зона устройства нужна, чтобы отличить «сегодня» от «задним числом» (§5.1)

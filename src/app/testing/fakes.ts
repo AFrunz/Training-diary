@@ -17,6 +17,18 @@ import type { Ports } from '../ports'
  * ради этого в архитектуре и заведены порты (ARCHITECTURE.md §6).
  */
 
+export interface FakeFiles {
+  /**
+   * Хранилища — обычные объекты, а не Map: состояние двойника клонируется через
+   * JSON при откате транзакции, и Map бы при этом потерялась.
+   */
+  exports: Record<string, unknown>
+  backups: Record<string, unknown>
+  /** Что вернёт диалог выбора файла. null — пользователь отменил. */
+  picked: unknown | null
+  shared: string[]
+}
+
 export interface FakeState {
   exercises: Exercise[]
   programs: Program[]
@@ -26,6 +38,7 @@ export interface FakeState {
   workoutSets: WorkoutSet[]
   absences: Absence[]
   settings: Settings
+  files: FakeFiles
 }
 
 export const emptyState = (): FakeState => ({
@@ -37,6 +50,7 @@ export const emptyState = (): FakeState => ({
   workoutSets: [],
   absences: [],
   settings: { unit: 'kg', firstDayOfWeek: 1, theme: 'system', language: 'system' },
+  files: { exports: {}, backups: {}, picked: null, shared: [] },
 })
 
 export class FixedClock {
@@ -229,6 +243,33 @@ export const createFakePorts = (options?: {
       },
       async remove(id) {
         state.absences = state.absences.filter((a) => a.id !== id)
+      },
+    },
+
+    files: {
+      async saveExport(fileName, content) {
+        const path = `/exports/${fileName}`
+        state.files.exports[path] = content
+        return path
+      },
+      async pickJson() {
+        return state.files.picked
+      },
+      async share(path) {
+        state.files.shared.push(path)
+      },
+      async listBackups() {
+        // свежие первыми: имена содержат дату, поэтому обратная сортировка строк
+        return Object.keys(state.files.backups).sort().reverse()
+      },
+      async saveBackup(fileName, content) {
+        state.files.backups[fileName] = content
+      },
+      async readBackup(fileName) {
+        return state.files.backups[fileName] ?? null
+      },
+      async removeBackup(fileName) {
+        delete state.files.backups[fileName]
       },
     },
 

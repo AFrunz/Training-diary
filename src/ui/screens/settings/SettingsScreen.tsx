@@ -80,7 +80,8 @@ export function SettingsScreen({
   }
 
   const exportAll = async () => {
-    await services.exportAll()
+    // exportToFile сохраняет файл и открывает системное «Поделиться» (FR-7.1)
+    await services.exportToFile()
     setExported(true)
   }
 

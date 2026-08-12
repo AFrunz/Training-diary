@@ -1,5 +1,6 @@
 import type { Ports } from './ports'
 import { createAbsence, deleteAbsence } from './usecases/absences'
+import { exportToFile, importFromFile, restoreBackup, runBackup, wipeAllData } from './usecases/backup'
 import { exportAll, importAll } from './usecases/data'
 import {
   archiveProgram,
@@ -50,6 +51,11 @@ export const createServices = (ports: Ports) => ({
   monthStats: monthStats(ports),
   exportAll: exportAll(ports),
   importAll: importAll(ports),
+  exportToFile: exportToFile(ports),
+  importFromFile: importFromFile(ports),
+  runBackup: runBackup(ports),
+  restoreBackup: restoreBackup(ports),
+  wipeAllData: wipeAllData(ports),
 })
 
 export type Services = ReturnType<typeof createServices>

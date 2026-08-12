@@ -38,7 +38,11 @@ export default function RootLayout() {
   useEffect(() => {
     let cancelled = false
     createAppPorts().then((ports) => {
-      if (!cancelled) setServices(createServices(ports))
+      if (cancelled) return
+      const created = createServices(ports)
+      setServices(created)
+      // автобэкап при каждом запуске с ротацией пяти копий (FR-7.3)
+      void created.runBackup()
     })
     return () => {
       cancelled = true
