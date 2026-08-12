@@ -1,12 +1,15 @@
 /**
- * Склонение числительных (§7.2). Чистая функция без зависимостей от React Native.
+ * Склонение числительных (§7.2).
  *
- * Формы выбираются правилами CLDR через Intl.PluralRules, а не по последней цифре:
- * 11–14 в русском — исключение, а дробные значения («3.1 тренировки») требуют
- * отдельной формы.
+ * Правила CLDR реализованы вручную, а не через `Intl.PluralRules`: движок Hermes
+ * на Android его не поддерживает, и обращение к нему роняет приложение. Формы
+ * выбираются не по последней цифре — 11–14 в русском исключение, а дробные
+ * значения («3.1 тренировки») требуют отдельной формы.
  */
 
 export type Locale = 'ru' | 'en'
+
+export type PluralCategory = 'one' | 'few' | 'many' | 'other'
 
 export interface PluralForms {
   readonly one: string
@@ -15,19 +18,25 @@ export interface PluralForms {
   readonly other?: string
 }
 
-const rules = new Map<Locale, Intl.PluralRules>()
+/** Категория по правилам CLDR для поддерживаемых языков. */
+export function pluralCategory(locale: Locale, count: number): PluralCategory {
+  const isFraction = !Number.isInteger(count)
+  if (locale === 'en') return count === 1 && !isFraction ? 'one' : 'other'
 
-const rulesFor = (locale: Locale): Intl.PluralRules => {
-  let rule = rules.get(locale)
-  if (!rule) {
-    rule = new Intl.PluralRules(locale)
-    rules.set(locale, rule)
-  }
-  return rule
+  // русский: дробные значения всегда «other» — «3.1 тренировки»
+  if (isFraction) return 'other'
+
+  const abs = Math.abs(count)
+  const lastDigit = abs % 10
+  const lastTwo = abs % 100
+
+  if (lastDigit === 1 && lastTwo !== 11) return 'one'
+  if (lastDigit >= 2 && lastDigit <= 4 && (lastTwo < 12 || lastTwo > 14)) return 'few'
+  return 'many'
 }
 
 export function pluralize(locale: Locale, count: number, forms: PluralForms): string {
-  const category = rulesFor(locale).select(count)
+  const category = pluralCategory(locale, count)
 
   const form =
     category === 'one'
@@ -39,9 +48,7 @@ export function pluralize(locale: Locale, count: number, forms: PluralForms): st
           : (forms.other ?? forms.many)
 
   if (form === undefined) {
-    throw new Error(
-      `не задана форма «${category}» для языка ${locale}: добавьте её в словарь`,
-    )
+    throw new Error(`не задана форма «${category}» для языка ${locale}: добавьте её в словарь`)
   }
   return form
 }

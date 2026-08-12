@@ -8,7 +8,9 @@ const formatters = new Map<string, Intl.DateTimeFormat>()
 const formatterFor = (timeZone: string): Intl.DateTimeFormat => {
   let formatter = formatters.get(timeZone)
   if (!formatter) {
-    formatter = new Intl.DateTimeFormat('en-CA', {
+    // формат собирается из частей: полагаться на порядок и разделители локали нельзя,
+    // на Android набор локалей движка отличается от настольного
+    formatter = new Intl.DateTimeFormat('en-US', {
       timeZone,
       year: 'numeric',
       month: '2-digit',
@@ -40,8 +42,11 @@ const fromEpochDay = (epochDay: number): LocalDate => {
 }
 
 export function toLocalDate(at: Instant, timeZone: string): LocalDate {
-  // en-CA даёт ровно формат YYYY-MM-DD
-  return localDate(formatterFor(timeZone).format(new Date(at)))
+  const parts = formatterFor(timeZone).formatToParts(new Date(at))
+  const value = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? ''
+
+  return localDate(`${value('year').padStart(4, '0')}-${value('month')}-${value('day')}`)
 }
 
 export function isSameLocalDay(a: Instant, b: Instant, timeZone: string): boolean {

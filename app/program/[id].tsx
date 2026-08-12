@@ -1,15 +1,18 @@
-import { router, useLocalSearchParams } from 'expo-router'
-import { id as makeId } from '../../src/domain/model/types'
-import { ProgramScreen } from '../../src/ui/screens/program/ProgramScreen'
+import { Screen } from "../../src/ui/components/Screen";
+import { router, useLocalSearchParams } from "expo-router";
+import { id as makeId } from "../../src/domain/model/types";
+import { ProgramScreen } from "../../src/ui/screens/program/ProgramScreen";
 
 export default function ProgramRoute() {
-  const { id } = useLocalSearchParams<{ id: string }>()
+  const { id } = useLocalSearchParams<{ id: string }>();
   return (
-    <ProgramScreen
-      programId={makeId(id)}
-      onBack={() => router.back()}
-      onDuplicated={(programId) => router.replace(`/program/${programId}`)}
-      onArchived={() => router.back()}
-    />
-  )
+    <Screen>
+      <ProgramScreen
+        programId={makeId(id)}
+        onBack={() => router.back()}
+        onDuplicated={(programId) => router.replace(`/program/${programId}`)}
+        onArchived={() => router.back()}
+      />
+    </Screen>
+  );
 }

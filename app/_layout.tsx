@@ -3,24 +3,25 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-} from '@expo-google-fonts/inter'
+} from "@expo-google-fonts/inter";
 import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
-} from '@expo-google-fonts/space-grotesk'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, StatusBar, View } from 'react-native'
-import { createServices } from '../src/app/container'
-import type { Services } from '../src/app/container'
-import { createAppPorts } from '../src/infra/bootstrap'
-import { I18nProvider } from '../src/ui/i18n/I18nProvider'
-import { ServicesProvider } from '../src/ui/providers/ServicesProvider'
-import { SettingsProvider } from '../src/ui/providers/SettingsProvider'
-import { ThemeProvider } from '../src/ui/theme/ThemeProvider'
-import { palette } from '../src/ui/theme/tokens'
+} from "@expo-google-fonts/space-grotesk";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StatusBar, View } from "react-native";
+import { createServices } from "../src/app/container";
+import type { Services } from "../src/app/container";
+import { createAppPorts } from "../src/infra/bootstrap";
+import { I18nProvider } from "../src/ui/i18n/I18nProvider";
+import { ServicesProvider } from "../src/ui/providers/ServicesProvider";
+import { SettingsProvider } from "../src/ui/providers/SettingsProvider";
+import { ThemeProvider } from "../src/ui/theme/ThemeProvider";
+import { palette } from "../src/ui/theme/tokens";
 
 /**
  * Корень приложения: открывает базу, применяет миграции и поднимает провайдеры.
@@ -35,16 +36,23 @@ const queryClient = new QueryClient({
       retry: false,
     },
   },
-})
+});
 
 const Splash = () => (
-  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: palette.light.bg }}>
+  <View
+    style={{
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: palette.light.bg,
+    }}
+  >
     <ActivityIndicator color={palette.light.accent} />
   </View>
-)
+);
 
 export default function RootLayout() {
-  const [services, setServices] = useState<Services | null>(null)
+  const [services, setServices] = useState<Services | null>(null);
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -52,44 +60,49 @@ export default function RootLayout() {
     Inter_700Bold,
     SpaceGrotesk_600SemiBold,
     SpaceGrotesk_700Bold,
-  })
+  });
 
   useEffect(() => {
-    let cancelled = false
+    let cancelled = false;
     createAppPorts().then((ports) => {
-      if (cancelled) return
-      const created = createServices(ports)
-      setServices(created)
+      if (cancelled) return;
+      const created = createServices(ports);
+      setServices(created);
       // автобэкап при каждом запуске с ротацией пяти копий (FR-7.3)
-      void created.runBackup()
-    })
+      void created.runBackup();
+    });
     return () => {
-      cancelled = true
-    }
-  }, [])
+      cancelled = true;
+    };
+  }, []);
 
-  if (!services || !fontsLoaded) return <Splash />
+  if (!services || !fontsLoaded) return <Splash />;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ServicesProvider services={services}>
-        <SettingsProvider fallback={<Splash />}>
-          {(settings) => (
-            <ThemeProvider mode={settings.theme}>
-              <I18nProvider mode={settings.language} systemLanguage={getSystemLanguage()}>
-                <StatusBar />
-                <Stack screenOptions={{ headerShown: false }} />
-              </I18nProvider>
-            </ThemeProvider>
-          )}
-        </SettingsProvider>
-      </ServicesProvider>
-    </QueryClientProvider>
-  )
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <ServicesProvider services={services}>
+          <SettingsProvider fallback={<Splash />}>
+            {(settings) => (
+              <ThemeProvider mode={settings.theme}>
+                <I18nProvider
+                  mode={settings.language}
+                  systemLanguage={getSystemLanguage()}
+                >
+                  <StatusBar />
+                  <Stack screenOptions={{ headerShown: false }} />
+                </I18nProvider>
+              </ThemeProvider>
+            )}
+          </SettingsProvider>
+        </ServicesProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
+  );
 }
 
 /** Язык устройства: по нему выбирается словарь в системном режиме (FR-7.6). */
 const getSystemLanguage = (): string => {
-  const locale = Intl.DateTimeFormat().resolvedOptions().locale
-  return locale || 'en'
-}
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+  return locale || "en";
+};
