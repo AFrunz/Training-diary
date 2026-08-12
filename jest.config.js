@@ -1,4 +1,7 @@
 const moduleNameMapper = {
+  // пакет отдаёт ESM с расширением .mjs, которое пресет не трансформирует:
+  // в тестах берём его же сборку CommonJS
+  '^lucide-react-native$': '<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js',
   '^@domain/(.*)$': '<rootDir>/src/domain/$1',
   '^@app/(.*)$': '<rootDir>/src/app/$1',
   '^@ui/(.*)$': '<rootDir>/src/ui/$1',
@@ -26,6 +29,10 @@ module.exports = {
       roots: ['<rootDir>/src/ui'],
       moduleNameMapper,
       clearMocks: true,
+      // lucide-react-native и шрифты поставляются в ESM: пресет их не трансформирует
+      transformIgnorePatterns: [
+        'node_modules/(?!(?:.pnpm/)?((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|react-native-svg|lucide-react-native))',
+      ],
     },
   ],
 }

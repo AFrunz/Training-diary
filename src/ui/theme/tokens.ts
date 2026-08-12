@@ -57,7 +57,24 @@ export const programColors = {
 
 export const radii = { lg: 22, md: 14, sm: 9, pill: 99 } as const
 
-export const fonts = { ui: 'Inter', num: 'SpaceGrotesk' } as const
+/**
+ * Имена шрифтов совпадают с ключами загрузки в `app/_layout.tsx`.
+ * Inter — весь интерфейс, Space Grotesk — числа и метрики (макет «00 · Дизайн-система»).
+ */
+export const fonts = {
+  ui: 'Inter_400Regular',
+  uiMedium: 'Inter_500Medium',
+  uiSemibold: 'Inter_600SemiBold',
+  uiBold: 'Inter_700Bold',
+  num: 'SpaceGrotesk_600SemiBold',
+  numBold: 'SpaceGrotesk_700Bold',
+} as const
+
+/** Гарнитура под нужную насыщенность: в RN начертания подключаются отдельными файлами. */
+export const uiFont = (weight?: string): string =>
+  weight === '700' ? fonts.uiBold : weight === '600' ? fonts.uiSemibold : weight === '500' ? fonts.uiMedium : fonts.ui
+
+export const numFont = (weight?: string): string => (weight === '700' ? fonts.numBold : fonts.num)
 
 /** Цвет бублика по тону завершённости из §5.2. */
 export const toneColor = (colors: Colors, tone: 'success' | 'warning' | 'danger' | 'muted'): string =>
