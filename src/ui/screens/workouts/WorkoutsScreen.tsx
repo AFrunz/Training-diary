@@ -163,7 +163,7 @@ export function WorkoutsScreen({ onCreateWorkout, onOpenWorkout }: WorkoutsScree
           {programs.map((program) => (
             <Chip
               key={program.id}
-              testID={`filter-chip-${program.id}`}
+              testID={`filter-chip-${program.name}`}
               label={program.name}
               dotColor={dotColor(program.color)}
               selected={programFilter === program.id}

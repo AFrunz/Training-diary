@@ -53,10 +53,16 @@ Maestro сопоставляет `id` и текст **регулярным вы�
 
 | Нужно | Почему нет |
 | --- | --- |
-| `tab-calendar` · `tab-workouts` · `tab-library` · `tab-stats` · `tab-settings` | таб-бар и навигация ещё не собраны |
-| `calendar-day-today` · `calendar-day-plus-N` · `calendar-day-minus-N` · `workout-card-today` | в коде идентификаторы дня и карточки строятся из даты (`calendar-day-2026-08-12`), относительных синонимов нет |
-| `absence-end-date` | экран добавления отсутствия не написан |
-| `workout-item-{index}` | у карточки упражнения в тренировке нет своего `testID`, есть только `item-checkbox-{index}` и `add-set-{index}` |
+| `calendar-day-today` · `calendar-day-plus-N` · `calendar-day-minus-N` · `workout-card-today` | в коде идентификаторы дня и карточки строятся из даты (`calendar-day-2026-08-12`, `workout-card-2026-08-12`), относительных синонимов нет |
+| `absence-end-date` и весь ввод отсутствия | экран добавления отсутствия не написан, календарь только показывает готовые периоды |
+| `workout-item-{index}` | у карточки упражнения в тренировке нет своего `testID`, есть только `item-checkbox-{index}`, `add-set-{index}` и `open-history-{index}` |
+| маршруты `/workout/new` и `/workout/{id}` | таббар и календарь уже ведут на них (`router.push('/workout/new?date=…')`), но самих экранов ещё нет; на них держатся `full-cycle`, `crash-resilience` и `exercise-history` |
+
+Экраны программы, истории и тренировки лежат поверх таббара отдельным стеком,
+поэтому вернуться в раздел можно только через `header-back`, а не тапом по табу.
+
+Плитки статистики держат подпись и значение в одном узле, поэтому
+`copyTextFrom` стоит брать с `stat-per-week-value`, а не с `stat-per-week`.
 
 ## Что проверяет каждый сценарий
 

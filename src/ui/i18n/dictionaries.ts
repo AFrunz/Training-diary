@@ -204,6 +204,8 @@ export const ru = {
   'date.weekday.6': 'суббота',
   'date.weekday.7': 'воскресенье',
 
+  'workout.chooseProgram': 'Выберите программу',
+
   'common.cancel': 'Отмена',
   'common.save': 'Сохранить',
   'common.done': 'Готово',
@@ -458,6 +460,8 @@ export const en: Record<keyof typeof ru, string> = {
   'date.weekday.5': 'Friday',
   'date.weekday.6': 'Saturday',
   'date.weekday.7': 'Sunday',
+
+  'workout.chooseProgram': 'Choose a program',
 
   'common.cancel': 'Cancel',
   'common.save': 'Save',

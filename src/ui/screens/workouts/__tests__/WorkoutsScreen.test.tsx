@@ -206,7 +206,7 @@ describe('Экран «Тренировки»', () => {
     render(<WorkoutsScreen />, { services: world.services })
     await screen.findByTestId('workout-card-2026-08-07')
 
-    fireEvent.press(await screen.findByTestId(`filter-chip-${world.back}`))
+    fireEvent.press(await screen.findByTestId('filter-chip-Спина + бицепс'))
 
     expect(screen.queryByTestId('workout-card-2026-08-07')).toBeNull()
     expect(screen.getByTestId('workout-card-2026-08-05')).toBeTruthy()
@@ -281,7 +281,7 @@ describe('Экран «Тренировки»', () => {
     const world = await buildWorld()
     const onCreateWorkout = jest.fn()
     render(<WorkoutsScreen onCreateWorkout={onCreateWorkout} />, { services: world.services })
-    await screen.findByTestId(`filter-chip-${world.chest}`)
+    await screen.findByTestId('filter-chip-Грудь + трицепс')
 
     fireEvent.press(screen.getByTestId('add-button'))
     expect(onCreateWorkout).toHaveBeenCalled()
@@ -293,8 +293,8 @@ describe('Экран «Тренировки»', () => {
 
     render(<WorkoutsScreen />, { services: world.services })
 
-    expect(await screen.findByTestId(`filter-chip-${world.chest}`)).toBeTruthy()
+    expect(await screen.findByTestId('filter-chip-Грудь + трицепс')).toBeTruthy()
     expect(screen.getByTestId('filter-chip-all')).toBeTruthy()
-    expect(screen.queryByTestId(`filter-chip-${world.back}`)).toBeNull()
+    expect(screen.queryByTestId('filter-chip-Спина + бицепс')).toBeNull()
   })
 })

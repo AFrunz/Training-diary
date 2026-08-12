@@ -1,8 +1,9 @@
-import { Pressable, StyleSheet, Text, View, useColorScheme } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { WeightKg, WeightUnit } from '../../domain/model/types'
 import { formatSet } from '../../domain/rules/format'
 import { useT } from '../i18n/I18nProvider'
-import { palette, radii } from '../theme/tokens'
+import { useTheme } from '../theme/ThemeProvider'
+import { radii } from '../theme/tokens'
 
 export interface ExerciseRowSet {
   readonly id: string
@@ -37,7 +38,8 @@ export function ExerciseRow({
   onAddSet,
   onOpenHistory,
 }: ExerciseRowProps) {
-  const colors = palette[useColorScheme() === 'dark' ? 'dark' : 'light']
+  // тема берётся из провайдера, а не из системной схемы: иначе явный выбор темы не применится
+  const { colors } = useTheme()
   const { t } = useT()
   const target = targetSets && targetReps ? `${targetSets} × ${targetReps}` : null
 
@@ -110,7 +112,8 @@ export function ExerciseRow({
 }
 
 const styles = StyleSheet.create({
-  card: { borderRadius: radii.lg, borderWidth: 1, padding: 14, gap: 12 },
+  // размеры из макета: карточка padding 12, gap 10
+  card: { borderRadius: radii.lg, borderWidth: 1, padding: 12, gap: 10 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   checkbox: {
     width: 24,

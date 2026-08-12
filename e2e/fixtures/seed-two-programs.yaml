@@ -1,0 +1,55 @@
+appId: com.trainingdiary.app
+name: Подготовка — две программы и две тренировки
+---
+- runFlow: seed-program.yaml
+
+# Вторая программа: одно упражнение, чтобы тренировка закрывалась одной отметкой
+- tapOn:
+    id: 'tab-library'
+- tapOn:
+    id: 'library-segment-exercises'
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Приседания'
+- tapOn:
+    id: 'create-button'
+
+- tapOn:
+    id: 'library-segment-programs'
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'День ног'
+- tapOn:
+    id: 'exercise-picker-open'
+- tapOn:
+    id: 'exercise-row-Приседания'
+- tapOn:
+    id: 'exercise-picker-done'
+- tapOn:
+    id: 'create-button'
+
+# Вчерашняя завершённая тренировка по «День ног».
+# Вчера всегда есть в сетке текущего месяца: первая неделя показывает и хвост предыдущего.
+- evalScript: ${output.yesterday = new Date(Date.now() - 86400000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+- tapOn:
+    id: 'tab-calendar'
+- tapOn:
+    id: 'calendar-day-${output.yesterday}'
+- tapOn:
+    id: 'calendar-create-workout'
+- tapOn: 'День ног'
+- tapOn:
+    id: 'item-checkbox-0'
+
+# Сегодняшняя тренировка по «Грудь + трицепс» остаётся незавершённой
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'add-button'
+- tapOn: 'Грудь + трицепс'
+- assertVisible:
+    id: 'workout-timer'

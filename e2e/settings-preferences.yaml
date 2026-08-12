@@ -1,0 +1,67 @@
+appId: com.trainingdiary.app
+name: Единицы веса и тема в настройках (FR-7.4, FR-7.5)
+---
+- runFlow: fixtures/seed-workout.yaml
+
+- tapOn:
+    id: 'tab-settings'
+- assertVisible: 'Настройки'
+
+# Килограммы по умолчанию: подход записан как 80 × 8
+- tapOn:
+    id: 'settings-unit-lb'
+
+# История пересчитана на показ, вес — в фунтах (80 кг → 176 lb)
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'workout-card-today'
+- assertVisible: '176 × 8'
+- assertNotVisible: '80 × 8'
+
+# Возврат к килограммам: значение то же, что вводили, — история не переписана (FR-7.5)
+- tapOn:
+    id: 'tab-settings'
+- tapOn:
+    id: 'settings-unit-kg'
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'workout-card-today'
+- assertVisible: '80 × 8'
+- assertNotVisible: '176 × 8'
+
+# Тема переключается по кругу: системная → светлая → тёмная → системная
+- tapOn:
+    id: 'tab-settings'
+- assertVisible:
+    id: 'settings-theme-value'
+    text: 'Системный'
+- tapOn:
+    id: 'settings-theme'
+- assertVisible:
+    id: 'settings-theme-value'
+    text: 'Светлая'
+- tapOn:
+    id: 'settings-theme'
+- assertVisible:
+    id: 'settings-theme-value'
+    text: 'Тёмная'
+- tapOn:
+    id: 'settings-theme'
+- assertVisible:
+    id: 'settings-theme-value'
+    text: 'Системный'
+
+# Три секции экрана на месте (FR-7.1 — FR-7.4)
+- assertVisible: 'Данные'
+- assertVisible:
+    id: 'settings-export'
+- assertVisible: 'Предпочтения'
+- assertVisible:
+    id: 'settings-units'
+- scrollUntilVisible:
+    element:
+      text: 'Опасная зона'
+- assertVisible:
+    id: 'settings-wipe'

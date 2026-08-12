@@ -207,3 +207,28 @@ describe('ExerciseRow', () => {
     expect(screen.queryByTestId('item-target-0')).toBeNull()
   })
 })
+
+describe('ExerciseRow — тема', () => {
+  const row = (
+    <ExerciseRow
+      index={0}
+      name="Жим лёжа"
+      sets={sets}
+      done={false}
+      unit="kg"
+      onToggleDone={jest.fn()}
+      onAddSet={jest.fn()}
+      onOpenHistory={jest.fn()}
+    />
+  )
+
+  it('явно выбранная тёмная тема применяется, даже если система светлая', () => {
+    render(row, { theme: 'dark' })
+    const dark = screen.getByText('Жим лёжа').props.style
+
+    render(row, { theme: 'light' })
+    const light = screen.getByText('Жим лёжа').props.style
+
+    expect(JSON.stringify(dark)).not.toEqual(JSON.stringify(light))
+  })
+})

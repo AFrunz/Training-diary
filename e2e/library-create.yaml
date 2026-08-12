@@ -1,0 +1,73 @@
+appId: com.trainingdiary.app
+name: Упражнение и программа из библиотеки (FR-2.1.1, FR-3.1.1)
+---
+- runFlow: fixtures/seed-program.yaml
+
+- tapOn:
+    id: 'tab-library'
+- tapOn:
+    id: 'library-segment-exercises'
+
+# Занятое имя подсвечивается прямо при вводе, до попытки сохранить (FR-2.1.1)
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Жим лёжа'
+- assertVisible:
+    id: 'name-error'
+- assertVisible:
+    id: 'create-button'
+    enabled: false
+
+# Исправленное имя снимает ошибку и разблокирует создание
+- eraseText
+- inputText: 'Приседания'
+- assertVisible:
+    id: 'name-free'
+- assertNotVisible:
+    id: 'name-error'
+- tapOn:
+    id: 'muscle-group-legs'
+- tapOn:
+    id: 'create-button'
+- assertVisible:
+    id: 'exercise-row-Приседания'
+
+# Пока название пустое, создать программу нельзя (FR-3.1.1)
+- tapOn:
+    id: 'library-segment-programs'
+- tapOn:
+    id: 'add-button'
+- assertVisible:
+    id: 'create-button'
+    enabled: false
+- tapOn:
+    id: 'name-input'
+- inputText: 'День ног'
+- assertVisible:
+    id: 'create-button'
+    enabled: true
+
+# Состав собирается шитом, счётчик показывает число выбранных
+- tapOn:
+    id: 'exercise-picker-open'
+- tapOn:
+    id: 'exercise-row-Приседания'
+- tapOn:
+    id: 'exercise-row-Жим лёжа'
+- assertVisible:
+    id: 'exercise-picker-counter'
+    text: 'Выбрано 2'
+- tapOn:
+    id: 'exercise-picker-done'
+- assertVisible:
+    id: 'program-item-1'
+- tapOn:
+    id: 'create-button'
+
+# Программа встала в список вкладки «Программы»
+- tapOn:
+    id: 'library-segment-programs'
+- assertVisible:
+    id: 'program-row-День ног'

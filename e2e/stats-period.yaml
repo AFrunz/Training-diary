@@ -1,0 +1,84 @@
+appId: com.trainingdiary.app
+name: Статистика за период (FR-6.2, FR-6.4)
+---
+- runFlow: fixtures/seed-stats.yaml
+
+- tapOn:
+    id: 'tab-stats'
+- assertVisible:
+    id: 'stats-screen'
+
+# Текущий месяц: считать есть что, прочерков в метриках нет (FR-6.4)
+- assertNotVisible:
+    id: 'stat-workouts-value'
+    text: '—'
+- assertNotVisible:
+    id: 'stat-per-week-value'
+    text: '—'
+- assertNotVisible:
+    id: 'stat-duration-value'
+    text: '—'
+- assertNotVisible:
+    id: 'stat-completion-value'
+    text: '—'
+- assertVisible:
+    id: 'stats-programs-bar'
+- assertVisible:
+    id: 'stats-streak'
+
+# Вперёд с текущего месяца некуда
+- assertVisible:
+    id: 'stats-next'
+    enabled: false
+
+# Уходим в предыдущий месяц
+- copyTextFrom:
+    id: 'stats-period'
+- evalScript: ${output.currentPeriod = maestro.copiedText}
+- tapOn:
+    id: 'stats-prev'
+- copyTextFrom:
+    id: 'stats-period'
+- assertTrue: ${maestro.copiedText != output.currentPeriod}
+
+# Данных нет: тренировок ноль, а длительность и завершённость — прочерк, не ноль (FR-6.4)
+- assertVisible:
+    id: 'stat-workouts-value'
+    text: '0'
+- assertVisible:
+    id: 'stat-duration-value'
+    text: '—'
+- assertVisible:
+    id: 'stat-completion-value'
+    text: '—'
+
+# Возвращаемся в текущий месяц: тот же период и снова недоступная стрелка вперёд
+- tapOn:
+    id: 'stats-next'
+- copyTextFrom:
+    id: 'stats-period'
+- assertTrue: ${maestro.copiedText == output.currentPeriod}
+- assertVisible:
+    id: 'stats-next'
+    enabled: false
+- assertNotVisible:
+    id: 'stat-completion-value'
+    text: '—'
+
+# Сегмент «Год»: график становится двенадцатью столбцами месяцев
+- tapOn:
+    id: 'stats-mode-year'
+- assertVisible:
+    id: 'stat-bar-11'
+- assertVisible:
+    id: 'stats-next'
+    enabled: false
+
+# Обратно на «Месяц»: столбцов снова не больше шести недель
+- tapOn:
+    id: 'stats-mode-month'
+- assertNotVisible:
+    id: 'stat-bar-11'
+- copyTextFrom:
+    id: 'stats-period'
+- assertTrue: ${maestro.copiedText == output.currentPeriod}

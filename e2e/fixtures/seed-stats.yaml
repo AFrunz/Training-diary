@@ -1,0 +1,63 @@
+appId: com.trainingdiary.app
+name: Подготовка — тренировки текущего месяца
+---
+# Три тренировки текущего месяца по двум программам: с ними у статистики есть
+# и распределение по программам, и достоверная длительность (§5.1).
+# Относительные дни берутся внутри месяца, поэтому сценарий рассчитан на запуск
+# не в первые дни месяца — как и отпуск в absence-regularity.yaml.
+- runFlow: seed-program.yaml
+
+# Вторая программа: полосе распределения нужно что делить
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'name-input'
+- inputText: 'Спина + бицепс'
+- tapOn:
+    id: 'exercise-picker-open'
+- tapOn:
+    id: 'exercise-row-Жим лёжа'
+- tapOn:
+    id: 'exercise-picker-done'
+- tapOn:
+    id: 'create-button'
+
+# Четыре дня назад: отмечено одно упражнение из двух — завершённость ниже 100 %
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'workout-date'
+- tapOn:
+    id: 'calendar-day-minus-4'
+- tapOn: 'Грудь + трицепс'
+- tapOn:
+    id: 'item-checkbox-0'
+- tapOn:
+    id: 'tab-workouts'
+
+# Два дня назад: та же программа, отмечено всё
+- tapOn:
+    id: 'add-button'
+- tapOn:
+    id: 'workout-date'
+- tapOn:
+    id: 'calendar-day-minus-2'
+- tapOn: 'Грудь + трицепс'
+- tapOn:
+    id: 'item-checkbox-0'
+- tapOn:
+    id: 'item-checkbox-1'
+- tapOn:
+    id: 'tab-workouts'
+
+# Сегодня: вторая программа. Тренировка не задним числом, поэтому её длительность
+# попадает в среднее (§5.1)
+- tapOn:
+    id: 'add-button'
+- tapOn: 'Спина + бицепс'
+- tapOn:
+    id: 'item-checkbox-0'
+- tapOn:
+    id: 'tab-workouts'

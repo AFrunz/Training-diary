@@ -38,8 +38,9 @@ name: Правка программы не трогает проведённую
 - assertNotVisible: 'Разводка гантелей'
 
 # В библиотеке теперь две программы: оригинал никуда не делся
+# (копия открылась через replace, поэтому «назад» ведёт сразу в библиотеку)
 - tapOn:
-    id: 'tab-library'
+    id: 'header-back'
 - assertVisible:
     id: 'program-row-Грудь \+ трицепс'
 - assertVisible:

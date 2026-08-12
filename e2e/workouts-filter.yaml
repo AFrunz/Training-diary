@@ -1,0 +1,47 @@
+appId: com.trainingdiary.app
+name: Фильтр списка тренировок по программам (§5.2)
+---
+- runFlow: fixtures/seed-two-programs.yaml
+
+- evalScript: ${output.yesterday = new Date(Date.now() - 86400000 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+- tapOn:
+    id: 'tab-workouts'
+
+# «Все» — обе тренировки; сегодняшняя незавершённая закреплена сверху с бейджем
+- assertVisible:
+    id: 'filter-chip-all'
+- assertVisible:
+    id: 'active-workout-card'
+- assertVisible: 'Идёт'
+- assertVisible:
+    id: 'workout-card-${output.yesterday}'
+
+# Фильтр по «День ног» оставляет только вчерашнюю тренировку.
+# Чипы фильтров идут выше карточек, поэтому берём первое совпадение по названию:
+# у чипа testID завязан на id программы, а он в сценарии неизвестен.
+- tapOn:
+    text: 'День ног'
+    index: 0
+- assertVisible:
+    id: 'workout-card-${output.yesterday}'
+- assertNotVisible:
+    id: 'active-workout-card'
+- assertNotVisible: 'Идёт'
+
+# Фильтр по «Грудь + трицепс» оставляет только сегодняшнюю
+- tapOn:
+    text: 'Грудь + трицепс'
+    index: 0
+- assertVisible:
+    id: 'active-workout-card'
+- assertVisible: 'Идёт'
+- assertNotVisible:
+    id: 'workout-card-${output.yesterday}'
+
+# Возврат к «Все» снова показывает обе
+- tapOn:
+    id: 'filter-chip-all'
+- assertVisible:
+    id: 'active-workout-card'
+- assertVisible:
+    id: 'workout-card-${output.yesterday}'
