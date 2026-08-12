@@ -1,0 +1,84 @@
+appId: com.trainingdiary.app
+name: История упражнения — рекорд, подходы и 1ПМ (FR-5.1, FR-5.2)
+---
+- runFlow: fixtures/seed-program.yaml
+
+# Прошлая тренировка: заводится через день в календаре — в одном дне тренировка
+# может быть только одна (FR-1.3), поэтому вторую делаем на другую дату
+- tapOn:
+    id: 'tab-calendar'
+- tapOn:
+    id: 'calendar-day-minus-2'
+- tapOn: 'Начать тренировку'
+- tapOn: 'Грудь \+ трицепс'
+
+- tapOn:
+    id: 'add-set-0'
+- tapOn:
+    id: 'set-weight-input'
+- inputText: '75'
+- tapOn:
+    id: 'set-reps-input'
+- inputText: '8'
+- tapOn:
+    id: 'set-submit'
+
+# Сегодняшняя тренировка — тяжелее прошлой
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'add-button'
+- tapOn: 'Грудь \+ трицепс'
+
+- tapOn:
+    id: 'add-set-0'
+- tapOn:
+    id: 'set-weight-input'
+- inputText: '80'
+- tapOn:
+    id: 'set-reps-input'
+- inputText: '8'
+- tapOn:
+    id: 'set-submit'
+- assertVisible: '80 × 8'
+
+# История открывается из строки упражнения в тренировке
+- tapOn:
+    id: 'open-history-0'
+- assertVisible:
+    id: 'exercise-history-screen'
+- assertVisible: 'Жим лёжа'
+
+# Рекорд веса — из сегодняшней тренировки, с прибавкой к прошлому рекорду
+- assertVisible:
+    id: 'history-record-weight-value'
+    text: '80 кг'
+- assertVisible:
+    id: 'history-record-weight-note'
+
+# Раскладка подходов: обе тренировки на месте, у свежей — дельта к прошлому разу
+- assertVisible:
+    id: 'history-workout-0'
+- assertVisible: '80 × 8'
+- assertVisible: '75 × 8'
+- assertVisible:
+    id: 'history-delta-0'
+    text: '\+5 кг'
+# у самой первой тренировки сравнивать не с чем
+- assertNotVisible:
+    id: 'history-delta-1'
+
+# График переключается на 1ПМ: пик перестаёт быть рабочим весом
+- assertVisible:
+    id: 'history-bar-peak-1'
+    text: '80'
+- tapOn:
+    id: 'history-metric-oneRm'
+- assertVisible:
+    id: 'history-metric-oneRm'
+    selected: true
+- assertVisible:
+    id: 'history-chart'
+- assertNotVisible:
+    id: 'history-bar-peak-1'
+    text: '80'

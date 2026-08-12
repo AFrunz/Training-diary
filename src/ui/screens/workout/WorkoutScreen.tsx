@@ -112,11 +112,13 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
     timeZone: services.ports.timeZone,
   })
 
-  // тренировка завершена — счётчик замирает на итоговой длительности
-  const elapsed =
-    entity.finishedAt || entity.manualFinishedAt
-      ? formatDuration(duration.ms, locale)
-      : formatElapsed(entity.startedAt, now, locale)
+  // finishedAt проставляется с первой же отметки, поэтому «завершена» — это когда
+  // отмечены все упражнения: только тогда счётчик замирает на итоговой длительности
+  const isFinished =
+    Boolean(entity.manualFinishedAt) || (completion.total > 0 && completion.done === completion.total)
+  const elapsed = isFinished
+    ? formatDuration(duration.ms, locale)
+    : formatElapsed(entity.startedAt, now, locale)
 
   const targetOf = (exerciseId: Id) =>
     data.program?.items.find((item) => item.exerciseId === exerciseId) ?? null

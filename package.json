@@ -5,7 +5,9 @@
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-sqlite jest",
     "test:watch": "NODE_OPTIONS=--experimental-sqlite jest --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "start": "expo start",
+    "android": "expo run:android"
   },
   "devDependencies": {
     "@testing-library/react-native": "^13.3.3",
@@ -29,5 +31,6 @@
     "react": "^19.2.8",
     "react-native": "^0.84.1",
     "react-native-svg": "^15.15.5"
-  }
+  },
+  "main": "expo-router/entry"
 }

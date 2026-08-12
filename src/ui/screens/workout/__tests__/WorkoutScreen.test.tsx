@@ -99,6 +99,29 @@ describe('WorkoutScreen', () => {
     expect(await screen.findByTestId('workout-timer')).toHaveTextContent('40 мин')
   })
 
+  it('пока отмечены не все упражнения, счётчик продолжает идти', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date(STARTED_AT))
+
+    try {
+      const fixture = await seed()
+      fixture.ports.clock.set(instant(STARTED_AT + 20 * 60_000))
+      await fixture.services.toggleItemDone({
+        workoutId: fixture.workoutId,
+        itemId: fixture.ports.state.workoutItems[0]!.id,
+        done: true,
+      })
+
+      jest.setSystemTime(new Date(STARTED_AT + 50 * 60_000))
+      renderScreen(fixture)
+
+      // отметка одного упражнения проставила finishedAt, но тренировка ещё идёт
+      expect(await screen.findByTestId('workout-timer')).toHaveTextContent('50 мин')
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
   it('отметка упражнения уходит в сценарий и возвращается из данных', async () => {
     const fixture = await seed()
     renderScreen(fixture)

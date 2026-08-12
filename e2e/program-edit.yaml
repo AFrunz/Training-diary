@@ -1,0 +1,55 @@
+appId: com.trainingdiary.app
+name: Правка программы не трогает проведённую тренировку (FR-3.5, FR-3.6)
+---
+- runFlow: fixtures/seed-workout.yaml
+
+# Открываем программу из библиотеки
+- tapOn:
+    id: 'tab-library'
+- tapOn:
+    id: 'library-segment-programs'
+# «+» в названии — метасимвол регулярного выражения, поэтому экранируется
+- tapOn:
+    id: 'program-row-Грудь \+ трицепс'
+- assertVisible:
+    id: 'program-screen'
+- assertVisible: 'Состав'
+
+# Цвет: выбор отмечается прямо на палитре
+- tapOn:
+    id: 'program-color-prog-blue'
+- assertVisible:
+    id: 'program-color-prog-blue'
+    selected: true
+
+# Убираем второе упражнение из состава
+- assertVisible:
+    id: 'program-item-1'
+- tapOn:
+    id: 'program-item-remove-1'
+- assertVisible: 'Жим лёжа'
+- assertNotVisible: 'Разводка гантелей'
+
+# Дублируем: копия открывается сразу и повторяет уже изменённый состав
+- tapOn:
+    id: 'program-duplicate'
+- assertVisible: 'Грудь \+ трицепс \(копия\)'
+- assertVisible: 'Жим лёжа'
+- assertNotVisible: 'Разводка гантелей'
+
+# В библиотеке теперь две программы: оригинал никуда не делся
+- tapOn:
+    id: 'tab-library'
+- assertVisible:
+    id: 'program-row-Грудь \+ трицепс'
+- assertVisible:
+    id: 'program-row-Грудь \+ трицепс \(копия\)'
+
+# Главное (FR-3.5): проведённая тренировка держит свой снапшот состава
+- tapOn:
+    id: 'tab-workouts'
+- tapOn:
+    id: 'workout-card-today'
+- assertVisible: 'Жим лёжа'
+- assertVisible: 'Разводка гантелей'
+- assertVisible: '80 × 8'

@@ -32,6 +32,31 @@ maestro test e2e/full-cycle.yaml # один
 | `workout-donut` · `workout-card-{YYYY-MM-DD}` | список тренировок |
 | `stat-workouts` · `stat-per-week` · `stat-completion` | плитки статистики |
 | `settings-export` · `settings-import` · `settings-wipe` · `settings-language` | настройки |
+| `header-back` | стрелка «назад» в шапке экрана |
+| `open-history-{index}` | кнопка «История» в строке упражнения тренировки |
+| `program-screen` · `program-item-{index}` · `program-item-remove-{index}` | экран программы: состав |
+| `program-color-{ключ палитры}` · `program-add-exercise` · `program-duplicate` · `program-archive` | экран программы: цвет и действия |
+| `exercise-history-screen` · `history-record-weight-value` · `history-record-weight-note` | история упражнения: рекорд веса |
+| `history-metric-weight` · `history-metric-oneRm` · `history-chart` · `history-bar-peak-{index}` | история упражнения: график |
+| `history-workout-{index}` · `history-delta-{index}` | история упражнения: раскладка по тренировкам |
+
+Ключи палитры программ — `prog-red`, `prog-orange`, `prog-amber`, `prog-green`,
+`prog-teal`, `prog-blue`, `prog-violet`, `prog-pink` (§7.3 ТЗ).
+
+Maestro сопоставляет `id` и текст **регулярным выражением**, поэтому `+`, `(`, `)`
+в названиях экранируются: `program-row-Грудь \+ трицепс \(копия\)`.
+
+## Чего пока нет в коде
+
+Список расхождений контракта и интерфейса — сценарии зелёными не станут, пока
+эти идентификаторы не появятся:
+
+| Нужно | Почему нет |
+| --- | --- |
+| `tab-calendar` · `tab-workouts` · `tab-library` · `tab-stats` · `tab-settings` | таб-бар и навигация ещё не собраны |
+| `calendar-day-today` · `calendar-day-plus-N` · `calendar-day-minus-N` · `workout-card-today` | в коде идентификаторы дня и карточки строятся из даты (`calendar-day-2026-08-12`), относительных синонимов нет |
+| `absence-end-date` | экран добавления отсутствия не написан |
+| `workout-item-{index}` | у карточки упражнения в тренировке нет своего `testID`, есть только `item-checkbox-{index}` и `add-set-{index}` |
 
 ## Что проверяет каждый сценарий
 
@@ -42,3 +67,5 @@ maestro test e2e/full-cycle.yaml # один
 | `export-import.yaml` | экспорт, полная очистка, импорт | FR-7.1, FR-7.2, критерий 10 |
 | `absence-regularity.yaml` | отпуск не портит регулярность | FR-1.4, §5.3, критерий 7 |
 | `language-switch.yaml` | смена языка на лету | FR-7.6 |
+| `program-edit.yaml` | правка и дублирование программы не задевают проведённую тренировку | FR-3.5, FR-3.6 |
+| `exercise-history.yaml` | рекорд веса, раскладка подходов, дельта к прошлому разу, график 1ПМ | FR-5.1–FR-5.4 |
