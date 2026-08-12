@@ -1,0 +1,130 @@
+import { fireEvent, screen, waitFor } from '@testing-library/react-native'
+import type { Services } from '../../../../app/container'
+import type { FakePorts } from '../../../../app/testing/fakes'
+import type { Id } from '../../../../domain/model/types'
+import { localDate } from '../../../../domain/model/types'
+import { createTestServices, renderWithProviders } from '../../../testing/render'
+import { ProgramScreen } from '../ProgramScreen'
+
+interface Fixture {
+  services: Services
+  ports: FakePorts
+  programId: Id
+  bench: Id
+  fly: Id
+  dips: Id
+}
+
+const seed = async (): Promise<Fixture> => {
+  const { services, ports } = createTestServices()
+
+  const bench = await services.createExercise({ name: 'Жим лёжа', muscleGroup: 'Грудь' })
+  const fly = await services.createExercise({ name: 'Разводка гантелей' })
+  const dips = await services.createExercise({ name: 'Отжимания на брусьях' })
+
+  const programId = await services.createProgram({
+    name: 'Грудь + трицепс',
+    color: 'prog-red',
+    exerciseIds: [bench, fly, dips],
+  })
+
+  return { services, ports, programId, bench, fly, dips }
+}
+
+const renderScreen = (fixture: Fixture) =>
+  renderWithProviders(<ProgramScreen programId={fixture.programId} />, { services: fixture.services })
+
+describe('ProgramScreen', () => {
+  it('показывает состав в порядке программы', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('program-item-0')).toHaveTextContent(/Жим лёжа/)
+    expect(screen.getByTestId('program-item-1')).toHaveTextContent(/Разводка гантелей/)
+    expect(screen.getByTestId('program-item-2')).toHaveTextContent(/Отжимания на брусьях/)
+  })
+
+  it('в подзаголовке — число упражнений и тренировок', async () => {
+    const fixture = await seed()
+    await fixture.services.createWorkout({ date: localDate('2026-08-10'), programId: fixture.programId })
+    await fixture.services.createWorkout({ date: localDate('2026-08-11'), programId: fixture.programId })
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('header-subtitle')).toHaveTextContent('3 упражнения · 2 тренировки')
+  })
+
+  it('выбор цвета сохраняется через порты', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('program-color-prog-green'))
+
+    await waitFor(async () => {
+      const program = await fixture.ports.programs.byId(fixture.programId)
+      expect(program?.color).toBe('prog-green')
+    })
+    await waitFor(() => expect(screen.getByTestId('program-color-prog-green')).toBeSelected())
+  })
+
+  it('удаление упражнения меняет состав, но не трогает проведённую тренировку', async () => {
+    const fixture = await seed()
+    const workoutId = await fixture.services.createWorkout({
+      date: localDate('2026-08-11'),
+      programId: fixture.programId,
+    })
+
+    renderScreen(fixture)
+    fireEvent.press(await screen.findByTestId('program-item-remove-1'))
+
+    await waitFor(async () => {
+      const program = await fixture.ports.programs.byIdWithItems(fixture.programId)
+      expect(program?.items.map((item) => item.exerciseId)).toEqual([fixture.bench, fixture.dips])
+    })
+
+    // снапшот тренировки (FR-3.5) остаётся полным
+    const workout = await fixture.ports.workouts.byId(workoutId)
+    expect(workout?.items.map((item) => item.exerciseName)).toEqual([
+      'Жим лёжа',
+      'Разводка гантелей',
+      'Отжимания на брусьях',
+    ])
+  })
+
+  it('дублирование создаёт вторую программу с пометкой «копия»', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('program-duplicate'))
+
+    await waitFor(async () => {
+      const programs = await fixture.ports.programs.list()
+      expect(programs).toHaveLength(2)
+      expect(programs[1]?.name).toBe('Грудь + трицепс (копия)')
+    })
+
+    const copy = (await fixture.ports.programs.list())[1]!
+    const items = await fixture.ports.programs.byIdWithItems(copy.id)
+    expect(items?.items.map((item) => item.exerciseId)).toEqual([fixture.bench, fixture.fly, fixture.dips])
+  })
+
+  it('архивация убирает программу из списка действующих', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('program-archive'))
+
+    await waitFor(async () => expect(await fixture.ports.programs.list()).toHaveLength(0))
+    expect(await fixture.ports.programs.list({ includeArchived: true })).toHaveLength(1)
+  })
+
+  it('пустой состав показывает подсказку вместо списка', async () => {
+    const { services, ports } = createTestServices()
+    const programId = await services.createProgram({ name: 'Пустая' })
+
+    renderWithProviders(<ProgramScreen programId={programId} />, { services })
+
+    expect(await screen.findByText('Пока пусто')).toBeTruthy()
+    expect(await ports.programs.byIdWithItems(programId)).toBeTruthy()
+  })
+})
