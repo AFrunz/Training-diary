@@ -59,7 +59,7 @@ export function Donut({ done, total, tone, size = 46, testID = 'workout-donut' }
 }
 
 const styles = StyleSheet.create({
-  label: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  label: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
   // подпись бублика — Space Grotesk, как все числа в макете
   text: { fontFamily: numFont('700'), fontWeight: '700' },
 })

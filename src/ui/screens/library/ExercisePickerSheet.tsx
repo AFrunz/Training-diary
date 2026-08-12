@@ -173,9 +173,9 @@ export function ExercisePickerSheet({
 }
 
 const styles = StyleSheet.create({
-  overlay: { ...StyleSheet.absoluteFillObject, justifyContent: 'flex-end' },
+  overlay: { ...StyleSheet.absoluteFill, justifyContent: 'flex-end' },
   // затемнение из макета — тот же тёмный тон, что и основной текст, с прозрачностью
-  scrim: { ...StyleSheet.absoluteFillObject, opacity: 0.7 },
+  scrim: { ...StyleSheet.absoluteFill, opacity: 0.7 },
   sheet: {
     maxHeight: '80%',
     borderTopLeftRadius: radii.lg,
