@@ -6,13 +6,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "android": {
       "package": "com.trainingdiary.app",
       "adaptiveIcon": {
         "backgroundColor": "#5A5AF0"
       },
-      "edgeToEdgeEnabled": true,
       "permissions": []
     },
     "plugins": [
