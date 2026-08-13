@@ -78,8 +78,13 @@ export default function RootLayout() {
       if (cancelled) return;
       const created = createServices(ports);
       setServices(created);
-      // автобэкап при каждом запуске с ротацией пяти копий (FR-7.3)
-      void created.runBackup();
+      // базовый набор упражнений на пустой базе: без него первую программу
+      // не из чего собрать. Язык фиксируется в момент заполнения — дальше это
+      // пользовательские данные, и переводить их нельзя (FR-7.6)
+      void created
+        .seedPresetExercises(getSystemLanguage().toLowerCase().startsWith("ru") ? "ru" : "en")
+        // автобэкап снимается после набора, чтобы копия была осмысленной (FR-7.3)
+        .then(() => created.runBackup());
     });
     return () => {
       cancelled = true;

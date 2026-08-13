@@ -11,6 +11,7 @@ import {
   setProgramItems,
   suggestProgramColor,
 } from './usecases/library'
+import { seedPresetExercises } from './usecases/seed'
 import { monthStats, yearStats } from './usecases/stats'
 import {
   addAdHocExercise,
@@ -44,6 +45,8 @@ export const createServices = (ports: Ports) => ({
   setProgramItems: setProgramItems(ports),
   archiveProgram: archiveProgram(ports),
   suggestProgramColor: suggestProgramColor(ports),
+
+  seedPresetExercises: seedPresetExercises(ports),
 
   createAbsence: createAbsence(ports),
   deleteAbsence: deleteAbsence(ports),
