@@ -24,6 +24,8 @@ import { WipeSlider } from './WipeSlider'
  */
 
 export interface SettingsScreenProps {
+  /** Меняется, когда экран теряет фокус: подтверждение удаления снимается. */
+  readonly resetSignal?: number
   /** Вызывается после записи настроек: корень приложения обновляет провайдеры. */
   readonly onSettingsChange?: (settings: Settings) => void
   /** Выбор файла живёт в infra, поэтому импорт запускается снаружи. */
@@ -53,6 +55,7 @@ const themeKey: Record<ThemeMode, TranslationKey> = {
 }
 
 export function SettingsScreen({
+  resetSignal,
   onSettingsChange,
   onImportRequested,
   onBackupsRequested,
@@ -65,6 +68,7 @@ export function SettingsScreen({
   const { t } = useT()
 
   const [exported, setExported] = useState(false)
+  const [ownReset, setOwnReset] = useState(0)
 
   const today = useMemo(
     () => toLocalDate(services.ports.clock.now(), services.ports.timeZone),
@@ -102,7 +106,10 @@ export function SettingsScreen({
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.sections}>
+      <ScrollView
+        contentContainerStyle={styles.sections}
+        onTouchStart={() => setOwnReset((value) => value + 1)}
+      >
         <Section title={t('settings.data')}>
           <Row
             testID="settings-export"
@@ -194,8 +201,13 @@ export function SettingsScreen({
             title={t('settings.wipe')}
             subtitle={t('settings.wipeHint')}
           />
-          <View style={styles.sliderWrap}>
-            <WipeSlider onConfirmed={onWipeConfirmed} />
+          <View
+            style={styles.sliderWrap}
+            // своё же касание не должно сбрасывать ползунок, поэтому событие
+            // не поднимается до обработчика на списке
+            onTouchStart={(event) => event.stopPropagation()}
+          >
+            <WipeSlider onConfirmed={onWipeConfirmed} resetSignal={(resetSignal ?? 0) + ownReset} />
           </View>
         </Section>
 

@@ -1,5 +1,7 @@
 import { Screen } from "../../src/ui/components/Screen";
 import { useQueryClient } from "@tanstack/react-query";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 import type { ImportMode } from "../../src/domain/transfer/types";
@@ -9,6 +11,10 @@ import { SettingsScreen } from "../../src/ui/screens/settings/SettingsScreen";
 
 export default function SettingsTab() {
   const queryClient = useQueryClient();
+  const [blurCount, setBlurCount] = useState(0);
+
+  // уход с экрана снимает готовность удаления: возвращаться к взведённой кнопке нельзя
+  useFocusEffect(useCallback(() => () => setBlurCount((value) => value + 1), []));
   const services = useServices();
   const { t } = useT();
 
@@ -31,7 +37,8 @@ export default function SettingsTab() {
         // единицы веса и первый день недели участвуют в расчётах на всех экранах,
         // а кэш живёт вечно (staleTime: Infinity) — после правки настроек сбрасываем весь кэш,
         // иначе открытая тренировка останется в старых единицах
-        onSettingsChange={() => queryClient.invalidateQueries()}
+        resetSignal={blurCount}
+      onSettingsChange={() => queryClient.invalidateQueries()}
         onImportRequested={() =>
           // режим импорта выбирается до диалога выбора файла (FR-7.2)
           Alert.alert(t("settings.import"), t("settings.importHint"), [

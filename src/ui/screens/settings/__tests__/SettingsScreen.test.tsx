@@ -250,3 +250,51 @@ describe('SettingsScreen — экспорт в файл (FR-7.1)', () => {
     expect(Object.keys(ports.state.files.exports)[0]).toMatch(/training-diary-\d{4}-\d{2}-\d{2}\.json$/)
   })
 })
+
+describe('экран настроек — снятие готовности удаления', () => {
+  /** Доводит ползунок до конца доступным действием: жест в jest не разыграть. */
+  const armSlider = () => {
+    fireEvent(screen.getByTestId('settings-wipe-slider'), 'accessibilityAction', {
+      nativeEvent: { actionName: 'increment' },
+    })
+  }
+
+  it('уход с экрана возвращает ползунок в исходное состояние', async () => {
+    const { services } = createTestServices()
+    const { rerender } = renderWithProviders(<SettingsScreen resetSignal={0} />, { services })
+    await screen.findByTestId('settings-wipe-slider')
+
+    armSlider()
+    expect(screen.getByTestId('settings-wipe-confirm')).toBeTruthy()
+
+    // маршрут увеличивает счётчик, когда экран теряет фокус
+    rerender(<SettingsScreen resetSignal={1} />)
+
+    expect(screen.queryByTestId('settings-wipe-confirm')).toBeNull()
+    expect(screen.getByTestId('settings-wipe-slider')).toBeTruthy()
+  })
+
+  it('нажатие в другом месте экрана тоже снимает готовность', async () => {
+    const { services } = createTestServices()
+    renderWithProviders(<SettingsScreen />, { services })
+    await screen.findByTestId('settings-wipe-slider')
+
+    armSlider()
+    expect(screen.getByTestId('settings-wipe-confirm')).toBeTruthy()
+
+    fireEvent(screen.getByTestId('settings-export'), 'touchStart', { stopPropagation: () => {} })
+
+    expect(screen.queryByTestId('settings-wipe-confirm')).toBeNull()
+  })
+
+  it('касание самого ползунка готовность не снимает', async () => {
+    const { services } = createTestServices()
+    renderWithProviders(<SettingsScreen />, { services })
+    await screen.findByTestId('settings-wipe-slider')
+
+    armSlider()
+    fireEvent(screen.getByTestId('settings-wipe-confirm'), 'touchStart', { stopPropagation: () => {} })
+
+    expect(screen.getByTestId('settings-wipe-confirm')).toBeTruthy()
+  })
+})

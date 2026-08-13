@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { PanResponder, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { AccessibilityActionEvent, LayoutChangeEvent } from 'react-native'
 import { Icon } from '../../components/Icon'
@@ -21,16 +21,27 @@ const KNOB_SIZE = 44
 const TRACK_PADDING = 4
 
 export interface WipeSliderProps {
+  /**
+   * Смена значения возвращает ползунок в исходное состояние. Родитель меняет его,
+   * когда экран теряет фокус или пользователь нажал мимо: подтверждение удаления
+   * не должно ждать в готовности неизвестно сколько.
+   */
+  readonly resetSignal?: number
   readonly onConfirmed?: () => void
 }
 
-export function WipeSlider({ onConfirmed }: WipeSliderProps) {
+export function WipeSlider({ onConfirmed, resetSignal = 0 }: WipeSliderProps) {
   const { colors } = useTheme()
   const { t } = useT()
 
   const [trackWidth, setTrackWidth] = useState(0)
   const [progress, setProgress] = useState(0)
   const [confirmed, setConfirmed] = useState(false)
+
+  useEffect(() => {
+    setConfirmed(false)
+    setProgress(0)
+  }, [resetSignal])
 
   /** Ход ручки: дорожка без самой ручки и полей по краям. */
   const travel = Math.max(0, trackWidth - KNOB_SIZE - TRACK_PADDING * 2)
