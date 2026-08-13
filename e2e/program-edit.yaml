@@ -3,6 +3,9 @@ name: Правка программы не трогает проведённую
 ---
 - runFlow: fixtures/seed-workout.yaml
 
+# Карточка проведённой тренировки именуется датой, поэтому она считается заранее
+- evalScript: ${output.today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+
 # Открываем программу из библиотеки
 - tapOn:
     id: 'tab-library'
@@ -22,23 +25,65 @@ name: Правка программы не трогает проведённую
     id: 'program-color-prog-blue'
     selected: true
 
-# Убираем второе упражнение из состава
+# Порядок меняется стрелками, а не перетаскиванием: у первой строки недоступна
+# «вверх», у последней — «вниз»
 - assertVisible:
-    id: 'program-item-1'
+    id: 'program-item-up-0'
+    enabled: false
+- assertVisible:
+    id: 'program-item-down-1'
+    enabled: false
+
+# Опускаем «Жим лёжа» на вторую позицию: первой становится «Разводка гантелей».
+# Её и убираем — заодно видно, что строки действительно поменялись местами.
 - tapOn:
-    id: 'program-item-remove-1'
+    id: 'program-item-down-0'
+- tapOn:
+    id: 'program-item-remove-0'
 - assertVisible: 'Жим лёжа'
 - assertNotVisible: 'Разводка гантелей'
 
-# Дублируем: копия открывается сразу и повторяет уже изменённый состав
+# Дублирование больше не создаёт копию сразу: открывается экран создания
+# с подставленными именем и составом (FR-3.6)
 - tapOn:
     id: 'program-duplicate'
-- assertVisible: 'Грудь \+ трицепс \(копия\)'
+- assertVisible:
+    id: 'new-program-screen'
+- assertVisible:
+    id: 'name-input'
+    text: 'Грудь \+ трицепс \(копия\)'
 - assertVisible: 'Жим лёжа'
 - assertNotVisible: 'Разводка гантелей'
 
-# В библиотеке теперь две программы: оригинал никуда не делся
-# (копия открылась через replace, поэтому «назад» ведёт сразу в библиотеку)
+# Уходим с формы, не нажав «Создать»: копии в библиотеке не появилось.
+# «Назад» с формы возвращает на экран программы, оттуда — в библиотеку.
+- tapOn:
+    id: 'header-back'
+- assertVisible:
+    id: 'program-screen'
+- tapOn:
+    id: 'header-back'
+- assertVisible:
+    id: 'library-screen'
+- assertNotVisible:
+    id: 'program-row-Грудь \+ трицепс \(копия\)'
+
+# Дублируем до конца: копия появляется только по кнопке «Создать»
+# и сразу открывается своим экраном
+- tapOn:
+    id: 'program-row-Грудь \+ трицепс'
+- tapOn:
+    id: 'program-duplicate'
+- tapOn:
+    id: 'create-button'
+- assertVisible:
+    id: 'program-screen'
+- assertVisible: 'Грудь \+ трицепс \(копия\)'
+
+# В библиотеке теперь две программы: оригинал никуда не делся.
+# Копия открылась через replace поверх экрана оригинала, поэтому «назад» дважды.
+- tapOn:
+    id: 'header-back'
 - tapOn:
     id: 'header-back'
 - assertVisible:
@@ -50,7 +95,7 @@ name: Правка программы не трогает проведённую
 - tapOn:
     id: 'tab-workouts'
 - tapOn:
-    id: 'workout-card-today'
+    id: 'workout-card-${output.today}'
 - assertVisible: 'Жим лёжа'
 - assertVisible: 'Разводка гантелей'
 - assertVisible: '80 × 8'

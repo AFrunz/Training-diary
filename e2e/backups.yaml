@@ -1,0 +1,81 @@
+appId: com.trainingdiary.app
+name: Автобэкапы — ручная копия и восстановление после очистки (FR-7.3)
+---
+- runFlow: fixtures/seed-workout.yaml
+
+# Карточка проведённой тренировки именуется датой, поэтому она считается заранее
+- evalScript: ${output.today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+
+# Список копий живёт за строкой настроек и лежит поверх таббара
+- tapOn:
+    id: 'tab-settings'
+- tapOn:
+    id: 'settings-backups'
+- assertVisible:
+    id: 'backups-screen'
+
+# Снимаем копию руками: свежие идут сверху, поэтому наша — нулевая строка.
+# Пустого состояния здесь уже не будет: копия снимается и при запуске
+# приложения, то есть до того, как заведена тренировка.
+- tapOn:
+    id: 'backups-create'
+- assertVisible:
+    id: 'backups-row-0'
+- assertVisible:
+    id: 'backups-restore-0'
+- assertNotVisible:
+    id: 'backups-empty'
+
+# Стираем всё: строка в «Опасной зоне» ничего не запускает — решает ползунок.
+# Свайп начинается от ручки: Maestro ведёт палец от элемента до 90 % ширины
+# экрана, и от середины дорожки хода не хватит.
+- tapOn:
+    id: 'header-back'
+- assertVisible:
+    id: 'settings-screen'
+- scrollUntilVisible:
+    element:
+      id: 'settings-wipe-slider'
+- swipe:
+    from:
+      id: 'settings-wipe-knob'
+    direction: RIGHT
+- assertVisible:
+    id: 'settings-wipe-confirm'
+- tapOn:
+    id: 'settings-wipe-confirm'
+- tapOn:
+    id: 'tab-workouts'
+- assertVisible:
+    id: 'workouts-empty'
+- assertNotVisible: 'Грудь \+ трицепс'
+
+# Восстанавливаем из свежей копии. Первое нажатие только вооружает кнопку:
+# подпись строки меняется на просьбу подтвердить, данные ещё на месте.
+# Настройки остались прокрученными к опасной зоне, поэтому сначала вверх.
+- tapOn:
+    id: 'tab-settings'
+- scrollUntilVisible:
+    element:
+      id: 'settings-backups'
+    direction: UP
+- tapOn:
+    id: 'settings-backups'
+- tapOn:
+    id: 'backups-restore-0'
+- assertVisible:
+    id: 'backups-row-0-subtitle'
+    text: 'нажмите ещё раз, чтобы подтвердить'
+- tapOn:
+    id: 'backups-restore-0'
+
+# Тренировка вернулась целиком, вместе с подходами
+- tapOn:
+    id: 'header-back'
+- tapOn:
+    id: 'tab-workouts'
+- assertVisible: 'Грудь \+ трицепс'
+- tapOn:
+    id: 'workout-card-${output.today}'
+- assertVisible: 'Жим лёжа'
+- assertVisible: '80 × 8'

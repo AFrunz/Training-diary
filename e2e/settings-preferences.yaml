@@ -3,6 +3,9 @@ name: Единицы веса и тема в настройках (FR-7.4, FR-7.
 ---
 - runFlow: fixtures/seed-workout.yaml
 
+# Карточка проведённой тренировки именуется датой, поэтому она считается заранее
+- evalScript: ${output.today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10)}
+
 - tapOn:
     id: 'tab-settings'
 - assertVisible: 'Настройки'
@@ -15,11 +18,14 @@ name: Единицы веса и тема в настройках (FR-7.4, FR-7.
 - tapOn:
     id: 'tab-workouts'
 - tapOn:
-    id: 'workout-card-today'
+    id: 'workout-card-${output.today}'
 - assertVisible: '176 × 8'
 - assertNotVisible: '80 × 8'
 
-# Возврат к килограммам: значение то же, что вводили, — история не переписана (FR-7.5)
+# Возврат к килограммам: значение то же, что вводили, — история не переписана (FR-7.5).
+# Экран тренировки лежит поверх таббара, поэтому в разделы — через «назад».
+- tapOn:
+    id: 'header-back'
 - tapOn:
     id: 'tab-settings'
 - tapOn:
@@ -27,9 +33,11 @@ name: Единицы веса и тема в настройках (FR-7.4, FR-7.
 - tapOn:
     id: 'tab-workouts'
 - tapOn:
-    id: 'workout-card-today'
+    id: 'workout-card-${output.today}'
 - assertVisible: '80 × 8'
 - assertNotVisible: '176 × 8'
+- tapOn:
+    id: 'header-back'
 
 # Тема переключается по кругу: системная → светлая → тёмная → системная
 - tapOn:
@@ -57,11 +65,20 @@ name: Единицы веса и тема в настройках (FR-7.4, FR-7.
 - assertVisible: 'Данные'
 - assertVisible:
     id: 'settings-export'
+- assertVisible:
+    id: 'settings-backups'
 - assertVisible: 'Предпочтения'
 - assertVisible:
     id: 'settings-units'
+
+# Опасная зона: строка только объясняет, удаление прячется за ползунком,
+# а кнопка подтверждения появляется лишь после того, как его протянут
 - scrollUntilVisible:
     element:
       text: 'Опасная зона'
 - assertVisible:
     id: 'settings-wipe'
+- assertVisible:
+    id: 'settings-wipe-slider'
+- assertNotVisible:
+    id: 'settings-wipe-confirm'
