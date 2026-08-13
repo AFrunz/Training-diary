@@ -145,7 +145,7 @@ export function WorkoutsScreen({ onCreateWorkout, onOpenWorkout }: WorkoutsScree
           onPress={onCreateWorkout}
           style={[styles.addButton, { backgroundColor: colors.accent }]}
         >
-          <Icon name="plus" size={20} color={colors.onAccent} />
+          <Icon name="plus" size={24} color={colors.onAccent} />
         </Pressable>
       </View>
 
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
   },
   title: { fontSize: 26, fontWeight: '700', fontFamily: uiFont('700') },
-  addButton: { width: 36, height: 36, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
+  addButton: { width: 44, height: 44, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
 
   filters: { paddingBottom: 14 },
   filtersRow: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 20 },

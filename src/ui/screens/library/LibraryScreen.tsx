@@ -118,7 +118,7 @@ export function LibraryScreen({
           onPress={isExercises ? onCreateExercise : onCreateProgram}
           style={[styles.addButton, { backgroundColor: colors.accent }]}
         >
-          <Icon name="plus" size={20} color={colors.onAccent} />
+          <Icon name="plus" size={24} color={colors.onAccent} />
         </Pressable>
       </View>
 
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: { fontSize: 26, fontFamily: uiFont('700'), fontWeight: '700' },
-  addButton: { width: 36, height: 36, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
+  addButton: { width: 44, height: 44, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
 
   segmentWrap: { paddingHorizontal: 20, paddingBottom: 10 },
   segmented: { flexDirection: 'row', gap: 2, padding: 3, borderRadius: radii.sm },

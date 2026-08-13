@@ -1,5 +1,6 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 import type { RenderOptions } from '@testing-library/react-native'
 import type { ReactElement, ReactNode } from 'react'
 import { createServices } from '../../app/container'
@@ -27,8 +28,14 @@ export interface ProviderOptions {
  * устройстве, поэтому `staleTime: Infinity`. Совпадение с боевыми настройками
  * важно — иначе тесты не увидят забытую инвалидацию запроса.
  */
-const createTestQueryClient = () =>
-  new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } })
+const createTestQueryClient = () => {
+  const client: QueryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    // как в приложении: любая запись сбрасывает кэш целиком
+    mutationCache: new MutationCache({ onSuccess: () => client.invalidateQueries() }),
+  })
+  return client
+}
 
 export const withProviders = (
   children: ReactNode,
@@ -39,7 +46,8 @@ export const withProviders = (
     services = createServices(createFakePorts()),
   }: ProviderOptions = {},
 ) => (
-  <QueryClientProvider client={createTestQueryClient()}>
+  <SafeAreaProvider initialMetrics={{ frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 44, bottom: 34, left: 0, right: 0 } }}>
+    <QueryClientProvider client={createTestQueryClient()}>
     <ServicesProvider services={services}>
       <ThemeProvider mode={theme}>
         <I18nProvider mode={language} systemLanguage={systemLanguage}>
@@ -47,7 +55,8 @@ export const withProviders = (
         </I18nProvider>
       </ThemeProvider>
     </ServicesProvider>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </SafeAreaProvider>
 )
 
 export const renderWithProviders = (

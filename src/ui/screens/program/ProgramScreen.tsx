@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { Fragment } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { ProgramWithItems } from '../../../app/ports'
@@ -7,6 +8,7 @@ import type { Id } from '../../../domain/model/types'
 import { localDate } from '../../../domain/model/types'
 import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
+import { ExercisePickerSheet } from '../library/ExercisePickerSheet'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -66,7 +68,13 @@ export function ProgramScreen({
     },
   })
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey })
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  /**
+   * Сбрасывается весь кэш, а не только этот экран: программа видна ещё и в
+   * библиотеке, в фильтрах списка тренировок и в выборе программы.
+   */
+  const invalidate = () => queryClient.invalidateQueries()
 
   const setColor = useMutation({
     mutationFn: async (color: string) => {
@@ -89,7 +97,15 @@ export function ProgramScreen({
 
   const duplicate = useMutation({
     mutationFn: () => services.duplicateProgram(programId),
-    onSuccess: (copyId) => onDuplicated?.(copyId),
+    onSuccess: async (copyId) => {
+      await invalidate()
+      onDuplicated?.(copyId)
+    },
+  })
+
+  const setItems = useMutation({
+    mutationFn: (exerciseIds: readonly Id[]) => services.setProgramItems({ programId, exerciseIds }),
+    onSuccess: invalidate,
   })
 
   const archive = useMutation({
@@ -210,7 +226,7 @@ export function ProgramScreen({
         <Pressable
           testID="program-add-exercise"
           accessibilityRole="button"
-          onPress={onAddExercise}
+          onPress={() => (onAddExercise ? onAddExercise() : setPickerOpen(true))}
           style={[styles.addButton, { backgroundColor: colors.accentSoft }]}
         >
           <Icon name="plus" size={16} color={colors.accent} />
@@ -241,6 +257,16 @@ export function ProgramScreen({
           </Pressable>
         </View>
       </ScrollView>
+
+      <ExercisePickerSheet
+        visible={pickerOpen}
+        selectedIds={items.map((item) => item.exerciseId)}
+        onDone={(exerciseIds) => {
+          setPickerOpen(false)
+          setItems.mutate(exerciseIds)
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
     </View>
   )
 }

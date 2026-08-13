@@ -8,7 +8,11 @@ import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
 } from "@expo-google-fonts/space-grotesk";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  MutationCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -28,7 +32,7 @@ import { palette } from "../src/ui/theme/tokens";
  * Единственное место, где сходятся infra и ui (ARCHITECTURE.md §1).
  */
 
-const queryClient = new QueryClient({
+const queryClient: QueryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // данные лежат на устройстве: перезапрашивать их по таймеру незачем
@@ -36,6 +40,12 @@ const queryClient = new QueryClient({
       retry: false,
     },
   },
+  /**
+   * Любая запись сбрасывает весь кэш. Данных мало, они локальные, а одна и та же
+   * сущность видна сразу на нескольких экранах: точечная инвалидация уже трижды
+   * приводила к тому, что созданное не появлялось в списке.
+   */
+  mutationCache: new MutationCache({ onSuccess: () => queryClient.invalidateQueries() }),
 });
 
 const Splash = () => (

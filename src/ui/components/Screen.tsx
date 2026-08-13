@@ -3,6 +3,9 @@ import { StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '../theme/ThemeProvider'
 
+/** Воздух поверх выреза: вплотную к шторке шапка выглядит зажатой. */
+const TOP_GAP = 12
+
 export interface ScreenProps {
   readonly children: ReactNode
   /**
@@ -28,7 +31,7 @@ export function Screen({ children, withBottomInset = true, testID }: ScreenProps
         styles.root,
         {
           backgroundColor: colors.bg,
-          paddingTop: insets.top,
+          paddingTop: insets.top + TOP_GAP,
           paddingBottom: withBottomInset ? insets.bottom : 0,
           paddingLeft: insets.left,
           paddingRight: insets.right,

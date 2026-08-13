@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { Id } from '../../../domain/model/types'
 import { Icon } from '../../components/Icon'
@@ -35,6 +36,7 @@ export function ExercisePickerSheet({
   onClose,
   onCreateExercise,
 }: ExercisePickerSheetProps) {
+  const insets = useSafeAreaInsets()
   const { colors } = useTheme()
   const { t, locale } = useT()
   const unit = useWeightUnit()
@@ -73,7 +75,12 @@ export function ExercisePickerSheet({
         style={[styles.scrim, { backgroundColor: colors.textPrimary }]}
       />
 
-      <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
+      <View
+        style={[
+          styles.sheet,
+          { backgroundColor: colors.surface, paddingBottom: 20 + insets.bottom },
+        ]}
+      >
         <View style={styles.handleRow}>
           <View style={[styles.handle, { backgroundColor: colors.border }]} />
         </View>
@@ -183,7 +190,6 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingTop: 12,
     paddingHorizontal: 20,
-    paddingBottom: 20,
   },
   handleRow: { alignItems: 'center' },
   handle: { width: 40, height: 4, borderRadius: radii.pill },

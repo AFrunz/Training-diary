@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ColorValue } from "react-native";
 import { Icon } from "../../src/ui/components/Icon";
 import type { IconName } from "../../src/ui/components/Icon";
@@ -8,6 +9,7 @@ import { uiFont } from "../../src/ui/theme/tokens";
 
 /** Таббар из макета: пять разделов, активный красится акцентом. */
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useT();
 

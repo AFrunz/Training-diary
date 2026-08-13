@@ -102,17 +102,12 @@ describe('AddSetSheet', () => {
     expect(screen.getByTestId('set-reps-input').props.value).toBe('7')
   })
 
-  it('быстрый чип прибавляет вес', async () => {
+  it('быстрых чипов нет: их работу делают кнопки «−» и «+»', async () => {
     const fixture = await seed()
-    await seedPreviousWorkout(fixture)
     renderSheet(fixture)
-
-    await waitFor(() => {
-      expect(screen.getByTestId('set-weight-input').props.value).toBe('80')
-    })
-
-    fireEvent.press(screen.getByTestId('set-quick-5'))
-    expect(screen.getByTestId('set-weight-input').props.value).toBe('85')
+    expect(screen.queryByTestId('set-quick-5')).toBeNull()
+    expect(screen.queryByTestId('set-quick-2.5')).toBeNull()
+    expect(screen.getByTestId('set-weight-plus')).toBeTruthy()
   })
 
   it('записывает подход через сценарий и закрывает шит', async () => {

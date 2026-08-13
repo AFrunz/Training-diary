@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { Id, WeightUnit } from '../../../domain/model/types'
@@ -51,6 +52,7 @@ export function AddSetSheet({
 }: AddSetSheetProps) {
   const services = useServices()
   const queryClient = useQueryClient()
+  const insets = useSafeAreaInsets()
   const { colors } = useTheme()
   const { t } = useT()
 
@@ -136,20 +138,6 @@ export function AddSetSheet({
     </Pressable>
   )
 
-  const quickChip = (delta: number) => {
-    const label = `${delta > 0 ? '+' : '−'}${Math.abs(delta)}`
-    return (
-      <Pressable
-        key={label}
-        testID={`set-quick-${delta}`}
-        accessibilityRole="button"
-        onPress={() => bumpWeight(delta)}
-        style={[styles.quickChip, { backgroundColor: colors.surface2 }]}
-      >
-        <Text style={[styles.quickChipLabel, { color: colors.textSecondary }]}>{label}</Text>
-      </Pressable>
-    )
-  }
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose} testID="add-set-sheet">
@@ -162,7 +150,13 @@ export function AddSetSheet({
           style={[StyleSheet.absoluteFill, styles.scrim, { backgroundColor: palette.dark.bg }]}
         />
 
-        <View style={[styles.sheet, { backgroundColor: colors.surface }]}>
+        <View
+          style={[
+            styles.sheet,
+            // жестовая полоса устройства: без этого кнопка уезжает под системное меню
+            { backgroundColor: colors.surface, paddingBottom: 20 + insets.bottom },
+          ]}
+        >
           <View style={styles.grabberWrap}>
             <View style={[styles.grabber, { backgroundColor: colors.border }]} />
           </View>
@@ -210,7 +204,6 @@ export function AddSetSheet({
             </View>
           </View>
 
-          <View style={styles.quickChips}>{[step, step * 2, -step].map(quickChip)}</View>
 
           {hint ? (
             <Text testID="set-hint" style={[styles.hint, { color: colors.textMuted }]}>
@@ -246,7 +239,6 @@ const styles = StyleSheet.create({
     gap: 22,
     paddingTop: 12,
     paddingHorizontal: 20,
-    paddingBottom: 34,
   },
   grabberWrap: { alignItems: 'center' },
   grabber: { width: 40, height: 4, borderRadius: radii.pill },
@@ -260,9 +252,6 @@ const styles = StyleSheet.create({
   round: { width: 38, height: 38, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
   // вес и повторы — числа: Space Grotesk и в поле ввода, и в быстрых чипах
   value: { fontFamily: numFont('700'), flex: 1, fontSize: 26, fontWeight: '700', textAlign: 'center', padding: 0 },
-  quickChips: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  quickChip: { borderRadius: radii.sm, paddingVertical: 6, paddingHorizontal: 10 },
-  quickChipLabel: { fontFamily: numFont('600'), fontSize: 12, fontWeight: '600' },
   hint: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
   submit: { borderRadius: radii.md, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
   submitLabel: { fontFamily: uiFont('700'), fontSize: 15, fontWeight: '700' },

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { WorkoutDateTaken } from '../../../domain/errors'
@@ -33,18 +33,17 @@ export function NewWorkoutScreen({ date, onBack, onCreated, onOpenExisting }: Ne
     queryFn: () => services.ports.programs.list(),
   })
 
-  const create = async (programId: Id) => {
-    try {
-      const workoutId = await services.createWorkout({ date, programId })
-      onCreated?.(workoutId)
-    } catch (error) {
+  const create = useMutation({
+    mutationFn: (programId: Id) => services.createWorkout({ date, programId }),
+    onSuccess: (workoutId) => onCreated?.(workoutId),
+    onError: (error) => {
       if (error instanceof WorkoutDateTaken) {
         setTaken(error.existingId)
         return
       }
       throw error
-    }
-  }
+    },
+  })
 
   return (
     <View testID="new-workout-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
@@ -64,7 +63,7 @@ export function NewWorkoutScreen({ date, onBack, onCreated, onOpenExisting }: Ne
           <Pressable
             key={program.id}
             testID={`program-option-${program.name}`}
-            onPress={() => create(program.id)}
+            onPress={() => create.mutate(program.id)}
             style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
           >
             <View
