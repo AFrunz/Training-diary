@@ -16,13 +16,24 @@ export interface NewProgramScreenProps {
   readonly onBack?: () => void
   readonly onCreated?: (id: Id) => void
   readonly onCreateExercise?: () => void
+  /**
+   * Дублирование программы (FR-3.6): экран открывается с подставленным именем и
+   * составом оригинала. Копия появляется только по кнопке «Создать», поэтому
+   * пользователь успевает поправить и название, и состав.
+   */
+  readonly sourceProgramId?: Id
 }
 
 /**
  * Экран «11 · Новая программа» (FR-3.1.1): пустое название, предложенный цвет,
  * пустой состав. Кнопка «Создать» неактивна, пока название пустое.
  */
-export function NewProgramScreen({ onBack, onCreated, onCreateExercise }: NewProgramScreenProps) {
+export function NewProgramScreen({
+  onBack,
+  onCreated,
+  onCreateExercise,
+  sourceProgramId,
+}: NewProgramScreenProps) {
   const { colors } = useTheme()
   const { t } = useT()
   const services = useServices()
@@ -33,15 +44,33 @@ export function NewProgramScreen({ onBack, onCreated, onCreateExercise }: NewPro
   const [exerciseIds, setExerciseIds] = useState<readonly Id[]>([])
   const [pickerOpen, setPickerOpen] = useState(false)
   const [saving, setSaving] = useState(false)
+  /** Подстановка из оригинала одноразовая: дальше поля принадлежат пользователю. */
+  const [prefilled, setPrefilled] = useState(false)
 
   const suggested = useQuery({
     queryKey: ['library', 'suggested-color'],
     queryFn: () => services.suggestProgramColor(),
   })
 
+  // отдельный ключ от экрана программы: там лежит другое представление тех же данных
+  const source = useQuery({
+    queryKey: ['library', 'program-source', sourceProgramId ?? null],
+    queryFn: () =>
+      sourceProgramId === undefined ? null : services.ports.programs.byIdWithItems(sourceProgramId),
+    enabled: sourceProgramId !== undefined,
+  })
+
   useEffect(() => {
     if (color === null && suggested.data) setColor(suggested.data)
   }, [color, suggested.data])
+
+  useEffect(() => {
+    const loaded = source.data
+    if (prefilled || !loaded) return
+    setName(`${loaded.program.name} (${t('program.copySuffix')})`)
+    setExerciseIds(loaded.items.map((item) => item.exerciseId))
+    setPrefilled(true)
+  }, [prefilled, source.data, t])
 
   const exercises = useExerciseSummaries()
   const chosen = exerciseIds

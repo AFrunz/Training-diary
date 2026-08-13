@@ -91,21 +91,97 @@ describe('ProgramScreen', () => {
     ])
   })
 
-  it('дублирование создаёт вторую программу с пометкой «копия»', async () => {
+  it('дублирование не создаёт программу сразу, а зовёт навигацию на экран создания', async () => {
     const fixture = await seed()
-    renderScreen(fixture)
+    const onDuplicate = jest.fn()
+
+    renderWithProviders(<ProgramScreen programId={fixture.programId} onDuplicate={onDuplicate} />, {
+      services: fixture.services,
+    })
 
     fireEvent.press(await screen.findByTestId('program-duplicate'))
 
-    await waitFor(async () => {
-      const programs = await fixture.ports.programs.list()
-      expect(programs).toHaveLength(2)
-      expect(programs[1]?.name).toBe('Грудь + трицепс (копия)')
+    await waitFor(() => expect(onDuplicate).toHaveBeenCalledTimes(1))
+    expect(await fixture.ports.programs.list()).toHaveLength(1)
+  })
+
+  describe('порядок упражнений', () => {
+    it('стрелка вниз у первого упражнения меняет порядок в портах', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      fireEvent.press(await screen.findByTestId('program-item-down-0'))
+
+      await waitFor(async () => {
+        const program = await fixture.ports.programs.byIdWithItems(fixture.programId)
+        expect(program?.items.map((item) => item.exerciseId)).toEqual([
+          fixture.fly,
+          fixture.bench,
+          fixture.dips,
+        ])
+      })
     })
 
-    const copy = (await fixture.ports.programs.list())[1]!
-    const items = await fixture.ports.programs.byIdWithItems(copy.id)
-    expect(items?.items.map((item) => item.exerciseId)).toEqual([fixture.bench, fixture.fly, fixture.dips])
+    it('после перестановки список перерисован в новом порядке', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      fireEvent.press(await screen.findByTestId('program-item-down-0'))
+
+      await waitFor(() =>
+        expect(screen.getByTestId('program-item-0')).toHaveTextContent(/Разводка гантелей/),
+      )
+      expect(screen.getByTestId('program-item-1')).toHaveTextContent(/Жим лёжа/)
+      expect(screen.getByTestId('program-item-2')).toHaveTextContent(/Отжимания на брусьях/)
+    })
+
+    it('стрелка вверх ведёт упражнение к началу списка', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      fireEvent.press(await screen.findByTestId('program-item-up-2'))
+
+      await waitFor(async () => {
+        const program = await fixture.ports.programs.byIdWithItems(fixture.programId)
+        expect(program?.items.map((item) => item.exerciseId)).toEqual([
+          fixture.bench,
+          fixture.dips,
+          fixture.fly,
+        ])
+      })
+    })
+
+    it('у первого упражнения стрелка вверх недоступна, у последнего — вниз', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      expect((await screen.findByTestId('program-item-up-0')).props.accessibilityState).toMatchObject({
+        disabled: true,
+      })
+      expect(screen.getByTestId('program-item-down-0').props.accessibilityState).toMatchObject({
+        disabled: false,
+      })
+      expect(screen.getByTestId('program-item-down-2').props.accessibilityState).toMatchObject({
+        disabled: true,
+      })
+      expect(screen.getByTestId('program-item-up-2').props.accessibilityState).toMatchObject({
+        disabled: false,
+      })
+    })
+
+    it('нажатие на недоступную стрелку ничего не меняет', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      fireEvent.press(await screen.findByTestId('program-item-up-0'))
+
+      const program = await fixture.ports.programs.byIdWithItems(fixture.programId)
+      expect(program?.items.map((item) => item.exerciseId)).toEqual([
+        fixture.bench,
+        fixture.fly,
+        fixture.dips,
+      ])
+    })
   })
 
   it('архивация убирает программу из списка действующих', async () => {

@@ -32,9 +32,9 @@ describe('Icon', () => {
     expect(screen.getByTestId('glyph')).toHaveStyle({ width: 22, height: 22 })
   })
 
-  it('инвентарь совпадает с макетом: 28 иконок интерфейса', () => {
+  it('инвентарь: 28 иконок макета плюс стрелка вверх для смены порядка', () => {
     // три иконки статус-бара в приложение не идут, они только для макетов
-    expect(ICON_NAMES).toHaveLength(28)
+    expect(ICON_NAMES).toHaveLength(29)
   })
 
   it('каждая иконка из инвентаря рисуется', () => {

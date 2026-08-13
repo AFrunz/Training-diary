@@ -12,6 +12,7 @@ import type { TranslationKey } from '../../i18n/dictionaries'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
 import { radii, uiFont } from '../../theme/tokens'
+import { WipeSlider } from './WipeSlider'
 
 /**
  * Экран «10 · Настройки» из макета: секции «Данные», «Предпочтения»
@@ -27,7 +28,9 @@ export interface SettingsScreenProps {
   readonly onSettingsChange?: (settings: Settings) => void
   /** Выбор файла живёт в infra, поэтому импорт запускается снаружи. */
   readonly onImportRequested?: () => void
-  /** Удаление всех данных: сценария в app пока нет. */
+  /** Переход к списку автобэкапов: навигация живёт в маршруте. */
+  readonly onBackupsRequested?: () => void
+  /** Удаление всех данных: вызывается только после протянутого ползунка. */
   readonly onWipeConfirmed?: () => void
   readonly version?: string
 }
@@ -52,6 +55,7 @@ const themeKey: Record<ThemeMode, TranslationKey> = {
 export function SettingsScreen({
   onSettingsChange,
   onImportRequested,
+  onBackupsRequested,
   onWipeConfirmed,
   version = '1.0',
 }: SettingsScreenProps) {
@@ -61,7 +65,6 @@ export function SettingsScreen({
   const { t } = useT()
 
   const [exported, setExported] = useState(false)
-  const [wipeArmed, setWipeArmed] = useState(false)
 
   const today = useMemo(
     () => toLocalDate(services.ports.clock.now(), services.ports.timeZone),
@@ -85,15 +88,6 @@ export function SettingsScreen({
     // exportToFile сохраняет файл и открывает системное «Поделиться» (FR-7.1)
     await services.exportToFile()
     setExported(true)
-  }
-
-  const wipe = () => {
-    if (!wipeArmed) {
-      setWipeArmed(true)
-      return
-    }
-    setWipeArmed(false)
-    onWipeConfirmed?.()
   }
 
   if (!settings) {
@@ -135,6 +129,7 @@ export function SettingsScreen({
             icon="history"
             title={t('settings.backups')}
             subtitle={t('settings.backupsHint')}
+            onPress={onBackupsRequested}
             right={<Chevron />}
           />
         </Section>
@@ -191,14 +186,17 @@ export function SettingsScreen({
         </Section>
 
         <Section title={t('settings.dangerZone')}>
+          {/* нажатием такое не запускается: строка только объясняет, а решает ползунок */}
           <Row
             testID="settings-wipe"
             icon="trash-2"
             danger
             title={t('settings.wipe')}
-            subtitle={wipeArmed ? t('settings.wipeConfirm') : t('settings.wipeHint')}
-            onPress={wipe}
+            subtitle={t('settings.wipeHint')}
           />
+          <View style={styles.sliderWrap}>
+            <WipeSlider onConfirmed={onWipeConfirmed} />
+          </View>
         </Section>
 
         <View style={styles.footer}>
@@ -370,6 +368,7 @@ const styles = StyleSheet.create({
   rowTitle: { fontSize: 15, fontWeight: '500', fontFamily: uiFont('500') },
   rowSubtitle: { fontSize: 11, fontFamily: uiFont() },
   divider: { height: 1 },
+  sliderWrap: { paddingHorizontal: 14, paddingBottom: 14 },
   value: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   valueText: { fontSize: 13, fontFamily: uiFont() },
 

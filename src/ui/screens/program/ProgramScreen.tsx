@@ -18,8 +18,12 @@ export interface ProgramScreenProps {
   readonly programId: Id
   readonly onBack?: () => void
   readonly onAddExercise?: () => void
-  /** Дублирование уводит на копию, архивация — назад к списку: маршруты знает навигация. */
-  readonly onDuplicated?: (programId: Id) => void
+  /**
+   * Дублирование уводит на экран создания с подставленным составом, архивация —
+   * назад к списку: маршруты знает навигация. Копия появляется только по кнопке
+   * «Создать», поэтому здесь никакой записи не происходит.
+   */
+  readonly onDuplicate?: () => void
   readonly onArchived?: () => void
 }
 
@@ -42,7 +46,7 @@ export function ProgramScreen({
   programId,
   onBack,
   onAddExercise,
-  onDuplicated,
+  onDuplicate,
   onArchived,
 }: ProgramScreenProps) {
   const services = useServices()
@@ -95,16 +99,27 @@ export function ProgramScreen({
     onSuccess: invalidate,
   })
 
-  const duplicate = useMutation({
-    mutationFn: () => services.duplicateProgram(programId),
-    onSuccess: async (copyId) => {
-      await invalidate()
-      onDuplicated?.(copyId)
-    },
-  })
-
   const setItems = useMutation({
     mutationFn: (exerciseIds: readonly Id[]) => services.setProgramItems({ programId, exerciseIds }),
+    onSuccess: invalidate,
+  })
+
+  /**
+   * Перестановка соседей: порядок массива и есть порядок в программе, поэтому
+   * достаточно обменять две позиции и сохранить состав целиком.
+   */
+  const moveItem = useMutation({
+    mutationFn: async ({ from, to }: { readonly from: number; readonly to: number }) => {
+      const exerciseIds = (data?.items ?? []).map((item) => item.exerciseId)
+      const moved = exerciseIds[from]
+      const target = exerciseIds[to]
+      if (moved === undefined || target === undefined) return
+
+      const next = [...exerciseIds]
+      next[from] = target
+      next[to] = moved
+      await services.setProgramItems({ programId, exerciseIds: next })
+    },
     onSuccess: invalidate,
   })
 
@@ -161,9 +176,6 @@ export function ProgramScreen({
             <Text style={[styles.blockLabel, { color: colors.textMuted }]}>
               {t('program.composition')}
             </Text>
-            <Text style={[styles.listHint, { color: colors.textMuted }]}>
-              {t('library.reorderHint')}
-            </Text>
           </View>
 
           <View
@@ -186,12 +198,45 @@ export function ProgramScreen({
                 {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
 
                 <View testID={`program-item-${index}`} style={styles.row}>
-                  <View
-                    testID={`program-item-handle-${index}`}
-                    accessibilityLabel={t('program.dragHandle')}
-                    style={styles.grip}
-                  >
-                    <Icon name="grip-vertical" size={18} color={colors.textMuted} />
+                  {/*
+                   * Осознанное отступление от макета: там ручка перетаскивания, но
+                   * жестовой библиотеки в проекте нет и ставить её ради одного
+                   * списка избыточно. Порядок меняется двумя стрелками — крайние
+                   * позиции получают недоступную кнопку вместо исчезающей, иначе
+                   * ряд бы прыгал по ширине.
+                   */}
+                  <View style={styles.reorder}>
+                    <Pressable
+                      testID={`program-item-up-${index}`}
+                accessibilityLabel={t('program.moveUp')}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: index === 0 }}
+                      disabled={index === 0}
+                      onPress={() => moveItem.mutate({ from: index, to: index - 1 })}
+                      style={styles.reorderButton}
+                    >
+                      <Icon
+                        name="chevron-up"
+                        size={15}
+                        color={index === 0 ? colors.border : colors.textMuted}
+                      />
+                    </Pressable>
+
+                    <Pressable
+                      testID={`program-item-down-${index}`}
+                accessibilityLabel={t('program.moveDown')}
+                      accessibilityRole="button"
+                      accessibilityState={{ disabled: index === items.length - 1 }}
+                      disabled={index === items.length - 1}
+                      onPress={() => moveItem.mutate({ from: index, to: index + 1 })}
+                      style={styles.reorderButton}
+                    >
+                      <Icon
+                        name="chevron-down"
+                        size={15}
+                        color={index === items.length - 1 ? colors.border : colors.textMuted}
+                      />
+                    </Pressable>
                   </View>
 
                   <View style={styles.rowTexts}>
@@ -237,7 +282,7 @@ export function ProgramScreen({
           <Pressable
             testID="program-duplicate"
             accessibilityRole="button"
-            onPress={() => duplicate.mutate()}
+            onPress={() => onDuplicate?.()}
             style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
           >
             <Icon name="copy" size={15} color={colors.textSecondary} />
@@ -291,13 +336,14 @@ const styles = StyleSheet.create({
   swatchDot: { width: 30, height: 30, borderRadius: radii.pill },
 
   listHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  listHint: { fontSize: 11, fontFamily: uiFont('400'), fontWeight: '400' },
 
   card: { borderRadius: radii.lg, borderWidth: 1, overflow: 'hidden' },
   divider: { height: 1 },
 
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13, paddingHorizontal: 14 },
-  grip: { width: 18, alignItems: 'center', justifyContent: 'center' },
+  reorder: { width: 22, alignItems: 'center', justifyContent: 'center' },
+  // компактно: две стрелки занимают ту же ширину, что раньше ручка перетаскивания
+  reorderButton: { width: 22, height: 20, alignItems: 'center', justifyContent: 'center' },
   rowTexts: { flex: 1, gap: 3 },
   rowName: { fontSize: 15, fontFamily: uiFont('500'), fontWeight: '500' },
   rowPlan: { fontSize: 11, fontFamily: uiFont('400'), fontWeight: '400' },

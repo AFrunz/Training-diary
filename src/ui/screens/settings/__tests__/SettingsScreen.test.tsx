@@ -158,21 +158,74 @@ describe('экран настроек', () => {
     expect(exportToFile).toHaveBeenCalled()
   })
 
-  it('удаление всех данных требует подтверждения', async () => {
+  it('строка «Автобэкапы» ведёт на список копий', async () => {
     const { services } = createTestServices()
+    const onBackupsRequested = jest.fn()
+
+    renderWithProviders(<SettingsScreen onBackupsRequested={onBackupsRequested} />, { services })
+
+    fireEvent.press(await screen.findByTestId('settings-backups'))
+
+    expect(onBackupsRequested).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * Опасная зона (FR-7.4): кнопку было слишком легко нажать, поэтому удаление
+ * спрятано за ползунком. Жест в jest не разыграть — его арифметика проверяется
+ * в `slider.test.ts`, а здесь важно, что до конца хода ничего не удаляется.
+ */
+describe('SettingsScreen — удаление всех данных', () => {
+  const slideToEnd = () =>
+    fireEvent(screen.getByTestId('settings-wipe-slider'), 'accessibilityAction', {
+      nativeEvent: { actionName: 'increment' },
+    })
+
+  it('без протягивания кнопка подтверждения не появляется', async () => {
+    const { services, ports } = createTestServices()
+    ports.state.exercises.push({
+      id: makeId('exercise-1'),
+      name: 'Жим лёжа',
+      createdAt: instant(0),
+      updatedAt: instant(0),
+    })
     const onWipeConfirmed = jest.fn()
 
     renderWithProviders(<SettingsScreen onWipeConfirmed={onWipeConfirmed} />, { services })
 
-    fireEvent.press(await screen.findByTestId('settings-wipe'))
+    expect(await screen.findByTestId('settings-wipe-slider')).toBeOnTheScreen()
+    expect(screen.queryByTestId('settings-wipe-confirm')).toBeNull()
 
+    // недотянутый ползунок возвращается назад и ничего не запускает
+    fireEvent(screen.getByTestId('settings-wipe-slider'), 'accessibilityAction', {
+      nativeEvent: { actionName: 'decrement' },
+    })
+
+    expect(screen.queryByTestId('settings-wipe-confirm')).toBeNull()
     expect(onWipeConfirmed).not.toHaveBeenCalled()
-    expect(screen.getByTestId('settings-wipe-subtitle')).toHaveTextContent(
-      'нажмите ещё раз, чтобы подтвердить',
-    )
+    expect(ports.state.exercises).toHaveLength(1)
+  })
 
-    fireEvent.press(screen.getByTestId('settings-wipe'))
+  it('протянутый ползунок открывает подтверждение, и по нему данные стираются', async () => {
+    const { services, ports } = createTestServices()
+    ports.state.exercises.push({
+      id: makeId('exercise-1'),
+      name: 'Жим лёжа',
+      createdAt: instant(0),
+      updatedAt: instant(0),
+    })
+    const onWipeConfirmed = jest.fn(() => services.wipeAllData())
+
+    renderWithProviders(<SettingsScreen onWipeConfirmed={onWipeConfirmed} />, { services })
+
+    await screen.findByTestId('settings-wipe-slider')
+    slideToEnd()
+
+    fireEvent.press(await screen.findByTestId('settings-wipe-confirm'))
+
     expect(onWipeConfirmed).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(ports.state.exercises).toHaveLength(0))
+    expect(screen.queryByTestId('settings-wipe-slider')).toBeNull()
   })
 })
 

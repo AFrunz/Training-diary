@@ -1,5 +1,6 @@
 import { Screen } from "../../src/ui/components/Screen";
 import { useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { Alert } from "react-native";
 import type { ImportMode } from "../../src/domain/transfer/types";
 import { useT } from "../../src/ui/i18n/I18nProvider";
@@ -45,6 +46,7 @@ export default function SettingsTab() {
             { text: t("common.cancel"), style: "cancel" },
           ])
         }
+        onBackupsRequested={() => router.push("/settings/backups")}
         onWipeConfirmed={async () => {
           await services.wipeAllData();
           await queryClient.invalidateQueries();

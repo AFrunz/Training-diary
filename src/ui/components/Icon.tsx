@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Copy,
   Download,
   Dumbbell,
@@ -49,6 +50,8 @@ const ICONS = {
   'chevron-down': ChevronDown,
   'chevron-left': ChevronLeft,
   'chevron-right': ChevronRight,
+  // в макете вместо стрелок ручка перетаскивания, но жестовой библиотеки в проекте нет
+  'chevron-up': ChevronUp,
   copy: Copy,
   download: Download,
   dumbbell: Dumbbell,

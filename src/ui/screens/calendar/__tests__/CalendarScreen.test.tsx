@@ -156,26 +156,36 @@ describe('Экран «Календарь»', () => {
     render(<CalendarScreen />, { services: world.services })
     await screen.findByTestId('calendar-day-2026-08-11')
 
-    fireEvent.press(screen.getByTestId('calendar-next-month'))
-    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Сентябрь 2026')
-    expect(screen.getByTestId('calendar-day-2026-09-15')).toBeTruthy()
-    expect(screen.queryByTestId('calendar-day-2026-08-11')).toBeNull()
-
-    fireEvent.press(screen.getByTestId('calendar-prev-month'))
     fireEvent.press(screen.getByTestId('calendar-prev-month'))
     expect(screen.getByTestId('calendar-title')).toHaveTextContent('Июль 2026')
     expect(screen.getByTestId('calendar-day-2026-07-15')).toBeTruthy()
+    expect(screen.queryByTestId('calendar-day-2026-08-11')).toBeNull()
+
+    fireEvent.press(screen.getByTestId('calendar-prev-month'))
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Июнь 2026')
+
+    fireEvent.press(screen.getByTestId('calendar-next-month'))
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Июль 2026')
   })
 
-  it('переключение месяца через декабрь меняет год', async () => {
+  it('переключение месяца через январь меняет год', async () => {
     const world = await buildWorld()
     render(<CalendarScreen />, { services: world.services })
     await screen.findByTestId('calendar-day-2026-08-11')
 
-    for (let step = 0; step < 5; step += 1) {
-      fireEvent.press(screen.getByTestId('calendar-next-month'))
+    for (let step = 0; step < 8; step += 1) {
+      fireEvent.press(screen.getByTestId('calendar-prev-month'))
     }
-    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Январь 2027')
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Декабрь 2025')
+  })
+
+  it('вперёд ходить можно: отпуск планируют заранее', async () => {
+    const world = await buildWorld()
+    render(<CalendarScreen />, { services: world.services })
+    await screen.findByTestId('calendar-day-2026-08-11')
+
+    fireEvent.press(screen.getByTestId('calendar-next-month'))
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Сентябрь 2026')
   })
 
   it('неделя начинается с понедельника по настройкам', async () => {
@@ -276,11 +286,12 @@ describe('Экран «Календарь»', () => {
     await screen.findByTestId('calendar-day-2026-08-11')
 
     fireEvent.press(screen.getByTestId('calendar-mode-year'))
+    expect(await screen.findByTestId('calendar-year-grid')).toBeTruthy()
     expect(screen.queryByTestId('calendar-day-2026-08-11')).toBeNull()
-    expect(screen.getByTestId('calendar-year-placeholder')).toBeTruthy()
 
     fireEvent.press(screen.getByTestId('calendar-mode-month'))
     expect(screen.getByTestId('calendar-day-2026-08-11')).toBeTruthy()
+    expect(screen.queryByTestId('calendar-year-grid')).toBeNull()
   })
 
   it('нажатие на день сообщает выбранную дату', async () => {
@@ -290,6 +301,187 @@ describe('Экран «Календарь»', () => {
 
     fireEvent.press(await screen.findByTestId('calendar-day-2026-08-14'))
     expect(onOpenDay).toHaveBeenCalledWith(localDate('2026-08-14'))
+  })
+})
+
+describe('Экран «Календарь» — режим года', () => {
+  /** Переводит экран в годовой режим и дожидается сетки. */
+  const openYear = async (world: World): Promise<void> => {
+    render(<CalendarScreen />, { services: world.services })
+    await screen.findByTestId('calendar-day-2026-08-11')
+    fireEvent.press(screen.getByTestId('calendar-mode-year'))
+    await screen.findByTestId('calendar-year-grid')
+  }
+
+  it('рисует все двенадцать мини-месяцев', async () => {
+    const world = await buildWorld()
+    await openYear(world)
+
+    for (let month = 1; month <= 12; month += 1) {
+      expect(screen.getByTestId(`calendar-year-month-${month}`)).toBeTruthy()
+    }
+    expect(screen.getByTestId('calendar-year-month-1-label')).toHaveTextContent('Январь')
+    expect(screen.getByTestId('calendar-year-month-12-label')).toHaveTextContent('Декабрь')
+  })
+
+  it('день с тренировкой закрашен цветом программы', async () => {
+    const world = await buildWorld()
+    await addWorkout(world, {
+      date: '2026-03-05',
+      programId: world.chest,
+      done: 3,
+      startedAt: '2026-03-05T09:00:00Z',
+      finishedAt: '2026-03-05T10:00:00Z',
+    })
+    await addWorkout(world, {
+      date: '2026-04-07',
+      programId: world.back,
+      done: 3,
+      startedAt: '2026-04-07T09:00:00Z',
+      finishedAt: '2026-04-07T10:00:00Z',
+    })
+
+    await openYear(world)
+
+    expect(screen.getByTestId('calendar-year-day-2026-03-05')).toHaveStyle({
+      backgroundColor: programColors['prog-red'],
+    })
+    expect(screen.getByTestId('calendar-year-day-2026-04-07')).toHaveStyle({
+      backgroundColor: programColors['prog-blue'],
+    })
+    expect(screen.getByTestId('calendar-year-day-2026-03-06')).toHaveStyle({
+      backgroundColor: light.track,
+    })
+  })
+
+  it('дни отсутствия отмечены приглушённым серым', async () => {
+    const world = await buildWorld()
+    await addAbsence(world, '2026-02-16', '2026-02-22')
+
+    await openYear(world)
+
+    expect(screen.getByTestId('calendar-year-day-2026-02-18')).toHaveStyle({
+      backgroundColor: light.textMuted,
+      opacity: 0.55,
+    })
+    expect(screen.getByTestId('calendar-year-day-2026-02-23')).toHaveStyle({
+      backgroundColor: light.track,
+    })
+  })
+
+  it('дни соседних месяцев в мини-месяц не попадают', async () => {
+    const world = await buildWorld()
+    await openYear(world)
+
+    const march = screen.getByTestId('calendar-year-month-3')
+    expect(within(march).queryByTestId('calendar-year-day-2026-02-28')).toBeNull()
+    expect(within(march).getByTestId('calendar-year-day-2026-03-01')).toBeTruthy()
+  })
+
+  it('текущий месяц выделен акцентом', async () => {
+    const world = await buildWorld()
+    await openYear(world)
+
+    expect(screen.getByTestId('calendar-year-month-8')).toHaveStyle({ borderColor: light.accent })
+    expect(screen.getByTestId('calendar-year-month-8-label')).toHaveStyle({ color: light.accent })
+    expect(screen.getByTestId('calendar-year-month-7')).toHaveStyle({ borderColor: 'transparent' })
+    expect(screen.getByTestId('calendar-year-month-7-label')).toHaveStyle({
+      color: light.textSecondary,
+    })
+  })
+
+  it('стрелки листают годы, а не месяцы', async () => {
+    const world = await buildWorld()
+    await addWorkout(world, {
+      date: '2025-05-06',
+      programId: world.chest,
+      done: 3,
+      startedAt: '2025-05-06T09:00:00Z',
+      finishedAt: '2025-05-06T10:00:00Z',
+    })
+
+    await openYear(world)
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('2026')
+
+    fireEvent.press(screen.getByTestId('calendar-prev-month'))
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('2025')
+    expect(await screen.findByTestId('calendar-year-day-2025-05-06')).toHaveStyle({
+      backgroundColor: programColors['prog-red'],
+    })
+    expect(screen.queryByTestId('calendar-year-month-8')).toHaveStyle({
+      borderColor: 'transparent',
+    })
+
+    fireEvent.press(screen.getByTestId('calendar-next-month'))
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('2026')
+    await screen.findByTestId('calendar-year-day-2026-08-11')
+  })
+
+  it('в годовом режиме вперёд тоже можно', async () => {
+    const world = await buildWorld()
+    render(<CalendarScreen />, { services: world.services })
+    await screen.findByTestId('calendar-day-2026-08-11')
+
+    fireEvent.press(screen.getByTestId('calendar-mode-year'))
+    await screen.findByTestId('calendar-year-grid')
+    fireEvent.press(screen.getByTestId('calendar-next-month'))
+
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('2027')
+  })
+
+  it('возврат в месяц показывает тот же период', async () => {
+    const world = await buildWorld()
+    render(<CalendarScreen />, { services: world.services })
+    await screen.findByTestId('calendar-day-2026-08-11')
+
+    fireEvent.press(screen.getByTestId('calendar-prev-month'))
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Июль 2026')
+
+    fireEvent.press(screen.getByTestId('calendar-mode-year'))
+    await screen.findByTestId('calendar-year-grid')
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('2026')
+
+    fireEvent.press(screen.getByTestId('calendar-mode-month'))
+    expect(screen.getByTestId('calendar-title')).toHaveTextContent('Июль 2026')
+    expect(await screen.findByTestId('calendar-day-2026-07-15')).toBeTruthy()
+  })
+
+  it('итоги года берутся из сценария yearStats', async () => {
+    const world = await buildWorld()
+    await addWorkout(world, {
+      date: '2026-01-13',
+      programId: world.chest,
+      done: 3,
+      startedAt: '2026-01-13T09:00:00Z',
+      finishedAt: '2026-01-13T10:00:00Z',
+    })
+    await addWorkout(world, {
+      date: '2026-06-09',
+      programId: world.back,
+      done: 3,
+      startedAt: '2026-06-09T09:00:00Z',
+      finishedAt: '2026-06-09T10:00:00Z',
+    })
+    await addAbsence(world, '2026-07-01', '2026-07-10')
+
+    const expected = await world.services.yearStats({
+      anyDateOfYear: localDate('2026-01-01'),
+      today: localDate('2026-08-11'),
+    })
+
+    await openYear(world)
+
+    const workouts = await screen.findByTestId('calendar-stat-workouts')
+    expect(within(workouts).getByText(String(expected.workouts))).toBeTruthy()
+    expect(
+      within(screen.getByTestId('calendar-stat-per-week')).getByText(
+        (expected.perWeek ?? 0).toFixed(1),
+      ),
+    ).toBeTruthy()
+    const absence = screen.getByTestId('calendar-stat-absence')
+    expect(within(absence).getByText(String(expected.absenceDays))).toBeTruthy()
+    expect(within(absence).getByText('дней отсутствия')).toBeTruthy()
+    expect(screen.queryByTestId('calendar-stat-average')).toBeNull()
   })
 })
 

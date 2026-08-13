@@ -10,7 +10,7 @@ export default function ProgramRoute() {
       <ProgramScreen
         programId={makeId(id)}
         onBack={() => router.back()}
-        onDuplicated={(programId) => router.replace(`/program/${programId}`)}
+        onDuplicate={() => router.push(`/program/new?from=${id}`)}
         onArchived={() => router.back()}
       />
     </Screen>

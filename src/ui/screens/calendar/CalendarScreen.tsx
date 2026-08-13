@@ -14,14 +14,16 @@ import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
 import { numFont, programColors, radii, uiFont } from '../../theme/tokens'
+import { loadYearGrid } from './yearData'
+import { YearGrid } from './YearGrid'
 
 /**
- * Экран «01 · Календарь — месяц» из макета: сетка месяца с точками программ,
- * серыми днями отсутствия и выделенным сегодня, легенда, мини-статистика и
- * карточка сегодняшнего дня.
+ * Экраны «01 · Календарь — месяц» и «02 · Календарь — год» из макета: сетка
+ * месяца с точками программ или год из 12 мини-месяцев, легенда, сводка периода
+ * и карточка сегодняшнего дня.
  *
  * Расчёты берутся готовыми: недели — из weeksOfRange, завершённость — из
- * computeCompletion, сводка месяца — из сценария monthStats.
+ * computeCompletion, сводки — из сценариев monthStats и yearStats.
  */
 
 const WEEKDAY_SHORT_KEYS = [
@@ -57,6 +59,10 @@ const monthOf = (date: LocalDate): number => Number(date.slice(5, 7))
 const dayOf = (date: LocalDate): number => Number(date.slice(8, 10))
 
 const startOfMonth = (date: LocalDate): LocalDate => localDate(`${date.slice(0, 7)}-01`)
+
+const startOfYear = (year: number): LocalDate => localDate(`${String(year).padStart(4, '0')}-01-01`)
+
+type CalendarMode = 'month' | 'year'
 
 const addMonths = (monthStart: LocalDate, delta: number): LocalDate => {
   const shifted = monthOf(monthStart) - 1 + delta
@@ -99,7 +105,17 @@ export function CalendarScreen({
   const today = toLocalDate(now, ports.timeZone)
 
   const [monthStart, setMonthStart] = useState<LocalDate>(() => startOfMonth(today))
-  const [mode, setMode] = useState<'month' | 'year'>('month')
+  const [mode, setMode] = useState<CalendarMode>('month')
+
+  const year = yearOf(monthStart)
+  /** Стрелки двигают месяц или год — смотря какой режим выбран (макет «Календарь — год»). */
+  const shiftPeriod = (direction: 1 | -1) =>
+    setMonthStart((current) => addMonths(current, mode === 'month' ? direction : direction * 12))
+  /**
+   * Вперёд ходить можно: отсутствия планируют заранее, и до будущего отпуска
+   * нужно доходить. Ограничение уместно в статистике, где будущего нет,
+   * но не в календаре.
+   */
 
   const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: () => ports.settings.get() })
   const firstDayOfWeek: FirstDayOfWeek = settingsQuery.data?.firstDayOfWeek ?? 1
@@ -147,6 +163,19 @@ export function CalendarScreen({
   const statsQuery = useQuery({
     queryKey: ['month-stats', monthStart, today],
     queryFn: () => services.monthStats({ anyDateOfMonth: monthStart, today }),
+    enabled: mode === 'month',
+  })
+
+  const yearGridQuery = useQuery({
+    queryKey: ['calendar-year-grid', year],
+    queryFn: () => loadYearGrid(services, { year }),
+    enabled: mode === 'year',
+  })
+
+  const yearStatsQuery = useQuery({
+    queryKey: ['year-stats', year, today],
+    queryFn: () => services.yearStats({ anyDateOfYear: startOfYear(year), today }),
+    enabled: mode === 'year',
   })
 
   const todayQuery = useQuery({
@@ -196,32 +225,40 @@ export function CalendarScreen({
 
   const todayWorkout = todayQuery.data ?? null
   const inProgress = todayWorkout !== null && todayWorkout.completion.done < todayWorkout.completion.total
-  const stats = statsQuery.data ?? null
+  const stats = (mode === 'month' ? statsQuery.data : yearStatsQuery.data) ?? null
 
   return (
     <View testID="calendar-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Text testID="calendar-title" style={[styles.title, { color: colors.textPrimary }]}>
-            {t('calendar.monthTitle', { month: t(monthKey), year: yearOf(monthStart) })}
-          </Text>
           <Pressable
             testID="calendar-prev-month"
             accessibilityRole="button"
-            accessibilityLabel={t('calendar.prevMonth')}
-            onPress={() => setMonthStart((current) => addMonths(current, -1))}
-            style={styles.monthArrow}
+            accessibilityLabel={mode === 'month' ? t('calendar.prevMonth') : t('stats.previousPeriod')}
+            onPress={() => shiftPeriod(-1)}
+            style={styles.periodArrow}
           >
             <Icon name="chevron-left" size={18} color={colors.textSecondary} />
           </Pressable>
+          <Text
+            testID="calendar-title"
+            numberOfLines={1}
+            style={[styles.title, { color: colors.textPrimary }]}
+          >
+            {mode === 'month' ? t('calendar.monthTitle', { month: t(monthKey), year }) : year}
+          </Text>
           <Pressable
             testID="calendar-next-month"
             accessibilityRole="button"
-            accessibilityLabel={t('calendar.nextMonth')}
-            onPress={() => setMonthStart((current) => addMonths(current, 1))}
-            style={styles.monthArrow}
+            accessibilityLabel={mode === 'month' ? t('calendar.nextMonth') : t('stats.nextPeriod')}
+            onPress={() => shiftPeriod(1)}
+            style={styles.periodArrow}
           >
-            <Icon name="chevron-right" size={18} color={colors.textSecondary} />
+            <Icon
+              name="chevron-right"
+              size={18}
+              color={colors.textSecondary}
+            />
           </Pressable>
         </View>
 
@@ -318,9 +355,14 @@ export function CalendarScreen({
               ))}
             </View>
           </>
-        ) : (
-          <View testID="calendar-year-placeholder" style={styles.yearPlaceholder} />
-        )}
+        ) : null}
+
+        {mode === 'year' && yearGridQuery.isSuccess ? (
+          <YearGrid
+            months={yearGridQuery.data}
+            currentMonth={year === yearOf(today) ? monthOf(today) : null}
+          />
+        ) : null}
 
         <View testID="calendar-legend" style={styles.legend}>
           {(programsQuery.data ?? []).map((program) => (
@@ -352,16 +394,23 @@ export function CalendarScreen({
             </Text>
             <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('calendar.statPerWeek')}</Text>
           </View>
-          <View testID="calendar-stat-average" style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.statValue, { color: colors.textPrimary }]}>
-              {formatDuration(stats.averageDurationMs, locale)}
-            </Text>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('calendar.statAverage')}</Text>
-          </View>
+          {mode === 'month' ? (
+            <View testID="calendar-stat-average" style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.statValue, { color: colors.textPrimary }]}>
+                {formatDuration(stats.averageDurationMs, locale)}
+              </Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('calendar.statAverage')}</Text>
+            </View>
+          ) : (
+            <View testID="calendar-stat-absence" style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.statValue, { color: colors.textPrimary }]}>{stats.absenceDays}</Text>
+              <Text style={[styles.statLabel, { color: colors.textMuted }]}>{t('stats.absenceDays')}</Text>
+            </View>
+          )}
         </View>
         )}
 
-        {todayQuery.isSuccess ? (
+        {mode === 'month' && todayQuery.isSuccess ? (
         <View style={styles.todayWrap}>
           <View testID="calendar-today-card" style={[styles.todayCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.todayTop}>
@@ -439,14 +488,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 12,
     paddingTop: 10,
     paddingHorizontal: 20,
     paddingBottom: 14,
   },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { fontSize: 22, fontWeight: '700', fontFamily: uiFont('700') },
-  monthArrow: { width: 18, height: 18, alignItems: 'center', justifyContent: 'center' },
+  // подпись растягивается между стрелками: пальцу нужно место, чтобы не промахнуться
+  titleRow: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  title: { flex: 1, textAlign: 'center', fontSize: 22, fontWeight: '700', fontFamily: uiFont('700') },
+  periodArrow: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
 
   segmented: { flexDirection: 'row', gap: 2, borderRadius: radii.sm, padding: 3 },
   segment: { borderRadius: 7, paddingVertical: 5, paddingHorizontal: 11 },
@@ -471,8 +521,6 @@ const styles = StyleSheet.create({
   dayNumber: { fontSize: 15 },
   dayDot: { width: 7, height: 7, borderRadius: radii.pill },
   dayDotPlaceholder: { width: 7, height: 7 },
-
-  yearPlaceholder: { height: 52 * 6 + 2 * 5 },
 
   legend: {
     flexDirection: 'row',
