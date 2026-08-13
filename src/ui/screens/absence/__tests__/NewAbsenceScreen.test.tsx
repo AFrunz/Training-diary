@@ -1,4 +1,20 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native'
+
+/** Системный календарь: открываем поле и отдаём выбранную дату, как это делает пикер. */
+const pickDate = (testID: string, iso: string) => {
+  fireEvent.press(screen.getByTestId(testID))
+  const [year, month, day] = iso.split('-').map(Number)
+  const picked = new Date(year!, month! - 1, day!)
+  fireEvent(
+    screen.getByTestId(`${testID}-picker`),
+    'onChange',
+    { type: 'set', nativeEvent: { timestamp: picked.getTime() } },
+    picked,
+  )
+}
+
+/** Машиночитаемое значение поля: человекочитаемая подпись остаётся для глаз. */
+const dateValue = (testID: string): string => screen.getByTestId(testID).props.accessibilityValue.text
 import { localDate } from '../../../../domain/model/types'
 import { createTestServices, renderWithProviders as render } from '../../../testing/render'
 import { NewAbsenceScreen } from '../NewAbsenceScreen'
@@ -11,8 +27,10 @@ describe('NewAbsenceScreen (FR-1.6)', () => {
     const { services } = createTestServices()
     render(<NewAbsenceScreen date={DATE} />, { services })
 
-    expect(screen.getByTestId('absence-start-date').props.value).toBe('2026-08-17')
-    expect(screen.getByTestId('absence-end-date').props.value).toBe('2026-08-23')
+    expect(dateValue('absence-start-date')).toBe('2026-08-17')
+    expect(dateValue('absence-end-date')).toBe('2026-08-23')
+    // на экране дата человекочитаемая, а не «2026-08-17»
+    expect(screen.getByText('17 августа')).toBeTruthy()
   })
 
   it('по умолчанию выбран отпуск', () => {
@@ -54,7 +72,7 @@ describe('NewAbsenceScreen (FR-1.6)', () => {
     const { services, ports } = createTestServices()
     render(<NewAbsenceScreen date={DATE} />, { services })
 
-    fireEvent.changeText(screen.getByTestId('absence-end-date'), '2026-08-10')
+    pickDate('absence-end-date', '2026-08-10')
     fireEvent.press(screen.getByTestId('absence-save'))
 
     expect(await screen.findByTestId('absence-error')).toBeTruthy()
@@ -65,26 +83,25 @@ describe('NewAbsenceScreen (FR-1.6)', () => {
     const { services } = createTestServices()
     render(<NewAbsenceScreen date={localDate('2026-01-01')} />, { services })
 
-    fireEvent.changeText(screen.getByTestId('absence-end-date'), '2027-06-01')
+    pickDate('absence-end-date', '2027-06-01')
     fireEvent.press(screen.getByTestId('absence-save'))
 
     expect(await screen.findByTestId('absence-error')).toBeTruthy()
   })
 
-  it('незаполненная дата делает кнопку недоступной', () => {
+  it('дату нельзя испортить руками: она приходит из системного календаря', () => {
     const { services } = createTestServices()
     render(<NewAbsenceScreen date={DATE} />, { services })
 
-    fireEvent.changeText(screen.getByTestId('absence-end-date'), '17 августа')
-
-    expect(screen.getByTestId('absence-save').props.accessibilityState).toMatchObject({ disabled: true })
+    expect(screen.getByTestId('absence-save').props.accessibilityState).toMatchObject({ disabled: false })
+    expect(screen.queryByTestId('absence-end-date-picker')).toBeNull()
   })
 
   it('отсутствие на один день допустимо', async () => {
     const { services, ports } = createTestServices()
     render(<NewAbsenceScreen date={DATE} onCreated={jest.fn()} />, { services })
 
-    fireEvent.changeText(screen.getByTestId('absence-end-date'), '2026-08-17')
+    pickDate('absence-end-date', '2026-08-17')
     fireEvent.press(screen.getByTestId('absence-save'))
 
     await waitFor(async () => expect(await ports.absences.listRange(ALL_TIME)).toHaveLength(1))

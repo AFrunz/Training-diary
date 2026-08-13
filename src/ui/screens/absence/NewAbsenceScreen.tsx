@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import DateTimePicker from '@react-native-community/datetimepicker'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { ValidationFailed } from '../../../domain/errors'
 import type { AbsenceType } from '../../../domain/model/entities'
@@ -143,7 +144,10 @@ export function NewAbsenceScreen({ date, onBack, onCreated }: NewAbsenceScreenPr
   )
 }
 
-/** Дата вводится строкой `YYYY-MM-DD`: системного пикера в проекте пока нет. */
+/**
+ * Дата выбирается системным календарём: руками вводить `YYYY-MM-DD` неудобно
+ * и легко ошибиться. Значение наружу отдаётся всё той же локальной датой.
+ */
 function DateField({
   testID,
   label,
@@ -156,23 +160,58 @@ function DateField({
   onChange: (next: string) => void
 }) {
   const { colors } = useTheme()
+  const { t } = useT()
+  const [open, setOpen] = useState(false)
+
   return (
     <View style={[styles.field, styles.grow]}>
       <Text style={[styles.label, { color: colors.textMuted }]}>{label}</Text>
-      <TextInput
+
+      <Pressable
         testID={testID}
-        value={value}
-        onChangeText={onChange}
-        autoCapitalize="none"
-        keyboardType="numbers-and-punctuation"
-        style={[
-          styles.input,
-          { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary },
-        ]}
-      />
+        accessibilityRole="button"
+        accessibilityLabel={t('absence.pickDate')}
+        accessibilityValue={{ text: value }}
+        onPress={() => setOpen(true)}
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      >
+        <Text style={[styles.inputValue, { color: colors.textPrimary }]}>
+          {humanDate(value, t)}
+        </Text>
+      </Pressable>
+
+      {open ? (
+        <DateTimePicker
+          testID={`${testID}-picker`}
+          value={toDate(value)}
+          mode="date"
+          onChange={(_event, picked) => {
+            setOpen(false)
+            if (picked) onChange(toLocalDateString(picked))
+          }}
+        />
+      ) : null}
     </View>
   )
 }
+
+/** Дата устройства в календарной строке: часовой пояс уже учтён самим пикером. */
+const toLocalDateString = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+
+/** «17 августа»: день и месяц берутся из словаря, порядок задаёт сам ключ. */
+const humanDate = (value: string, t: ReturnType<typeof useT>['t']): string => {
+  const [, month, day] = value.split('-')
+  const monthKey = `date.monthGenitive.${Number(month)}` as Parameters<typeof t>[0]
+  return t('date.dayMonth', { day: Number(day), month: t(monthKey) })
+}
+
+const toDate = (value: string): Date => {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year ?? 2026, (month ?? 1) - 1, day ?? 1)
+}
+
+
 
 const isDate = (value: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(value)
 
@@ -184,6 +223,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 12 },
   label: { fontSize: 12, fontWeight: '600', fontFamily: uiFont('600') },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+  inputValue: { fontSize: 15, fontFamily: uiFont('500'), fontWeight: '500' },
   input: {
     borderRadius: radii.md,
     borderWidth: 1,
