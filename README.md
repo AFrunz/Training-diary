@@ -25,6 +25,18 @@ To track how working weights grow for every exercise, and to see your consistenc
 - **Your data stays yours**: export and import as one file, rotating auto-backups, full wipe
 - Russian and English, light and dark themes, kilograms and pounds
 
+## Screens
+
+| Calendar | Workout | Workouts |
+| --- | --- | --- |
+| <img src="docs/screens/calendar.png" width="220" alt="Monthly calendar with program colours and time off"> | <img src="docs/screens/workout.png" width="220" alt="Workout screen with a live timer and sets"> | <img src="docs/screens/workouts.png" width="220" alt="Workout list with completion rings"> |
+
+| Library | Exercise history | Stats |
+| --- | --- | --- |
+| <img src="docs/screens/library.png" width="220" alt="Exercise library grouped by muscle"> | <img src="docs/screens/history.png" width="220" alt="Exercise history with records and a chart"> | <img src="docs/screens/stats.png" width="220" alt="Monthly stats with a weekly chart"> |
+
+> These are the design mockups the screens were built from, not device captures.
+
 ## How it is built
 
 Layered architecture with dependency inversion — details in [ARCHITECTURE.md](ARCHITECTURE.md).
