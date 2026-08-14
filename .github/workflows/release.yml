@@ -1,0 +1,81 @@
+name: Сборка APK
+
+on:
+  # публикация релиза в GitHub: файл прикладывается к нему же
+  release:
+    types: [published]
+  # ручной запуск: артефакт останется во вкладке Actions
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Собрать установочный файл
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Установить зависимости
+        run: npm ci
+
+      # сломанное не собираем: проверки те же, что в основном прогоне
+      - name: Проверить типы
+        run: npx tsc --noEmit
+
+      - name: Прогнать тесты
+        run: npm test -- --ci
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Сгенерировать нативный проект
+        # папка android/ в репозитории не хранится: она создаётся из app.json
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Подготовить ключ подписи
+        # без секретов сборка подписывается отладочным ключом: файл ставится на
+        # телефон, но в Google Play не годится
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: node scripts/prepare-release-signing.mjs
+
+      - name: Собрать APK
+        run: ./gradlew assembleRelease --no-daemon
+        working-directory: android
+
+      - name: Назвать файл по версии
+        id: apk
+        run: |
+          version=$(node -p "require('./app.json').expo.version")
+          name="training-diary-${version}.apk"
+          mv android/app/build/outputs/apk/release/app-release.apk "$name"
+          echo "path=$name" >> "$GITHUB_OUTPUT"
+          echo "Собран $name ($(du -h "$name" | cut -f1))" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Положить в артефакты
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: ${{ steps.apk.outputs.path }}
+          retention-days: 90
+
+      - name: Приложить к релизу
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "${{ steps.apk.outputs.path }}" --clobber

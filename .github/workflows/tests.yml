@@ -1,0 +1,42 @@
+name: Тесты
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Одновременный прогон одной ветки не нужен: свежий коммит отменяет предыдущий
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Типы и тесты
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Установить зависимости
+        run: npm ci
+
+      - name: Проверить типы
+        run: npx tsc --noEmit
+
+      - name: Прогнать тесты
+        # тестовый драйвер базы работает на встроенном в Node node:sqlite
+        run: npm test -- --ci
+
+      - name: Проверить конфигурацию проекта
+        run: npx expo-doctor@latest
+
+      - name: Собрать бандл
+        # ловит то, что не видят тесты: ошибки импортов и конфигурации сборщика
+        run: npx expo export --platform android --output-dir /tmp/export
