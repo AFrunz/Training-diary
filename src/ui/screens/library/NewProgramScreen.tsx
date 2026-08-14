@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import { PROGRAM_PALETTE } from '../../../app/usecases/library'
@@ -37,13 +37,11 @@ export function NewProgramScreen({
   const { colors } = useTheme()
   const { t } = useT()
   const services = useServices()
-  const queryClient = useQueryClient()
 
   const [name, setName] = useState('')
   const [color, setColor] = useState<string | null>(null)
   const [exerciseIds, setExerciseIds] = useState<readonly Id[]>([])
   const [pickerOpen, setPickerOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
   /** Подстановка из оригинала одноразовая: дальше поля принадлежат пользователю. */
   const [prefilled, setPrefilled] = useState(false)
 
@@ -77,22 +75,22 @@ export function NewProgramScreen({
     .map((id) => (exercises.data ?? []).find((summary) => summary.exercise.id === id))
     .filter((summary): summary is NonNullable<typeof summary> => summary !== undefined)
 
-  const canCreate = name.trim().length > 0 && !saving
 
-  const create = async () => {
+  /**
+   * Запись идёт мутацией: общий обработчик кэша сбрасывает его целиком, иначе
+   * программа появится в библиотеке, но не в выборе при создании тренировки —
+   * у них разные ключи запросов.
+   */
+  const createProgram = useMutation({
+    mutationFn: () => services.createProgram({ name, color: color ?? undefined, exerciseIds }),
+    onSuccess: (id) => onCreated?.(id),
+  })
+
+  const canCreate = name.trim().length > 0 && !createProgram.isPending
+
+  const create = () => {
     if (!canCreate) return
-    setSaving(true)
-    try {
-      const id = await services.createProgram({
-        name,
-        color: color ?? undefined,
-        exerciseIds,
-      })
-      await queryClient.invalidateQueries({ queryKey: ['library'] })
-      onCreated?.(id)
-    } finally {
-      setSaving(false)
-    }
+    createProgram.mutate()
   }
 
   return (

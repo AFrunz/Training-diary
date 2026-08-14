@@ -43,7 +43,6 @@ export function SettingsProvider({
 
   const mutation = useMutation({
     mutationFn: async (next: Settings) => services.ports.settings.set(next),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: SETTINGS_QUERY_KEY }),
   })
 
   const value = useMemo<SettingsContextValue | null>(() => {

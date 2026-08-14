@@ -106,10 +106,8 @@ export function AddSetSheet({
       })
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['workout', workoutId] })
-      // подсказка следующего подхода зависит от только что записанного:
-      // без сброса при вечном кэше шит откроется с прежними значениями (FR-4.4)
-      await queryClient.invalidateQueries({ queryKey: ['set-suggestion', workoutId] })
+      // кэш целиком сбрасывает общий обработчик мутаций: подсказка следующего
+      // подхода зависит от только что записанного (FR-4.4)
       onClose()
     },
   })

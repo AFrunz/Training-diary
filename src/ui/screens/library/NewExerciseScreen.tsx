@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { Id } from '../../../domain/model/types'
@@ -38,12 +38,10 @@ export function NewExerciseScreen({ onBack, onCreated }: NewExerciseScreenProps)
   const { colors } = useTheme()
   const { t } = useT()
   const services = useServices()
-  const queryClient = useQueryClient()
 
   const [name, setName] = useState('')
   const [group, setGroup] = useState<MuscleGroupKey | null>(null)
   const [note, setNote] = useState('')
-  const [saving, setSaving] = useState(false)
 
   // архивные упражнения тоже занимают имя, поэтому список берётся вместе с ними
   const existing = useQuery({
@@ -57,22 +55,23 @@ export function NewExerciseScreen({ onBack, onCreated }: NewExerciseScreenProps)
   const typed = name.trim().length > 0
   const check = validateExerciseName(name, existing.data ?? [])
   const errorKey = check.ok ? null : ERROR_KEYS[check.code] ?? null
-  const canCreate = check.ok && !saving
 
-  const create = async () => {
-    if (!canCreate) return
-    setSaving(true)
-    try {
-      const id = await services.createExercise({
+  /** Запись мутацией: общий обработчик кэша сбрасывает его целиком (см. mutations.test.ts). */
+  const createExercise = useMutation({
+    mutationFn: () =>
+      services.createExercise({
         name,
         muscleGroup: group,
         note: note.trim().length > 0 ? note.trim() : null,
-      })
-      await queryClient.invalidateQueries({ queryKey: ['library'] })
-      onCreated?.(id)
-    } finally {
-      setSaving(false)
-    }
+      }),
+    onSuccess: (id) => onCreated?.(id),
+  })
+
+  const canCreate = check.ok && !createExercise.isPending
+
+  const create = () => {
+    if (!canCreate) return
+    createExercise.mutate()
   }
 
   return (

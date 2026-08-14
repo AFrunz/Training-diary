@@ -87,7 +87,7 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
     },
   })
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['workout', workoutId] })
+  const invalidate = () => queryClient.invalidateQueries()
 
   const toggleDone = useMutation({
     mutationFn: (input: { itemId: Id; done: boolean }) =>
