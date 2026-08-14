@@ -9,9 +9,14 @@
     "android": {
       "package": "com.trainingdiary.app",
       "adaptiveIcon": {
-        "backgroundColor": "#5A5AF0"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5A5AF0",
+        "monochromeImage": "./assets/adaptive-icon.png"
       },
-      "permissions": []
+      "permissions": [],
+      "blockedPermissions": [
+        "android.permission.INTERNET"
+      ]
     },
     "plugins": [
       [
@@ -21,7 +26,19 @@
         }
       ],
       "expo-sqlite",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 132,
+          "resizeMode": "contain",
+          "backgroundColor": "#F5F5F8",
+          "dark": {
+            "backgroundColor": "#0D0D10"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
@@ -33,6 +50,7 @@
       "eas": {
         "projectId": "5be79c04-5d0c-4b51-bd54-c71f6f30441c"
       }
-    }
+    },
+    "icon": "./assets/icon.png"
   }
 }
