@@ -56,5 +56,20 @@
         "typescript"
       ]
     }
-  }
+  },
+  "description": "Офлайновый дневник силовых тренировок для Android: программы, подходы, календарь регулярности и статистика. Без аккаунтов и без интернета.",
+  "license": "MIT",
+  "author": "Alexey Frunze",
+  "keywords": [
+    "android",
+    "react-native",
+    "expo",
+    "workout-tracker",
+    "fitness",
+    "offline-first",
+    "strength-training",
+    "sqlite",
+    "typescript",
+    "clean-architecture"
+  ]
 }
