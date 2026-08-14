@@ -40,6 +40,28 @@ jobs:
 
       - uses: android-actions/setup-android@v3
 
+      - name: Определить версию
+        id: version
+        # тег релиза — источник правды: версия в app.json подтягивается под него,
+        # иначе файл назывался бы по старой версии из репозитория
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            version="${{ github.event.release.tag_name }}"
+            version="${version#v}"
+          else
+            version=$(node -p "require('./app.json').expo.version")
+          fi
+          node -e "
+            const fs = require('fs');
+            const config = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+            config.expo.version = '$version';
+            // номер сборки растёт сам: Google Play не принимает повторный
+            config.expo.android.versionCode = ${{ github.run_number }};
+            fs.writeFileSync('app.json', JSON.stringify(config, null, 2) + '\n');
+          "
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+          echo "Версия $version, номер сборки ${{ github.run_number }}" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Сгенерировать нативный проект
         # папка android/ в репозитории не хранится: она создаётся из app.json
         run: npx expo prebuild --platform android --no-install
@@ -61,8 +83,7 @@ jobs:
       - name: Назвать файл по версии
         id: apk
         run: |
-          version=$(node -p "require('./app.json').expo.version")
-          name="training-diary-${version}.apk"
+          name="training-diary-${{ steps.version.outputs.value }}.apk"
           mv android/app/build/outputs/apk/release/app-release.apk "$name"
           echo "path=$name" >> "$GITHUB_OUTPUT"
           echo "Собран $name ($(du -h "$name" | cut -f1))" >> "$GITHUB_STEP_SUMMARY"
