@@ -1,73 +1,75 @@
-# 🏋️ Дневник тренировок
+# 🏋️ Training Diary
 
-[![Тесты](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml)
-[![Сборка APK](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml)
-[![Лицензия MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Tests](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml)
+[![Android build](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Офлайновый дневник силовых тренировок для Android. Без аккаунтов, без сервера, без доступа в интернет — все данные лежат на устройстве и переносятся одним файлом.
+An offline strength-training diary for Android. No accounts, no server, no internet access — everything lives on the device and moves between phones as a single file.
 
-[English](README.en.md) · [Требования](TZ.md) · [Архитектура](ARCHITECTURE.md) · [Сборка и выпуск](RELEASE.md)
+[Русский](README.ru.md) · [Requirements](TZ.md) · [Architecture](ARCHITECTURE.md) · [Building and releasing](RELEASE.md)
 
-## Зачем
+> Requirements, architecture and release notes are written in Russian.
 
-Отслеживать динамику весов по каждому упражнению и честно видеть регулярность: запланированный отпуск отличается от пропуска, поэтому он не портит статистику.
+## Why
 
-## Что умеет
+To track how working weights grow for every exercise, and to see your consistency honestly: planned time off is not the same as a skipped week, so a vacation does not ruin the stats.
 
-- **Календарь** месяца и года: день тренировки помечен цветом программы, дни отсутствия — серым
-- **Тренировка** со счётчиком времени, подходами и отметками выполненного; вес в подходе необязателен — для турника и планки
-- **Программы** — тренировочные дни с произвольными названиями, своим цветом и составом
-- **Библиотека** из 40 предзаполненных упражнений с поиском и группировкой по мышцам
-- **История упражнения**: рекорды, график роста весов, раскладка подходов с дельтой к прошлому разу
-- **Статистика** за месяц и год: регулярность, средняя длительность, завершённость, серии недель
-- **Данные под контролем**: экспорт и импорт одним файлом, автобэкапы с ротацией, полное удаление
-- Русский и английский, светлая и тёмная темы, килограммы и фунты
+## Features
 
-## Как устроено
+- **Calendar**, monthly and yearly: a training day is marked with its program colour, time off is greyed out
+- **Workout screen** with a live timer, sets and completion checkmarks; weight is optional — for pull-ups and planks
+- **Programs** — training days with free-form names, their own colour and exercise list
+- **Library** of 40 preloaded exercises with search and grouping by muscle
+- **Exercise history**: records, a weight progression chart, sets broken down with the delta since last time
+- **Statistics** for a month or a year: consistency, average duration, completion rate, week streaks
+- **Your data stays yours**: export and import as one file, rotating auto-backups, full wipe
+- Russian and English, light and dark themes, kilograms and pounds
 
-Слоистая архитектура с инверсией зависимостей — подробно в [ARCHITECTURE.md](ARCHITECTURE.md).
+## How it is built
+
+Layered architecture with dependency inversion — details in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ```
-ui/      экраны, темы, локализация        → знает app и типы domain
-app/     сценарии и порты                 → знает domain
-domain/  правила расчётов, ноль импортов  → не знает никого
-infra/   SQLite, файлы, часы              → реализует порты app
+ui/      screens, theming, i18n            → knows app and domain types
+app/     use cases and ports               → knows domain
+domain/  calculation rules, zero imports   → knows nobody
+infra/   SQLite, files, clock              → implements app ports
 ```
 
-Правила расчётов не знают ни про React Native, ни про базу, поэтому проверяются обычными тестами за секунды. Порты позволяют компонентным тестам работать с настоящими сценариями поверх хранилища в памяти — без эмулятора и SQLite.
+Calculation rules know nothing about React Native or the database, so they run as plain tests in seconds. Ports let component tests exercise real use cases on top of in-memory storage — no emulator, no SQLite.
 
-**Стек:** Expo · React Native · TypeScript · expo-router · SQLite через Drizzle · TanStack Query
+**Stack:** Expo · React Native · TypeScript · expo-router · SQLite via Drizzle · TanStack Query
 
-## Тесты
+## Tests
 
-625 тестов на четырёх уровнях плюс 12 сквозных сценариев Maestro:
+625 tests across four levels plus 12 end-to-end Maestro flows:
 
 ```sh
-npm test              # всё
-npm run typecheck     # типы
-maestro test e2e/     # сквозные, нужен эмулятор
+npm test              # everything
+npm run typecheck     # types
+maestro test e2e/     # end-to-end, needs an emulator
 ```
 
-| Уровень | Чем подменяется окружение |
+| Level | What replaces the environment |
 | --- | --- |
-| правила расчётов | ничем |
-| сценарии | порты в памяти |
-| слой данных | SQLite в памяти |
-| интерфейс | контейнер сценариев поверх портов |
+| calculation rules | nothing |
+| use cases | in-memory ports |
+| data layer | in-memory SQLite |
+| interface | use-case container over ports |
 
-## Запуск
+## Running it
 
 ```sh
 npm install
-npx expo start        # дальше QR-код и приложение Expo Go
+npx expo start        # then scan the QR code with Expo Go
 ```
 
-Установочный APK собирается автоматически при публикации релиза — см. [RELEASE.md](RELEASE.md).
+An installable APK is built automatically when a release is published — see [RELEASE.md](RELEASE.md).
 
-## Дизайн
+## Design
 
-Макеты лежат в `design.pen` ([Pencil](https://pen.dev)): 13 экранов в светлой и тёмной темах, дизайн-система с токенами, иконка приложения и инвентарь интерфейсных иконок.
+Mockups live in `design.pen` ([Pencil](https://pen.dev)): 13 screens in light and dark themes, a design system with tokens, the app icon and an inventory of interface icons.
 
-## Лицензия
+## License
 
 [MIT](LICENSE)
