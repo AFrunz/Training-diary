@@ -1,5 +1,9 @@
 # 🏋️ Training Diary
 
+[![Tests](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml)
+[![Android build](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 An offline strength-training diary for Android. No accounts, no server, no internet access — everything lives on the device and moves between phones as a single file.
 
 [Русский](README.md) · [Requirements](TZ.md) · [Architecture](ARCHITECTURE.md) · [Building and releasing](RELEASE.md)

@@ -1,5 +1,9 @@
 # 🏋️ Дневник тренировок
 
+[![Тесты](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/tests.yml)
+[![Сборка APK](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml/badge.svg)](https://github.com/AFrunz/Training-diary/actions/workflows/release.yml)
+[![Лицензия MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Офлайновый дневник силовых тренировок для Android. Без аккаунтов, без сервера, без доступа в интернет — все данные лежат на устройстве и переносятся одним файлом.
 
 [English](README.en.md) · [Требования](TZ.md) · [Архитектура](ARCHITECTURE.md) · [Сборка и выпуск](RELEASE.md)
