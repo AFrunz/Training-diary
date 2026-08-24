@@ -1,5 +1,6 @@
 import type { Id, LocalDate, WeightKg } from '../model/types'
 import { daysBetween } from '../rules/dates'
+import { MAX_ANGLE_DEG } from '../rules/units'
 
 /**
  * Проверки ввода. Возвращают код ошибки, а не готовый текст: тексты живут в словаре
@@ -15,6 +16,7 @@ export type ValidationCode =
   | 'weight-negative'
   | 'weight-not-finite'
   | 'weight-too-large'
+  | 'angle-out-of-range'
   | 'range-inverted'
   | 'range-too-long'
   | 'exercise-duplicate-in-program'
@@ -27,6 +29,8 @@ export const MAX_NAME_LENGTH = 60
 export const MAX_REPS = 999
 export const MAX_WEIGHT_KG = 1000
 export const MAX_ABSENCE_DAYS = 365
+
+export { MAX_ANGLE_DEG }
 
 const ok: ValidationResult = { ok: true }
 const fail = (code: ValidationCode): ValidationResult => ({ ok: false, code })
@@ -58,7 +62,11 @@ export function validateProgramName(name: string): ValidationResult {
   return checkName(name)
 }
 
-export function validateSet(set: { weightKg?: WeightKg | null; reps: number }): ValidationResult {
+export function validateSet(set: {
+  weightKg?: WeightKg | null
+  angleDeg?: number | null
+  reps: number
+}): ValidationResult {
   if (!Number.isInteger(set.reps) || set.reps <= 0) return fail('reps-not-positive-integer')
   if (set.reps > MAX_REPS) return fail('reps-too-large')
 
@@ -67,6 +75,12 @@ export function validateSet(set: { weightKg?: WeightKg | null; reps: number }): 
     if (!Number.isFinite(weight)) return fail('weight-not-finite')
     if (weight < 0) return fail('weight-negative')
     if (weight > MAX_WEIGHT_KG) return fail('weight-too-large')
+  }
+
+  const angle = set.angleDeg ?? null
+  if (angle !== null) {
+    // отрицательный наклон и «больше вертикали» — это опечатка, а не настройка тренажёра
+    if (!Number.isFinite(angle) || angle < 0 || angle > MAX_ANGLE_DEG) return fail('angle-out-of-range')
   }
   return ok
 }

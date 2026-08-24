@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Fragment } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { ProgramWithItems } from '../../../app/ports'
 import { PROGRAM_PALETTE } from '../../../app/usecases/library'
 import type { Id } from '../../../domain/model/types'
@@ -73,12 +73,23 @@ export function ProgramScreen({
   })
 
   const [pickerOpen, setPickerOpen] = useState(false)
+  /** Черновик названия: пока поле правится, запрос его не перетирает. */
+  const [draftName, setDraftName] = useState<string | null>(null)
+
+  useEffect(() => {
+    setDraftName(null)
+  }, [programId])
 
   /**
    * Сбрасывается весь кэш, а не только этот экран: программа видна ещё и в
    * библиотеке, в фильтрах списка тренировок и в выборе программы.
    */
   const invalidate = () => queryClient.invalidateQueries()
+
+  const rename = useMutation({
+    mutationFn: (name: string) => services.renameProgram({ programId, name }),
+    onSuccess: invalidate,
+  })
 
   const setColor = useMutation({
     mutationFn: async (color: string) => {
@@ -134,6 +145,18 @@ export function ProgramScreen({
   if (!data) return <View testID="program-screen" style={[styles.root, { backgroundColor: colors.bg }]} />
 
   const { program, items, workoutCount } = data
+  const nameValue = draftName ?? program.name
+
+  /**
+   * Пустое название не сохраняется: поле возвращается к прежнему. Так правка
+   * названия ведёт себя как на экране создания, только без кнопки.
+   */
+  const commitName = () => {
+    const next = nameValue.trim()
+    setDraftName(null)
+    if (next.length === 0 || next === program.name) return
+    rename.mutate(next)
+  }
 
   return (
     <View testID="program-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
@@ -147,6 +170,25 @@ export function ProgramScreen({
       />
 
       <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.block}>
+          <Text style={[styles.blockLabel, { color: colors.textMuted }]}>{t('program.name')}</Text>
+
+          <TextInput
+            testID="program-name-input"
+            value={nameValue}
+            onChangeText={setDraftName}
+            onBlur={commitName}
+            onSubmitEditing={commitName}
+            returnKeyType="done"
+            placeholder={t('program.namePlaceholder')}
+            placeholderTextColor={colors.textMuted}
+            style={[
+              styles.nameInput,
+              { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary },
+            ]}
+          />
+        </View>
+
         <View style={styles.block}>
           <Text style={[styles.blockLabel, { color: colors.textMuted }]}>{t('program.color')}</Text>
 
@@ -322,6 +364,15 @@ const styles = StyleSheet.create({
 
   block: { gap: 9 },
   blockLabel: { fontSize: 12, fontFamily: uiFont('600'), fontWeight: '600' },
+  nameInput: {
+    borderRadius: radii.md,
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    fontFamily: uiFont('600'),
+    fontWeight: '600',
+  },
 
   swatches: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   swatchSlot: {

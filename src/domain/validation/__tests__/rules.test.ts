@@ -119,6 +119,18 @@ describe('validateSet', () => {
     expect(validateSet({ weightKg: 1000, reps: 999 })).toEqual(ok)
     expect(validateSet({ reps: 1 })).toEqual(ok)
   })
+
+  it('угол наклона от нуля до вертикали (FR-4.11)', () => {
+    expect(validateSet({ angleDeg: 45, reps: 15 })).toEqual(ok)
+    expect(validateSet({ angleDeg: 0, reps: 15 })).toEqual(ok)
+    expect(validateSet({ angleDeg: 90, reps: 15 })).toEqual(ok)
+  })
+
+  it('отрицательный и запредельный угол отклоняются', () => {
+    expect(validateSet({ angleDeg: -10, reps: 15 })).toEqual(fail('angle-out-of-range'))
+    expect(validateSet({ angleDeg: 91, reps: 15 })).toEqual(fail('angle-out-of-range'))
+    expect(validateSet({ angleDeg: Number.NaN, reps: 15 })).toEqual(fail('angle-out-of-range'))
+  })
 })
 
 describe('validateAbsenceRange', () => {

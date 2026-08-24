@@ -15,7 +15,18 @@ export type Instant = number & { readonly __brand: 'Instant' }
 /** Вес всегда хранится в килограммах (FR-7.5). */
 export type WeightKg = number
 
+/** Единица веса из настроек: значение по умолчанию для новых подходов. */
 export type WeightUnit = 'kg' | 'lb'
+
+/**
+ * Чем измеряется подход (FR-4.11). Вес — в килограммах или фунтах, `deg` — угол
+ * наклона скамьи: для пресса и жимов под углом сама «нагрузка» задаётся им.
+ */
+export type SetUnit = WeightUnit | 'deg'
+
+export const SET_UNITS: readonly SetUnit[] = ['kg', 'lb', 'deg']
+
+export const isWeightUnit = (unit: SetUnit): unit is WeightUnit => unit !== 'deg'
 
 /** 1 — понедельник, 7 — воскресенье (нумерация ISO-8601). */
 export type WeekdayNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7

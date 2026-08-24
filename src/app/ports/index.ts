@@ -43,9 +43,20 @@ export interface WorkoutRepo {
   remove(id: Id): Promise<void>
   addItem(item: WorkoutItem): Promise<void>
   addSet(set: WorkoutSet): Promise<void>
+  updateSet(set: WorkoutSet): Promise<void>
+  removeSet(setId: Id): Promise<void>
   setItemCompleted(itemId: Id, at: Instant | null): Promise<void>
-  /** Последний записанный подход упражнения — для предзаполнения полей (FR-4.4). */
-  lastSetOf(exerciseId: Id, options?: { readonly exceptWorkoutId?: Id }): Promise<WorkoutSet | null>
+  /**
+   * Подходы упражнения из ближайшей более ранней тренировки — их показывает экран
+   * тренировки над сегодняшними и из них берётся предзаполнение (FR-4.4, FR-4.10).
+   *
+   * Тренировки без подходов этого упражнения пропускаются: иначе «прошлый раз»
+   * оказался бы пустым из-за дня, когда упражнение просто не делали.
+   */
+  previousSetsOf(
+    exerciseId: Id,
+    options: { readonly before: LocalDate; readonly exceptWorkoutId: Id },
+  ): Promise<readonly WorkoutSet[]>
 }
 
 export interface ProgramWithItems {

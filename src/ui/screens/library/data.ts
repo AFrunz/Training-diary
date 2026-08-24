@@ -82,7 +82,8 @@ export const formatRecord = (
   locale: Locale,
 ): string => {
   if (summary.recordKg !== null) return formatWeight(summary.recordKg, unit, locale)
-  if (summary.recordReps !== null) return formatSet({ weightKg: null, reps: summary.recordReps }, unit)
+  if (summary.recordReps !== null)
+    return formatSet({ weightKg: null, reps: summary.recordReps }, unit, locale)
   return EMPTY_VALUE
 }
 

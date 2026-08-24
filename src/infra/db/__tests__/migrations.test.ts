@@ -88,3 +88,62 @@ describe('applyMigrations', () => {
     ])
   })
 })
+
+/**
+ * Переезд единицы из настроек в подход (FR-4.11). База версии 1 собирается
+ * вручную: подходы в ней уже есть, и обновление не должно их потерять.
+ */
+describe('переход со схемы 1 на 2', () => {
+  const seedVersionOne = async (unit: 'kg' | 'lb'): Promise<SqlDriver> => {
+    const driver = createNodeSqlDriver()
+    await driver.exec(
+      `CREATE TABLE workout_sets (
+        id TEXT PRIMARY KEY,
+        workout_item_id TEXT NOT NULL,
+        order_index INTEGER NOT NULL,
+        weight_kg REAL,
+        reps INTEGER NOT NULL,
+        created_at INTEGER NOT NULL
+      )`,
+    )
+    await driver.exec(
+      `CREATE TABLE settings (
+        id INTEGER PRIMARY KEY,
+        unit TEXT NOT NULL,
+        first_day_of_week INTEGER NOT NULL,
+        theme TEXT NOT NULL,
+        language TEXT NOT NULL
+      )`,
+    )
+    await driver.run('INSERT INTO settings (id, unit, first_day_of_week, theme, language) VALUES (1, ?, 1, ?, ?)', [
+      unit,
+      'system',
+      'system',
+    ])
+    await driver.run(
+      'INSERT INTO workout_sets (id, workout_item_id, order_index, weight_kg, reps, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+      ['ws-1', 'wi-1', 0, 82.5, 6, 1],
+    )
+    await driver.exec(
+      'CREATE TABLE schema_meta (id INTEGER PRIMARY KEY, version INTEGER NOT NULL, applied_at INTEGER NOT NULL)',
+    )
+    await driver.run('INSERT INTO schema_meta (id, version, applied_at) VALUES (1, 1, 1)', [])
+    return driver
+  }
+
+  it('дописывает единицу к записанным подходам, не трогая вес', async () => {
+    const driver = await seedVersionOne('kg')
+
+    await expect(applyMigrations(driver)).resolves.toEqual({ from: 1, to: SCHEMA_VERSION })
+    await expect(driver.all('SELECT weight_kg, angle_deg, unit, reps FROM workout_sets', [])).resolves.toEqual([
+      [82.5, null, 'kg', 6],
+    ])
+  })
+
+  it('единица берётся из настроек: кто считал в фунтах, того история не переедет в килограммы', async () => {
+    const driver = await seedVersionOne('lb')
+
+    await applyMigrations(driver)
+    await expect(driver.all('SELECT unit FROM workout_sets', [])).resolves.toEqual([['lb']])
+  })
+})

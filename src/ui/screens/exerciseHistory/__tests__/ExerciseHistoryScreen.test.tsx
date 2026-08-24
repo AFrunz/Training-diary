@@ -28,7 +28,7 @@ const seed = async (options?: { muscleGroup?: string }): Promise<Fixture> => {
     const item = aggregate!.items[0]!
 
     for (const [weightKg, reps] of sets) {
-      await services.addSet({ workoutId, itemId: item.id, weightKg, reps })
+      await services.addSet({ workoutId, itemId: item.id, value: weightKg, unit: 'kg', reps })
     }
     return workoutId
   }
@@ -140,5 +140,43 @@ describe('ExerciseHistoryScreen', () => {
     renderScreen(fixture)
 
     expect(await screen.findByTestId('header-subtitle')).toHaveTextContent('Грудь · 1 тренировка')
+  })
+})
+
+describe('ExerciseHistoryScreen — объём упражнения (FR-5.5)', () => {
+  it('складывает вес на повторы за все тренировки', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [
+      [80, 8],
+      [80, 6],
+    ])
+    await fixture.addWorkout('2026-08-11', [[82.5, 6]])
+
+    renderScreen(fixture)
+
+    // 80×8 + 80×6 + 82.5×6 = 1615
+    expect(await screen.findByTestId('history-volume-value')).toHaveTextContent('1615 кг')
+  })
+
+  it('у упражнения без веса объём считается повторами', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-11', [
+      [null, 12],
+      [null, 10],
+    ])
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('history-volume-value')).toHaveTextContent('22 повтора')
+  })
+
+  it('объём показывается в единицах из настроек', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-11', [[100, 10]])
+    await fixture.ports.settings.set({ ...fixture.ports.state.settings, unit: 'lb' })
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('history-volume-value')).toHaveTextContent('2205 lb')
   })
 })

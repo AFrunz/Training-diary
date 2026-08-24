@@ -7,6 +7,7 @@ import {
   createProgram,
   duplicateProgram,
   removeExercise,
+  renameProgram,
   setProgramItems,
   suggestProgramColor,
 } from '../library'
@@ -281,6 +282,48 @@ describe('setProgramItems', () => {
     await expect(
       setProgramItems(ports)({ programId, exerciseIds: [id('e-1'), id('e-1')] }),
     ).rejects.toMatchObject({ code: 'exercise-duplicate-in-program' })
+  })
+})
+
+describe('renameProgram (FR-3.1.3)', () => {
+  it('меняет название и отмечает правку', async () => {
+    const ports = setup()
+    const programId = await createProgram(ports)({ name: 'Грудь' })
+    ports.clock.advance(60_000)
+
+    await renameProgram(ports)({ programId, name: '  Грудь + трицепс  ' })
+
+    const program = (await ports.programs.byId(programId))!
+    expect(program.name).toBe('Грудь + трицепс')
+    expect(program.updatedAt).toBe(ports.clock.now())
+  })
+
+  it('проведённая тренировка держит прежнее название (FR-3.5)', async () => {
+    const ports = setup()
+    withExercises(ports)
+    const programId = await createProgram(ports)({ name: 'Грудь', exerciseIds: [id('e-1')] })
+    const workoutId = await createWorkout(ports)({ date: localDate('2026-08-11'), programId })
+
+    await renameProgram(ports)({ programId, name: 'День А' })
+
+    expect((await ports.workouts.byId(workoutId))!.workout.programName).toBe('Грудь')
+  })
+
+  it('пустое название отклоняется', async () => {
+    const ports = setup()
+    const programId = await createProgram(ports)({ name: 'Грудь' })
+
+    await expect(renameProgram(ports)({ programId, name: '   ' })).rejects.toMatchObject({
+      code: 'name-empty',
+    })
+    expect((await ports.programs.byId(programId))!.name).toBe('Грудь')
+  })
+
+  it('несуществующая программа — NotFound', async () => {
+    const ports = setup()
+    await expect(
+      renameProgram(ports)({ programId: id('нет-такой'), name: 'День А' }),
+    ).rejects.toMatchObject({ name: 'NotFound' })
   })
 })
 

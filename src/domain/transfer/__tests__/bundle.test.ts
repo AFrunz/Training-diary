@@ -41,6 +41,7 @@ const item = (over: Partial<WorkoutItem> & Pick<WorkoutItem, 'id' | 'workoutId'>
 
 const set = (over: Partial<WorkoutSet> & Pick<WorkoutSet, 'id' | 'workoutItemId'>): WorkoutSet => ({
   order: 0,
+  unit: 'kg',
   reps: 8,
   weightKg: 80,
   createdAt: at('2026-08-11T15:40:00Z'),
@@ -131,6 +132,27 @@ describe('parseBundle', () => {
   it('незнакомые поля не мешают: файл новой минорной версии должен открываться', () => {
     const raw = { ...bundle(), somethingNew: true }
     expect(() => parseBundle(raw)).not.toThrow()
+  })
+
+  it('подход из старого файла получает килограммы: единицы там ещё не было (FR-4.11)', () => {
+    const { unit, ...legacySet } = set({ id: id('ws-1'), workoutItemId: id('wi-1') })
+    const raw = JSON.parse(
+      JSON.stringify({
+        ...bundle({ workoutSets: [legacySet as unknown as WorkoutSet] }),
+      }),
+    )
+
+    expect(parseBundle(raw).workoutSets[0]).toMatchObject({ unit: 'kg', weightKg: 80 })
+  })
+
+  it('своя единица подхода из файла сохраняется', () => {
+    const raw = JSON.parse(
+      JSON.stringify(
+        bundle({ workoutSets: [set({ id: id('ws-1'), workoutItemId: id('wi-1'), unit: 'deg', weightKg: null, angleDeg: 45 })] }),
+      ),
+    )
+
+    expect(parseBundle(raw).workoutSets[0]).toMatchObject({ unit: 'deg', angleDeg: 45 })
   })
 })
 

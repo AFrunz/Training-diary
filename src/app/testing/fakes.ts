@@ -153,25 +153,36 @@ export const createFakePorts = (options?: {
       async addSet(set) {
         state.workoutSets.push(set)
       },
+      async updateSet(set) {
+        const index = state.workoutSets.findIndex((s) => s.id === set.id)
+        if (index >= 0) state.workoutSets[index] = set
+      },
+      async removeSet(setId) {
+        state.workoutSets = state.workoutSets.filter((s) => s.id !== setId)
+      },
       async setItemCompleted(itemId, at) {
         const index = state.workoutItems.findIndex((i) => i.id === itemId)
         if (index >= 0) state.workoutItems[index] = { ...state.workoutItems[index]!, completedAt: at }
       },
-      async lastSetOf(exerciseId, options) {
-        const items = state.workoutItems.filter(
-          (i) => i.exerciseId === exerciseId && i.workoutId !== options?.exceptWorkoutId,
-        )
+      async previousSetsOf(exerciseId, options) {
         const byWorkoutDate = new Map(state.workouts.map((w) => [w.id, w.date]))
-        const sets = state.workoutSets
-          .filter((s) => items.some((i) => i.id === s.workoutItemId))
-          .sort((a, b) => {
-            const itemA = items.find((i) => i.id === a.workoutItemId)!
-            const itemB = items.find((i) => i.id === b.workoutItemId)!
-            const dateA = byWorkoutDate.get(itemA.workoutId) ?? ''
-            const dateB = byWorkoutDate.get(itemB.workoutId) ?? ''
-            return dateA === dateB ? a.order - b.order : dateA.localeCompare(dateB)
-          })
-        return sets.at(-1) ?? null
+        const candidates = state.workoutItems
+          .filter(
+            (i) =>
+              i.exerciseId === exerciseId &&
+              i.workoutId !== options.exceptWorkoutId &&
+              (byWorkoutDate.get(i.workoutId) ?? '') < options.before &&
+              state.workoutSets.some((s) => s.workoutItemId === i.id),
+          )
+          .sort((a, b) =>
+            (byWorkoutDate.get(a.workoutId) ?? '').localeCompare(byWorkoutDate.get(b.workoutId) ?? ''),
+          )
+
+        const item = candidates.at(-1)
+        if (!item) return []
+        return state.workoutSets
+          .filter((s) => s.workoutItemId === item.id)
+          .sort((a, b) => a.order - b.order)
       },
     },
 

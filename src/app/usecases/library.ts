@@ -145,6 +145,22 @@ export const setProgramItems =
     })
   }
 
+/**
+ * Переименование программы (FR-3.1.3). Проведённые тренировки держат снапшот
+ * названия (FR-3.5), поэтому история не меняется задним числом.
+ */
+export const renameProgram =
+  (p: Ports) =>
+  async (input: { readonly programId: Id; readonly name: string }): Promise<void> => {
+    const check = validateProgramName(input.name)
+    if (!check.ok) throw new ValidationFailed(check.code)
+
+    const program = await p.programs.byId(input.programId)
+    if (!program) throw new NotFound('program', input.programId)
+
+    await p.programs.update({ ...program, name: input.name.trim(), updatedAt: p.clock.now() })
+  }
+
 export const archiveProgram = (p: Ports) => async (id: Id): Promise<void> => {
   const program = await p.programs.byId(id)
   if (!program) throw new NotFound('program', id)

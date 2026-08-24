@@ -73,7 +73,13 @@ export function parseBundle(raw: unknown): ExportBundle {
     }
   }
 
-  return raw as unknown as ExportBundle
+  const bundle = raw as unknown as ExportBundle
+
+  // файлы прошлых версий не знают про единицу подхода: там всё было в килограммах
+  return {
+    ...bundle,
+    workoutSets: bundle.workoutSets.map((set) => ({ ...set, unit: set.unit ?? 'kg' })),
+  }
 }
 
 export function buildBundle(

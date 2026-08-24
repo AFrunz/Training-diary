@@ -6,8 +6,11 @@ import {
   addAdHocExercise,
   addSet,
   createWorkout,
+  deleteSet,
   deleteWorkout,
+  editSet,
   editWorkoutTimes,
+  previousSets,
   suggestNextSet,
   toggleItemDone,
 } from '../workouts'
@@ -151,7 +154,7 @@ describe('addSet', () => {
 
   it('записывает вес и повторы', async () => {
     const { ports, workoutId, itemId } = await withWorkout()
-    await addSet(ports)({ workoutId, itemId, weightKg: 80, reps: 8 })
+    await addSet(ports)({ workoutId, itemId, value: 80, unit: 'kg', reps: 8 })
 
     const sets = (await ports.workouts.byId(workoutId))!.items[0]!.sets
     expect(sets).toHaveLength(1)
@@ -160,41 +163,41 @@ describe('addSet', () => {
 
   it('подход без веса — штатный случай для турника и брусьев', async () => {
     const { ports, workoutId, itemId } = await withWorkout()
-    await addSet(ports)({ workoutId, itemId, weightKg: null, reps: 12 })
+    await addSet(ports)({ workoutId, itemId, value: null, unit: 'kg', reps: 12 })
     expect((await ports.workouts.byId(workoutId))!.items[0]!.sets[0]!.weightKg).toBeNull()
   })
 
   it('порядок подходов возрастает', async () => {
     const { ports, workoutId, itemId } = await withWorkout()
-    await addSet(ports)({ workoutId, itemId, weightKg: 80, reps: 8 })
-    await addSet(ports)({ workoutId, itemId, weightKg: 80, reps: 8 })
-    await addSet(ports)({ workoutId, itemId, weightKg: 82.5, reps: 6 })
+    await addSet(ports)({ workoutId, itemId, value: 80, unit: 'kg', reps: 8 })
+    await addSet(ports)({ workoutId, itemId, value: 80, unit: 'kg', reps: 8 })
+    await addSet(ports)({ workoutId, itemId, value: 82.5, unit: 'kg', reps: 6 })
     expect((await ports.workouts.byId(workoutId))!.items[0]!.sets.map((s) => s.order)).toEqual([0, 1, 2])
   })
 
   it('подход пишется сразу, без отдельного «Сохранить» (§7.1)', async () => {
     const { ports, workoutId, itemId } = await withWorkout()
-    await addSet(ports)({ workoutId, itemId, weightKg: 80, reps: 8 })
+    await addSet(ports)({ workoutId, itemId, value: 80, unit: 'kg', reps: 8 })
     expect(ports.state.workoutSets).toHaveLength(1)
   })
 
   it('нулевые повторы отклоняются', async () => {
     const { ports, workoutId, itemId } = await withWorkout()
-    await expect(addSet(ports)({ workoutId, itemId, weightKg: 80, reps: 0 })).rejects.toMatchObject({
+    await expect(addSet(ports)({ workoutId, itemId, value: 80, unit: 'kg', reps: 0 })).rejects.toMatchObject({
       code: 'reps-not-positive-integer',
     })
   })
 
   it('отрицательный вес отклоняется и ничего не записывает', async () => {
     const { ports, workoutId, itemId } = await withWorkout()
-    await addSet(ports)({ workoutId, itemId, weightKg: -10, reps: 8 }).catch(() => undefined)
+    await addSet(ports)({ workoutId, itemId, value: -10, unit: 'kg', reps: 8 }).catch(() => undefined)
     expect(ports.state.workoutSets).toHaveLength(0)
   })
 
   it('подход к чужому упражнению не записывается', async () => {
     const { ports, workoutId } = await withWorkout()
     await expect(
-      addSet(ports)({ workoutId, itemId: id('нет-такого'), weightKg: 80, reps: 8 }),
+      addSet(ports)({ workoutId, itemId: id('нет-такого'), value: 80, unit: 'kg', reps: 8 }),
     ).rejects.toMatchObject({ name: 'NotFound' })
   })
 })
@@ -329,7 +332,7 @@ describe('deleteWorkout', () => {
     const ports = setup()
     const workoutId = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
     const itemId = (await ports.workouts.byId(workoutId))!.items[0]!.id
-    await addSet(ports)({ workoutId, itemId, weightKg: 80, reps: 8 })
+    await addSet(ports)({ workoutId, itemId, value: 80, unit: 'kg', reps: 8 })
 
     await deleteWorkout(ports)(workoutId)
 
@@ -353,34 +356,174 @@ describe('deleteWorkout', () => {
   })
 })
 
-describe('suggestNextSet — предзаполнение полей (FR-4.4)', () => {
-  it('берёт последний подход этого упражнения в текущей тренировке', async () => {
+describe('editSet и deleteSet — правка записанного подхода (FR-4.4.1)', () => {
+  const withSets = async () => {
     const ports = setup()
     const workoutId = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
     const itemId = (await ports.workouts.byId(workoutId))!.items[0]!.id
-    await addSet(ports)({ workoutId, itemId, weightKg: 80, reps: 8 })
-    await addSet(ports)({ workoutId, itemId, weightKg: 82.5, reps: 6 })
+    await addSet(ports)({ workoutId, itemId, value: 80, unit: 'kg', reps: 8 })
+    await addSet(ports)({ workoutId, itemId, value: 82.5, unit: 'kg', reps: 6 })
+    await addSet(ports)({ workoutId, itemId, value: 85, unit: 'kg', reps: 4 })
+    const sets = (await ports.workouts.byId(workoutId))!.items[0]!.sets
+    return { ports, workoutId, itemId, sets }
+  }
 
-    await expect(suggestNextSet(ports)({ workoutId, itemId })).resolves.toMatchObject({
-      weightKg: 82.5,
-      reps: 6,
-      source: 'this-workout',
-    })
+  it('меняет вес и повторы, не трогая номер подхода', async () => {
+    const { ports, workoutId, itemId, sets } = await withSets()
+
+    await editSet(ports)({ workoutId, itemId, setId: sets[1]!.id, value: 85, unit: 'kg', reps: 5 })
+
+    const updated = (await ports.workouts.byId(workoutId))!.items[0]!.sets
+    expect(updated[1]).toMatchObject({ weightKg: 85, reps: 5, order: 1 })
+    expect(updated.map((set) => set.order)).toEqual([0, 1, 2])
   })
 
-  it('если в этой тренировке подходов ещё нет — берёт из прошлой', async () => {
+  it('переключение единицы пересчитывает вес в килограммы', async () => {
+    const { ports, workoutId, itemId, sets } = await withSets()
+
+    await editSet(ports)({ workoutId, itemId, setId: sets[0]!.id, value: 180, unit: 'lb', reps: 8 })
+
+    const updated = (await ports.workouts.byId(workoutId))!.items[0]!.sets[0]!
+    expect(updated.unit).toBe('lb')
+    expect(updated.weightKg).toBeCloseTo(81.6, 1)
+  })
+
+  it('угол пишется в своё поле, а вес остаётся пустым', async () => {
+    const { ports, workoutId, itemId, sets } = await withSets()
+
+    await editSet(ports)({ workoutId, itemId, setId: sets[0]!.id, value: 45, unit: 'deg', reps: 12 })
+
+    const updated = (await ports.workouts.byId(workoutId))!.items[0]!.sets[0]!
+    expect(updated).toMatchObject({ unit: 'deg', angleDeg: 45, weightKg: null })
+  })
+
+  it('угол больше вертикали отклоняется', async () => {
+    const { ports, workoutId, itemId, sets } = await withSets()
+
+    await expect(
+      editSet(ports)({ workoutId, itemId, setId: sets[0]!.id, value: 120, unit: 'deg', reps: 12 }),
+    ).rejects.toMatchObject({ code: 'angle-out-of-range' })
+  })
+
+  it('чужой подход не правится', async () => {
+    const { ports, workoutId, itemId } = await withSets()
+
+    await expect(
+      editSet(ports)({ workoutId, itemId, setId: id('нет-такого'), value: 80, unit: 'kg', reps: 8 }),
+    ).rejects.toMatchObject({ name: 'NotFound' })
+  })
+
+  it('удаление сжимает нумерацию оставшихся подходов', async () => {
+    const { ports, workoutId, itemId, sets } = await withSets()
+
+    await deleteSet(ports)({ workoutId, itemId, setId: sets[1]!.id })
+
+    const rest = (await ports.workouts.byId(workoutId))!.items[0]!.sets
+    expect(rest.map((set) => set.order)).toEqual([0, 1])
+    expect(rest.map((set) => set.reps)).toEqual([8, 4])
+  })
+})
+
+describe('previousSets — подходы прошлой тренировки (FR-4.10)', () => {
+  it('отдаёт подходы по каждому упражнению текущей тренировки', async () => {
     const ports = setup()
     const previous = await createWorkout(ports)({ date: localDate('2026-08-07'), programId: id('p-1') })
     const previousItemId = (await ports.workouts.byId(previous))!.items[0]!.id
-    await addSet(ports)({ workoutId: previous, itemId: previousItemId, weightKg: 80, reps: 8 })
+    await addSet(ports)({ workoutId: previous, itemId: previousItemId, value: 80, unit: 'kg', reps: 8 })
+    await addSet(ports)({ workoutId: previous, itemId: previousItemId, value: 82.5, unit: 'kg', reps: 6 })
+
+    const today = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    const items = (await ports.workouts.byId(today))!.items
+
+    const result = await previousSets(ports)(today)
+    expect(result[items[0]!.id]!.map((set) => set.reps)).toEqual([8, 6])
+    // второе упражнение в прошлый раз не делали
+    expect(result[items[1]!.id]).toEqual([])
+  })
+
+  it('тренировки после текущей не считаются прошлыми', async () => {
+    const ports = setup()
+    const earlier = await createWorkout(ports)({ date: localDate('2026-08-01'), programId: id('p-1') })
+    const earlierItemId = (await ports.workouts.byId(earlier))!.items[0]!.id
+    await addSet(ports)({ workoutId: earlier, itemId: earlierItemId, value: 70, unit: 'kg', reps: 10 })
+
+    const middle = await createWorkout(ports)({ date: localDate('2026-08-07'), programId: id('p-1') })
+    const middleItemId = (await ports.workouts.byId(middle))!.items[0]!.id
+
+    const later = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    const laterItemId = (await ports.workouts.byId(later))!.items[0]!.id
+    await addSet(ports)({ workoutId: later, itemId: laterItemId, value: 90, unit: 'kg', reps: 5 })
+
+    const result = await previousSets(ports)(middle)
+    expect(result[middleItemId]!.map((set) => set.weightKg)).toEqual([70])
+  })
+})
+
+describe('suggestNextSet — предзаполнение полей (FR-4.4)', () => {
+  it('берёт подход прошлой тренировки под тем же номером, а не последний сделанный', async () => {
+    const ports = setup()
+    const previous = await createWorkout(ports)({ date: localDate('2026-08-07'), programId: id('p-1') })
+    const previousItemId = (await ports.workouts.byId(previous))!.items[0]!.id
+    await addSet(ports)({ workoutId: previous, itemId: previousItemId, value: 80, unit: 'kg', reps: 8 })
+    await addSet(ports)({ workoutId: previous, itemId: previousItemId, value: 82.5, unit: 'kg', reps: 6 })
+
+    const today = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    const itemId = (await ports.workouts.byId(today))!.items[0]!.id
+    await addSet(ports)({ workoutId: today, itemId, value: 85, unit: 'kg', reps: 8 })
+
+    // второй подход подставляется из второго прошлого — 82.5 × 6, а не из 85 × 8
+    await expect(suggestNextSet(ports)({ workoutId: today, itemId })).resolves.toMatchObject({
+      value: 82.5,
+      unit: 'kg',
+      reps: 6,
+      source: 'previous-workout',
+    })
+  })
+
+  it('подсказка несёт тот же подход прошлой тренировки', async () => {
+    const ports = setup()
+    const previous = await createWorkout(ports)({ date: localDate('2026-08-07'), programId: id('p-1') })
+    const previousItemId = (await ports.workouts.byId(previous))!.items[0]!.id
+    await addSet(ports)({ workoutId: previous, itemId: previousItemId, value: 80, unit: 'kg', reps: 8 })
+
+    const today = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    const itemId = (await ports.workouts.byId(today))!.items[0]!.id
+
+    const suggestion = await suggestNextSet(ports)({ workoutId: today, itemId })
+    expect(suggestion.previous).toMatchObject({ weightKg: 80, reps: 8 })
+  })
+
+  it('подходов сегодня больше, чем было в прошлый раз — берётся последний сегодняшний', async () => {
+    const ports = setup()
+    const previous = await createWorkout(ports)({ date: localDate('2026-08-07'), programId: id('p-1') })
+    const previousItemId = (await ports.workouts.byId(previous))!.items[0]!.id
+    await addSet(ports)({ workoutId: previous, itemId: previousItemId, value: 80, unit: 'kg', reps: 8 })
+
+    const today = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    const itemId = (await ports.workouts.byId(today))!.items[0]!.id
+    await addSet(ports)({ workoutId: today, itemId, value: 85, unit: 'kg', reps: 5 })
+
+    await expect(suggestNextSet(ports)({ workoutId: today, itemId })).resolves.toMatchObject({
+      value: 85,
+      reps: 5,
+      source: 'this-workout',
+      previous: null,
+    })
+  })
+
+  it('единица подхода наследуется от прошлого раза', async () => {
+    const ports = setup()
+    const previous = await createWorkout(ports)({ date: localDate('2026-08-07'), programId: id('p-1') })
+    const previousItemId = (await ports.workouts.byId(previous))!.items[0]!.id
+    await addSet(ports)({ workoutId: previous, itemId: previousItemId, value: 45, unit: 'deg', reps: 15 })
 
     const today = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
     const itemId = (await ports.workouts.byId(today))!.items[0]!.id
 
     await expect(suggestNextSet(ports)({ workoutId: today, itemId })).resolves.toMatchObject({
-      weightKg: 80,
-      reps: 8,
-      source: 'previous-workout',
+      value: 45,
+      unit: 'deg',
+      reps: 15,
     })
   })
 
@@ -390,7 +533,8 @@ describe('suggestNextSet — предзаполнение полей (FR-4.4)', 
     const itemId = (await ports.workouts.byId(workoutId))!.items[0]!.id
 
     await expect(suggestNextSet(ports)({ workoutId, itemId })).resolves.toMatchObject({
-      weightKg: null,
+      value: null,
+      unit: 'kg',
       reps: 8,
       source: 'program-target',
     })
@@ -402,7 +546,7 @@ describe('suggestNextSet — предзаполнение полей (FR-4.4)', 
     const itemId = (await ports.workouts.byId(workoutId))!.items[1]!.id
 
     await expect(suggestNextSet(ports)({ workoutId, itemId })).resolves.toMatchObject({
-      weightKg: null,
+      value: null,
       source: 'empty',
     })
   })

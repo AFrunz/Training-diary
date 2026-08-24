@@ -1,5 +1,5 @@
-import type { WeightKg, WeightUnit } from '../model/types'
-import { toDisplayWeight } from './units'
+import type { SetUnit, WeightKg, WeightUnit } from '../model/types'
+import { measureToDisplay, toDisplayWeight } from './units'
 
 /**
  * Форматирование значений для интерфейса. Чистые функции: ни времени, ни локали
@@ -39,12 +39,28 @@ export function formatElapsed(startedAt: number, now: number, locale: Locale): s
   return formatDuration(Math.max(0, now - startedAt), locale)
 }
 
-export function formatSet(
-  set: { weightKg?: WeightKg | null; reps: number },
-  unit: WeightUnit,
-): string {
-  const weight = toDisplayWeight(set.weightKg ?? null, unit)
-  return weight === null ? `× ${set.reps}` : `${formatNumber(weight)} × ${set.reps}`
+export interface FormattableSet {
+  readonly weightKg?: WeightKg | null
+  readonly angleDeg?: number | null
+  /** Единица подхода; без неё считается, что подход записан в единицах по умолчанию. */
+  readonly unit?: SetUnit
+  readonly reps: number
+}
+
+/**
+ * Подход чипом: «82.5 × 6».
+ *
+ * Единица не подписывается, пока она совпадает с той, что выбрана в настройках:
+ * иначе чипы разрослись бы у всех. Подпись появляется у подходов, записанных
+ * иначе — «180 lb × 6» и «45° × 12» (FR-4.11).
+ */
+export function formatSet(set: FormattableSet, defaultUnit: WeightUnit, locale: Locale): string {
+  const unit = set.unit ?? defaultUnit
+  const value = measureToDisplay(set, unit)
+  if (value === null) return `× ${set.reps}`
+
+  const suffix = unit === 'deg' ? '°' : unit === defaultUnit ? '' : ` ${WORDS[locale][unit]}`
+  return `${formatNumber(value)}${suffix} × ${set.reps}`
 }
 
 export function formatWeight(kg: WeightKg | null, unit: WeightUnit, locale: Locale): string {

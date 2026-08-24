@@ -69,28 +69,44 @@ describe('formatElapsed — счётчик идущей тренировки (FR
 
 describe('formatSet', () => {
   it('вес и повторы через знак умножения', () => {
-    expect(formatSet({ weightKg: 80, reps: 8 }, 'kg')).toBe('80 × 8')
+    expect(formatSet({ weightKg: 80, reps: 8 }, 'kg', 'ru')).toBe('80 × 8')
   })
 
   it('дробный вес пишется через точку, как в макетах', () => {
-    expect(formatSet({ weightKg: 82.5, reps: 6 }, 'kg')).toBe('82.5 × 6')
+    expect(formatSet({ weightKg: 82.5, reps: 6 }, 'kg', 'ru')).toBe('82.5 × 6')
   })
 
   it('целый вес показывается без лишних нулей', () => {
-    expect(formatSet({ weightKg: 80.0, reps: 8 }, 'kg')).toBe('80 × 8')
+    expect(formatSet({ weightKg: 80.0, reps: 8 }, 'kg', 'ru')).toBe('80 × 8')
   })
 
   it('упражнение без веса — только повторы', () => {
-    expect(formatSet({ weightKg: null, reps: 12 }, 'kg')).toBe('× 12')
-    expect(formatSet({ reps: 12 }, 'kg')).toBe('× 12')
+    expect(formatSet({ weightKg: null, reps: 12 }, 'kg', 'ru')).toBe('× 12')
+    expect(formatSet({ reps: 12 }, 'kg', 'ru')).toBe('× 12')
   })
 
   it('в фунтах вес переводится и округляется до целого', () => {
-    expect(formatSet({ weightKg: 82.5, reps: 6 }, 'lb')).toBe('182 × 6')
+    expect(formatSet({ weightKg: 82.5, reps: 6 }, 'lb', 'ru')).toBe('182 × 6')
   })
 
   it('нулевой вес — это вес, он показывается', () => {
-    expect(formatSet({ weightKg: 0, reps: 20 }, 'kg')).toBe('0 × 20')
+    expect(formatSet({ weightKg: 0, reps: 20 }, 'kg', 'ru')).toBe('0 × 20')
+  })
+
+  it('своя единица подхода подписывается, совпадающая с настройками — нет (FR-4.11)', () => {
+    expect(formatSet({ weightKg: 82.5, unit: 'lb', reps: 6 }, 'kg', 'ru')).toBe('182 lb × 6')
+    expect(formatSet({ weightKg: 82.5, unit: 'lb', reps: 6 }, 'lb', 'ru')).toBe('182 × 6')
+    expect(formatSet({ weightKg: 82.5, unit: 'kg', reps: 6 }, 'lb', 'ru')).toBe('82.5 кг × 6')
+    expect(formatSet({ weightKg: 82.5, unit: 'kg', reps: 6 }, 'lb', 'en')).toBe('82.5 kg × 6')
+  })
+
+  it('угол показывается градусами и в фунтах не пересчитывается', () => {
+    expect(formatSet({ angleDeg: 45, unit: 'deg', reps: 15 }, 'kg', 'ru')).toBe('45° × 15')
+    expect(formatSet({ angleDeg: 45, unit: 'deg', reps: 15 }, 'lb', 'en')).toBe('45° × 15')
+  })
+
+  it('подход с единицей deg без угла — только повторы', () => {
+    expect(formatSet({ unit: 'deg', reps: 15 }, 'kg', 'ru')).toBe('× 15')
   })
 })
 

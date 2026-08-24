@@ -18,9 +18,11 @@ To track how working weights grow for every exercise, and to see your consistenc
 
 - **Calendar**, monthly and yearly: a training day is marked with its program colour, time off is greyed out
 - **Workout screen** with a live timer, sets and completion checkmarks; weight is optional — for pull-ups and planks
+- **Last workout right above this one**: every set is paired with the same-numbered set from last time, and a new set is prefilled from it
+- **Per-set units** — kilograms, pounds or degrees of bench incline; tap a set to edit or delete it
 - **Programs** — training days with free-form names, their own colour and exercise list
 - **Library** of 40 preloaded exercises with search and grouping by muscle
-- **Exercise history**: records, a weight progression chart, sets broken down with the delta since last time
+- **Exercise history**: records, all-time volume, a weight progression chart, sets broken down with the delta since last time
 - **Statistics** for a month or a year: consistency, average duration, completion rate, week streaks
 - **Your data stays yours**: export and import as one file, rotating auto-backups, full wipe
 - Russian and English, light and dark themes, kilograms and pounds
@@ -54,7 +56,7 @@ Calculation rules know nothing about React Native or the database, so they run a
 
 ## Tests
 
-625 tests across four levels plus 12 end-to-end Maestro flows:
+692 tests across four levels plus 12 end-to-end Maestro flows:
 
 ```sh
 npm test              # everything
@@ -80,7 +82,7 @@ An installable APK is built automatically when a release is published — see [R
 
 ## Design
 
-Mockups live in `design.pen` ([Pencil](https://pen.dev)): 13 screens in light and dark themes, a design system with tokens, the app icon and an inventory of interface icons.
+Mockups live in `design.pen` ([Pencil](https://pen.dev)): 15 screens in light and dark themes, a design system with tokens, the app icon and an inventory of interface icons.
 
 ## License
 

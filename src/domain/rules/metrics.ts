@@ -19,6 +19,38 @@ export function epley1RM(weightKg: WeightKg | null, reps: number): number | null
   return weightKg * (1 + reps / 30)
 }
 
+export interface ExerciseVolume {
+  /** Тоннаж: сумма «вес × повторы» по подходам с весом. `null` — веса не было ни разу. */
+  readonly weightKg: number | null
+  /** Повторы подходов без веса: турник, планка, угол наклона. */
+  readonly reps: number
+}
+
+/**
+ * Объём упражнения (FR-5.5). Считается по упражнению, а не по тренировке:
+ * складывать килограммы жима и разводки бессмысленно.
+ *
+ * Подходы без веса не пропадают: у них суммируются повторы. Если в упражнении
+ * есть и то и другое, ведущей метрикой остаётся тоннаж.
+ */
+export function exerciseVolume(
+  sets: readonly { readonly weightKg?: WeightKg | null; readonly reps: number }[],
+): ExerciseVolume {
+  let weightKg: number | null = null
+  let reps = 0
+
+  for (const set of sets) {
+    const weight = set.weightKg ?? null
+    if (weight !== null && weight > 0) {
+      weightKg = (weightKg ?? 0) + weight * set.reps
+    } else {
+      reps += set.reps
+    }
+  }
+
+  return { weightKg, reps }
+}
+
 export function averageOrNull(values: readonly (number | null)[]): number | null {
   const known = values.filter((value): value is number => value !== null)
   if (known.length === 0) return null

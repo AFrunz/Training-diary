@@ -23,7 +23,7 @@ export class WorkoutDateTaken extends Error {
 
 export class NotFound extends Error {
   constructor(
-    readonly entity: 'exercise' | 'program' | 'workout' | 'workout-item' | 'absence',
+    readonly entity: 'exercise' | 'program' | 'workout' | 'workout-item' | 'workout-set' | 'absence',
     readonly entityId: Id,
   ) {
     super(`not-found:${entity}:${entityId}`)

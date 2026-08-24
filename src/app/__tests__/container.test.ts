@@ -67,7 +67,7 @@ describe('createServices', () => {
     const programId = await services.createProgram({ name: 'Грудь', exerciseIds: [id('e-1')] })
     const workoutId = await services.createWorkout({ date: localDate('2026-08-11'), programId })
     const itemId = (await ports.workouts.byId(workoutId))!.items[0]!.id
-    await services.addSet({ workoutId, itemId, weightKg: 80, reps: 8 })
+    await services.addSet({ workoutId, itemId, value: 80, unit: 'kg', reps: 8 })
     await services.toggleItemDone({ workoutId, itemId, done: true })
 
     const stats = await services.monthStats({

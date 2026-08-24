@@ -1,7 +1,7 @@
 import type { SqlDriver } from './driver'
 
 /** Текущая версия схемы. Растёт с каждой миграцией. */
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 /**
  * Шаги миграции. Каждый шаг применяется целиком и ровно один раз;
@@ -94,6 +94,16 @@ const MIGRATIONS: readonly { readonly version: number; readonly statements: read
       )`,
       `INSERT INTO settings (id, unit, first_day_of_week, theme, language)
        VALUES (1, 'kg', 1, 'system', 'system')`,
+    ],
+  },
+  {
+    // единица переехала из настроек в каждый подход (FR-4.11)
+    version: 2,
+    statements: [
+      `ALTER TABLE workout_sets ADD COLUMN angle_deg REAL`,
+      `ALTER TABLE workout_sets ADD COLUMN unit TEXT NOT NULL DEFAULT 'kg'`,
+      // записанное до миграции показывалось в единицах из настроек — так и остаётся
+      `UPDATE workout_sets SET unit = COALESCE((SELECT unit FROM settings WHERE id = 1), 'kg')`,
     ],
   },
 ]

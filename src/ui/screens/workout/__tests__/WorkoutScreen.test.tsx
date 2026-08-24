@@ -154,6 +154,52 @@ describe('WorkoutScreen', () => {
     expect(await screen.findByText('80 × 8')).toBeTruthy()
   })
 
+  it('правка подхода по тапу переписывает его на месте (FR-4.4.1)', async () => {
+    const fixture = await seed()
+    await fixture.services.addSet({
+      workoutId: fixture.workoutId,
+      itemId: fixture.ports.state.workoutItems[0]!.id,
+      value: 80,
+      unit: 'kg',
+      reps: 8,
+    })
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('set-chip-0-0'))
+
+    expect(await screen.findByTestId('add-set-title')).toHaveTextContent('Правка подхода')
+    fireEvent.changeText(screen.getByTestId('set-weight-input'), '85')
+    fireEvent.press(screen.getByTestId('set-submit'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.workoutSets[0]).toMatchObject({ weightKg: 85, reps: 8 })
+    })
+    expect(fixture.ports.state.workoutSets).toHaveLength(1)
+    expect(await screen.findByText('85 × 8')).toBeTruthy()
+  })
+
+  it('удаление подхода из шита убирает его с экрана', async () => {
+    const fixture = await seed()
+    await fixture.services.addSet({
+      workoutId: fixture.workoutId,
+      itemId: fixture.ports.state.workoutItems[0]!.id,
+      value: 80,
+      unit: 'kg',
+      reps: 8,
+    })
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('set-chip-0-0'))
+    fireEvent.press(await screen.findByTestId('set-delete'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.workoutSets).toHaveLength(0)
+    })
+    await waitFor(() => {
+      expect(screen.queryByTestId('set-chip-0-0')).toBeNull()
+    })
+  })
+
   it('пустая тренировка показывает бублик 0/0 и не рисует упражнений', async () => {
     const fixture = await seed({ exercises: false })
     renderScreen(fixture)
@@ -161,6 +207,54 @@ describe('WorkoutScreen', () => {
     expect(await screen.findByTestId('workout-donut')).toHaveTextContent('0/0')
     expect(screen.queryByTestId('item-checkbox-0')).toBeNull()
     expect(screen.getByTestId('add-exercise')).toBeTruthy()
+  })
+})
+
+describe('WorkoutScreen — прошлая тренировка рядом с сегодняшней (FR-4.10)', () => {
+  /** Та же программа неделей раньше: два подхода жима. */
+  const seedPrevious = async (fixture: Fixture) => {
+    const { services, ports } = fixture
+    ports.clock.set(instant(Date.parse('2026-08-04T15:00:00Z')))
+    const programId = ports.state.programs[0]!.id
+    const previousId = await services.createWorkout({ date: localDate('2026-08-04'), programId })
+    const item = ports.state.workoutItems.find((candidate) => candidate.workoutId === previousId)!
+    await services.addSet({ workoutId: previousId, itemId: item.id, value: 80, unit: 'kg', reps: 8 })
+    await services.addSet({ workoutId: previousId, itemId: item.id, value: 82.5, unit: 'kg', reps: 6 })
+    ports.clock.set(instant(STARTED_AT))
+  }
+
+  it('подходы прошлой тренировки стоят над сегодняшними', async () => {
+    const fixture = await seed()
+    await seedPrevious(fixture)
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('set-previous-0-0')).toHaveTextContent('80 × 8')
+    expect(screen.getByTestId('set-previous-0-1')).toHaveTextContent('82.5 × 6')
+    expect(screen.getByTestId('workout-sets-hint')).toBeTruthy()
+  })
+
+  it('новый подход предзаполняется тем же по счёту подходом прошлой тренировки', async () => {
+    const fixture = await seed()
+    await seedPrevious(fixture)
+    renderScreen(fixture)
+
+    const todayItemId = fixture.ports.state.workoutItems.find(
+      (item) => item.workoutId === fixture.workoutId,
+    )!.id
+    const todaySets = () =>
+      fixture.ports.state.workoutSets.filter((set) => set.workoutItemId === todayItemId)
+
+    // первый подход сегодня — 85 × 8, второй должен подставиться из 82.5 × 6
+    fireEvent.press(await screen.findByTestId('add-set-0'))
+    await waitFor(() => expect(screen.getByTestId('set-weight-input').props.value).toBe('80'))
+    fireEvent.changeText(screen.getByTestId('set-weight-input'), '85')
+    fireEvent.press(screen.getByTestId('set-submit'))
+    await waitFor(() => expect(todaySets()).toHaveLength(1))
+
+    fireEvent.press(await screen.findByTestId('add-set-0'))
+
+    await waitFor(() => expect(screen.getByTestId('set-weight-input').props.value).toBe('82.5'))
+    expect(screen.getByTestId('set-reps-input').props.value).toBe('6')
   })
 })
 

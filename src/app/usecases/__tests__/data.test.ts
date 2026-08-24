@@ -36,6 +36,7 @@ const setup = (): FakePorts => {
     id: id('ws-1'),
     workoutItemId: id('wi-1'),
     order: 0,
+    unit: 'kg',
     weightKg: 82.5,
     reps: 6,
     createdAt: at('2026-08-11T16:40:00Z'),

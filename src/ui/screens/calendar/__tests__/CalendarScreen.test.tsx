@@ -63,7 +63,7 @@ const addWorkout = async (
   ports.clock.set(at(input.finishedAt ?? input.startedAt ?? NOW))
 
   for (const item of (aggregate?.items ?? []).slice(0, input.done)) {
-    await services.addSet({ workoutId, itemId: item.id, weightKg: 60, reps: 8 })
+    await services.addSet({ workoutId, itemId: item.id, value: 60, unit: 'kg', reps: 8 })
     await services.toggleItemDone({ workoutId, itemId: item.id, done: true })
   }
 

@@ -100,6 +100,10 @@ export const workoutSets = sqliteTable(
       .references(() => workoutItems.id, { onDelete: 'cascade' }),
     order: integer('order_index').notNull(),
     weightKg: real('weight_kg'),
+    /** Угол наклона: заполнен вместо веса при `unit = 'deg'` (FR-4.11). */
+    angleDeg: real('angle_deg'),
+    /** Единица ввода: 'kg', 'lb' или 'deg'. Вес всё равно лежит в килограммах. */
+    unit: text('unit').notNull(),
     reps: integer('reps').notNull(),
     createdAt: integer('created_at').notNull(),
   },

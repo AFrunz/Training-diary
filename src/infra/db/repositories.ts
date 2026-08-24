@@ -9,7 +9,14 @@ import type {
   WorkoutItem,
   WorkoutSet,
 } from '../../domain/model/entities'
-import type { FirstDayOfWeek, Id, Instant, LocalDate, WeightUnit } from '../../domain/model/types'
+import type {
+  FirstDayOfWeek,
+  Id,
+  Instant,
+  LocalDate,
+  SetUnit,
+  WeightUnit,
+} from '../../domain/model/types'
 import { id as makeId, instant, localDate } from '../../domain/model/types'
 import type { Ports, WorkoutAggregate } from '../../app/ports'
 import type { SqlDriver } from './driver'
@@ -89,11 +96,25 @@ const toWorkoutSet = (row: Row): WorkoutSet => ({
   workoutItemId: makeId(str(row[1])),
   order: num(row[2]),
   weightKg: nullableNum(row[3]),
-  reps: num(row[4]),
-  createdAt: instant(num(row[5])),
+  angleDeg: nullableNum(row[4]),
+  unit: str(row[5]) as SetUnit,
+  reps: num(row[6]),
+  createdAt: instant(num(row[7])),
 })
 
-const WORKOUT_SET_COLUMNS = 'id, workout_item_id, order_index, weight_kg, reps, created_at'
+const WORKOUT_SET_COLUMNS =
+  'id, workout_item_id, order_index, weight_kg, angle_deg, unit, reps, created_at'
+
+const workoutSetValues = (set: WorkoutSet): readonly unknown[] => [
+  set.id,
+  set.workoutItemId,
+  set.order,
+  set.weightKg ?? null,
+  set.angleDeg ?? null,
+  set.unit,
+  set.reps,
+  set.createdAt,
+]
 
 const toAbsence = (row: Row): Absence => ({
   id: makeId(str(row[0])),
@@ -231,29 +252,47 @@ export function createSqliteRepositories(driver: SqlDriver): DataPorts {
 
       async addSet(set) {
         await driver.run(
-          `INSERT INTO workout_sets (${WORKOUT_SET_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?)`,
-          [set.id, set.workoutItemId, set.order, set.weightKg ?? null, set.reps, set.createdAt],
+          `INSERT INTO workout_sets (${WORKOUT_SET_COLUMNS}) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          workoutSetValues(set),
         )
+      },
+
+      async updateSet(set) {
+        await driver.run(
+          `UPDATE workout_sets SET order_index = ?, weight_kg = ?, angle_deg = ?, unit = ?, reps = ?
+           WHERE id = ?`,
+          [set.order, set.weightKg ?? null, set.angleDeg ?? null, set.unit, set.reps, set.id],
+        )
+      },
+
+      async removeSet(setId) {
+        await driver.run('DELETE FROM workout_sets WHERE id = ?', [setId])
       },
 
       async setItemCompleted(itemId, at) {
         await driver.run('UPDATE workout_items SET completed_at = ? WHERE id = ?', [at, itemId])
       },
 
-      async lastSetOf(exerciseId, options) {
-        const rows = await driver.all(
-          `SELECT ${WORKOUT_SET_COLUMNS.split(', ')
-            .map((column) => `s.${column}`)
-            .join(', ')}
-           FROM workout_sets s
-           JOIN workout_items i ON i.id = s.workout_item_id
+      async previousSetsOf(exerciseId, options) {
+        // ближайшая более ранняя тренировка, где у этого упражнения есть подходы
+        const previousWorkout = await driver.all(
+          `SELECT i.id
+           FROM workout_items i
            JOIN workouts w ON w.id = i.workout_id
-           WHERE i.exercise_id = ? AND (? IS NULL OR i.workout_id <> ?)
-           ORDER BY w.date DESC, s.order_index DESC
+           WHERE i.exercise_id = ? AND w.date < ? AND i.workout_id <> ?
+             AND EXISTS (SELECT 1 FROM workout_sets s WHERE s.workout_item_id = i.id)
+           ORDER BY w.date DESC
            LIMIT 1`,
-          [exerciseId, options?.exceptWorkoutId ?? null, options?.exceptWorkoutId ?? null],
+          [exerciseId, options.before, options.exceptWorkoutId],
         )
-        return rows[0] ? toWorkoutSet(rows[0]) : null
+        const itemId = previousWorkout[0]?.[0]
+        if (itemId === undefined) return []
+
+        const rows = await driver.all(
+          `SELECT ${WORKOUT_SET_COLUMNS} FROM workout_sets WHERE workout_item_id = ? ORDER BY order_index`,
+          [itemId],
+        )
+        return rows.map(toWorkoutSet)
       },
     },
 

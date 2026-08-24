@@ -2,11 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { Exercise } from '../../../domain/model/entities'
-import type { Id, LocalDate, WeightKg, WeightUnit } from '../../../domain/model/types'
+import type { Id, LocalDate, SetUnit, WeightKg, WeightUnit } from '../../../domain/model/types'
 import { localDate } from '../../../domain/model/types'
 import { toLocalDate } from '../../../domain/rules/dates'
 import { EMPTY_VALUE, formatSet, formatWeight } from '../../../domain/rules/format'
-import { epley1RM } from '../../../domain/rules/metrics'
+import type { ExerciseVolume } from '../../../domain/rules/metrics'
+import { epley1RM, exerciseVolume } from '../../../domain/rules/metrics'
 import { toDisplayWeight } from '../../../domain/rules/units'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { useT } from '../../i18n/I18nProvider'
@@ -33,6 +34,8 @@ type Metric = 'weight' | 'oneRm'
 interface HistorySet {
   readonly id: Id
   readonly weightKg: WeightKg | null
+  readonly angleDeg: number | null
+  readonly unit: SetUnit
   readonly reps: number
 }
 
@@ -64,6 +67,8 @@ interface HistoryView {
   readonly entries: readonly HistoryEntry[]
   readonly weightRecord: WeightRecord | null
   readonly repsRecord: RepsRecord | null
+  /** Объём за всё время: тоннаж, а у упражнений без веса — повторы (FR-5.5). */
+  readonly volume: ExerciseVolume
 }
 
 const maxOrNull = (values: readonly (number | null)[]): number | null => {
@@ -134,7 +139,13 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
         const sets: HistorySet[] = aggregate.items
           .filter((item) => item.exerciseId === exerciseId)
           .flatMap((item) =>
-            item.sets.map((set) => ({ id: set.id, weightKg: set.weightKg ?? null, reps: set.reps })),
+            item.sets.map((set) => ({
+              id: set.id,
+              weightKg: set.weightKg ?? null,
+              angleDeg: set.angleDeg ?? null,
+              unit: set.unit,
+              reps: set.reps,
+            })),
           )
         if (sets.length === 0) continue
 
@@ -154,6 +165,7 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
         entries,
         weightRecord: findWeightRecord(entries),
         repsRecord: findRepsRecord(entries),
+        volume: exerciseVolume(entries.flatMap((entry) => entry.sets)),
       }
     },
   })
@@ -162,7 +174,7 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
     return <View testID="exercise-history-screen" style={[styles.root, { backgroundColor: colors.bg }]} />
   }
 
-  const { exercise, unit, today, entries, weightRecord, repsRecord } = data
+  const { exercise, unit, today, entries, weightRecord, repsRecord, volume } = data
 
   const formatDate = (date: LocalDate, short: boolean): string => {
     const [, month, day] = date.split('-')
@@ -257,6 +269,34 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
                 </Text>
               ) : null}
             </View>
+          </View>
+
+          <View
+            testID="history-volume"
+            style={[styles.card, styles.volumeCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+          >
+            <View style={styles.volumeTexts}>
+              <View style={styles.volumeTitleRow}>
+                <Text style={[styles.volumeTitle, { color: colors.textPrimary }]}>
+                  {t('history.volume')}
+                </Text>
+                <View style={[styles.periodChip, { backgroundColor: colors.surface2 }]}>
+                  <Text style={[styles.periodLabel, { color: colors.textMuted }]}>
+                    {t('history.volumeAllTime')}
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={[styles.volumeHint, { color: colors.textMuted }]}>
+                {t(volume.weightKg === null ? 'history.volumeRepsHint' : 'history.volumeHint')}
+              </Text>
+            </View>
+
+            <Text testID="history-volume-value" style={[styles.volumeValue, { color: colors.textPrimary }]}>
+              {volume.weightKg === null
+                ? count('reps', volume.reps)
+                : formatWeight(volume.weightKg, unit, locale)}
+            </Text>
           </View>
 
           <View style={[styles.card, styles.chartCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -375,7 +415,7 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
                     {entry.sets.map((set) => (
                       <View key={set.id} style={[styles.setChip, { backgroundColor: colors.surface2 }]}>
                         <Text style={[styles.setLabel, { color: colors.textPrimary }]}>
-                          {formatSet(set, unit)}
+                          {formatSet(set, unit, locale)}
                         </Text>
                       </View>
                     ))}
@@ -402,6 +442,16 @@ const styles = StyleSheet.create({
   // значение рекорда — числовая гарнитура ($font-num в макете)
   recordValue: { fontSize: 22, fontFamily: numFont('700'), fontWeight: '700' },
   recordNote: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
+
+  // объём отдельной широкой карточкой: тремя в ряд значение уже не помещается
+  volumeCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
+  volumeTexts: { flex: 1, gap: 3 },
+  volumeTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  volumeTitle: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
+  periodChip: { borderRadius: radii.pill, paddingVertical: 2, paddingHorizontal: 8 },
+  periodLabel: { fontSize: 10, fontFamily: uiFont('600'), fontWeight: '600' },
+  volumeHint: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
+  volumeValue: { fontSize: 22, fontFamily: numFont('700'), fontWeight: '700' },
 
   chartCard: { padding: 16, gap: 14 },
   chartHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

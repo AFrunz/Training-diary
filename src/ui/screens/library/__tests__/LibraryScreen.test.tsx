@@ -101,7 +101,7 @@ describe('Библиотека', () => {
     const programId = await services.createProgram({ name: 'Грудь', exerciseIds: [exercise!.id] })
     const workoutId = await services.createWorkout({ date: localDate('2026-08-11'), programId })
     const aggregate = await ports.workouts.byId(workoutId)
-    await services.addSet({ workoutId, itemId: aggregate!.items[0]!.id, weightKg: 82.5, reps: 8 })
+    await services.addSet({ workoutId, itemId: aggregate!.items[0]!.id, value: 82.5, unit: 'kg', reps: 8 })
 
     render(<LibraryScreen />, { services })
 

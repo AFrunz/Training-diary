@@ -1,7 +1,8 @@
 import { NotFound, ValidationFailed, WorkoutDateTaken } from '../../domain/errors'
 import type { WorkoutItem, WorkoutSet } from '../../domain/model/entities'
-import type { Id, Instant, LocalDate, WeightKg } from '../../domain/model/types'
+import type { Id, Instant, LocalDate, SetUnit } from '../../domain/model/types'
 import { deriveFinishedAt } from '../../domain/rules/duration'
+import { measureFromInput, measureToDisplay } from '../../domain/rules/units'
 import { validateSet } from '../../domain/validation/rules'
 import type { Ports, WorkoutAggregate } from '../ports'
 
@@ -67,13 +68,19 @@ export const createWorkout = (p: Ports) => async (input: CreateWorkoutInput): Pr
 export interface AddSetInput {
   readonly workoutId: Id
   readonly itemId: Id
-  readonly weightKg?: WeightKg | null
+  /** Число из поля ввода в единицах `unit`; null — подход без веса. */
+  readonly value?: number | null
+  readonly unit: SetUnit
   readonly reps: number
 }
 
-/** Добавление подхода (FR-4.4). Вес необязателен. Пишется сразу, без кнопки «Сохранить». */
+/**
+ * Добавление подхода (FR-4.4). Вес необязателен, единица своя у каждого подхода
+ * (FR-4.11). Пишется сразу, без кнопки «Сохранить».
+ */
 export const addSet = (p: Ports) => async (input: AddSetInput): Promise<Id> => {
-  const check = validateSet({ weightKg: input.weightKg ?? null, reps: input.reps })
+  const measure = measureFromInput(input.value ?? null, input.unit)
+  const check = validateSet({ ...measure, reps: input.reps })
   if (!check.ok) throw new ValidationFailed(check.code)
 
   const aggregate = await requireWorkout(p, input.workoutId)
@@ -84,12 +91,70 @@ export const addSet = (p: Ports) => async (input: AddSetInput): Promise<Id> => {
     id: p.ids.uuid(),
     workoutItemId: item.id,
     order: item.sets.length,
-    weightKg: input.weightKg ?? null,
+    ...measure,
+    unit: input.unit,
     reps: input.reps,
     createdAt: p.clock.now(),
   }
   await p.workouts.addSet(set)
   return set.id
+}
+
+export interface EditSetInput {
+  readonly workoutId: Id
+  readonly itemId: Id
+  readonly setId: Id
+  readonly value?: number | null
+  readonly unit: SetUnit
+  readonly reps: number
+}
+
+const requireSet = (aggregate: WorkoutAggregate, itemId: Id, setId: Id): WorkoutSet => {
+  const item = aggregate.items.find((candidate) => candidate.id === itemId)
+  if (!item) throw new NotFound('workout-item', itemId)
+
+  const set = item.sets.find((candidate) => candidate.id === setId)
+  if (!set) throw new NotFound('workout-set', setId)
+  return set
+}
+
+/** Правка записанного подхода по тапу (FR-4.4.1). Номер и время создания не меняются. */
+export const editSet = (p: Ports) => async (input: EditSetInput): Promise<void> => {
+  const measure = measureFromInput(input.value ?? null, input.unit)
+  const check = validateSet({ ...measure, reps: input.reps })
+  if (!check.ok) throw new ValidationFailed(check.code)
+
+  const aggregate = await requireWorkout(p, input.workoutId)
+  const set = requireSet(aggregate, input.itemId, input.setId)
+
+  await p.workouts.updateSet({ ...set, ...measure, unit: input.unit, reps: input.reps })
+}
+
+export interface DeleteSetInput {
+  readonly workoutId: Id
+  readonly itemId: Id
+  readonly setId: Id
+}
+
+/**
+ * Удаление подхода из того же окна правки (FR-4.4.1).
+ *
+ * Оставшиеся подходы перенумеровываются: номер подхода — это его порядок, и без
+ * сжатия дырка сдвинула бы сопоставление с прошлой тренировкой.
+ */
+export const deleteSet = (p: Ports) => async (input: DeleteSetInput): Promise<void> => {
+  const aggregate = await requireWorkout(p, input.workoutId)
+  const set = requireSet(aggregate, input.itemId, input.setId)
+  const item = aggregate.items.find((candidate) => candidate.id === input.itemId)!
+
+  await p.uow.tx(async () => {
+    await p.workouts.removeSet(set.id)
+
+    const rest = item.sets.filter((candidate) => candidate.id !== set.id)
+    for (const [index, remaining] of rest.entries()) {
+      if (remaining.order !== index) await p.workouts.updateSet({ ...remaining, order: index })
+    }
+  })
 }
 
 export interface ToggleItemDoneInput {
@@ -176,15 +241,58 @@ export const deleteWorkout = (p: Ports) => async (workoutId: Id): Promise<void> 
   await p.workouts.remove(workoutId)
 }
 
+/**
+ * Подходы прошлой тренировки по каждому упражнению текущей (FR-4.10): экран
+ * показывает их над сегодняшними, чтобы сравнение было наглядным.
+ */
+export const previousSets =
+  (p: Ports) =>
+  async (workoutId: Id): Promise<Readonly<Record<string, readonly WorkoutSet[]>>> => {
+    const aggregate = await requireWorkout(p, workoutId)
+
+    const entries = await Promise.all(
+      aggregate.items.map(
+        async (item) =>
+          [
+            item.id,
+            await p.workouts.previousSetsOf(item.exerciseId, {
+              before: aggregate.workout.date,
+              exceptWorkoutId: workoutId,
+            }),
+          ] as const,
+      ),
+    )
+
+    return Object.fromEntries(entries)
+  }
+
 export interface SetSuggestion {
-  readonly weightKg: WeightKg | null
+  /** Число для поля ввода в единицах `unit`. */
+  readonly value: number | null
+  readonly unit: SetUnit
   readonly reps: number
-  readonly source: 'this-workout' | 'previous-workout' | 'program-target' | 'empty'
+  readonly source: 'previous-workout' | 'this-workout' | 'program-target' | 'empty'
+  /** Подход прошлой тренировки под тем же номером — его показывает подсказка. */
+  readonly previous: WorkoutSet | null
 }
 
+const fromSet = (
+  set: WorkoutSet,
+  source: SetSuggestion['source'],
+  previous: WorkoutSet | null,
+): SetSuggestion => ({
+  value: measureToDisplay(set, set.unit),
+  unit: set.unit,
+  reps: set.reps,
+  source,
+  previous,
+})
+
 /**
- * Предзаполнение полей нового подхода (FR-4.4): сначала предыдущий подход этого
- * упражнения в текущей тренировке, иначе — из прошлой тренировки, иначе — план программы.
+ * Предзаполнение полей нового подхода (FR-4.4). Ведущий источник — подход прошлой
+ * тренировки под тем же номером: второй подход подставляется из второго, а не из
+ * последнего сделанного. Дальше — последний подход в этой тренировке (когда
+ * подходов сегодня уже больше, чем было), план программы и пустые поля.
  */
 export const suggestNextSet =
   (p: Ports) =>
@@ -193,25 +301,32 @@ export const suggestNextSet =
     const item = aggregate.items.find((candidate) => candidate.id === input.itemId)
     if (!item) throw new NotFound('workout-item', input.itemId)
 
+    const previousAll = await p.workouts.previousSetsOf(item.exerciseId, {
+      before: aggregate.workout.date,
+      exceptWorkoutId: input.workoutId,
+    })
+    const sameNumber = previousAll[item.sets.length] ?? null
+
+    if (sameNumber) return fromSet(sameNumber, 'previous-workout', sameNumber)
+
     const lastInThisWorkout = item.sets.at(-1)
-    if (lastInThisWorkout) {
-      return {
-        weightKg: lastInThisWorkout.weightKg ?? null,
-        reps: lastInThisWorkout.reps,
-        source: 'this-workout',
-      }
-    }
+    if (lastInThisWorkout) return fromSet(lastInThisWorkout, 'this-workout', null)
 
-    const previous = await p.workouts.lastSetOf(item.exerciseId, { exceptWorkoutId: input.workoutId })
-    if (previous) {
-      return { weightKg: previous.weightKg ?? null, reps: previous.reps, source: 'previous-workout' }
-    }
+    const lastPrevious = previousAll.at(-1)
+    if (lastPrevious) return fromSet(lastPrevious, 'previous-workout', null)
 
+    const settings = await p.settings.get()
     const program = await p.programs.byIdWithItems(aggregate.workout.programId)
     const planned = program?.items.find((candidate) => candidate.exerciseId === item.exerciseId)
     if (planned?.targetReps) {
-      return { weightKg: null, reps: planned.targetReps, source: 'program-target' }
+      return {
+        value: null,
+        unit: settings.unit,
+        reps: planned.targetReps,
+        source: 'program-target',
+        previous: null,
+      }
     }
 
-    return { weightKg: null, reps: 0, source: 'empty' }
+    return { value: null, unit: settings.unit, reps: 0, source: 'empty', previous: null }
   }

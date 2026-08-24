@@ -52,6 +52,21 @@ name: Проведение тренировки — подходы, отметк
     id: 'set-submit'
 - assertVisible: '82\.5 × 7'
 
+# Правка подхода по тапу (FR-4.4.1): значения берутся из него самого
+- tapOn:
+    id: 'set-chip-0-1'
+- assertVisible: 'Правка подхода'
+- assertVisible:
+    id: 'set-weight-input'
+    text: '82\.5'
+- tapOn:
+    id: 'set-reps-input'
+- eraseText
+- inputText: '6'
+- tapOn:
+    id: 'set-submit'
+- assertVisible: '82\.5 × 6'
+
 # Третье упражнение без снаряда: вес не трогаем, подход показывается как «× N»
 - tapOn:
     id: 'add-set-2'
@@ -61,6 +76,28 @@ name: Проведение тренировки — подходы, отметк
 - tapOn:
     id: 'set-submit'
 - assertVisible: '× 12'
+
+# Угол вместо веса (FR-4.11): единица своя у подхода и подписывается в чипе
+- tapOn:
+    id: 'add-set-1'
+- tapOn:
+    id: 'set-unit-deg'
+- tapOn:
+    id: 'set-weight-input'
+- inputText: '45'
+- tapOn:
+    id: 'set-reps-input'
+- inputText: '15'
+- tapOn:
+    id: 'set-submit'
+- assertVisible: '45° × 15'
+
+# Лишний подход удаляется из того же окна правки
+- tapOn:
+    id: 'set-chip-1-0'
+- tapOn:
+    id: 'set-delete'
+- assertNotVisible: '45° × 15'
 
 # Отметка первого упражнения: в списке тренировок доля стала 1/3
 # (экран тренировки лежит поверх таббара, поэтому сначала «назад»)

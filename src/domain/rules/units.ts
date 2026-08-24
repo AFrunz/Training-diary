@@ -1,10 +1,12 @@
-import type { WeightKg, WeightUnit } from '../model/types'
+import type { SetUnit, WeightKg, WeightUnit } from '../model/types'
+import { isWeightUnit } from '../model/types'
 
 /**
  * FR-7.5: вес хранится в килограммах всегда. Переключение единиц меняет только
  * отображение и не переписывает историю.
  *
  * Шаг ввода: 2.5 кг или 5 фунтов (§7.2), округление показа — до 0.5 кг и до 1 фунта.
+ * Угол (FR-4.11) не конвертируется: он и хранится, и показывается в градусах.
  */
 
 export const LB_PER_KG = 2.20462262185
@@ -43,4 +45,33 @@ export function fromInputWeight(value: number | null, unit: WeightUnit): WeightK
 
 export function stepForUnit(unit: WeightUnit): number {
   return unit === 'kg' ? 2.5 : 5
+}
+
+/** Что именно записывается в подход: вес в килограммах либо угол. */
+export interface SetMeasure {
+  readonly weightKg: WeightKg | null
+  readonly angleDeg: number | null
+}
+
+export const ANGLE_STEP_DEG = 5
+export const MAX_ANGLE_DEG = 90
+
+/** Введённое число раскладывается по полям подхода согласно выбранной единице. */
+export function measureFromInput(value: number | null, unit: SetUnit): SetMeasure {
+  if (unit === 'deg') return { weightKg: null, angleDeg: value }
+  return { weightKg: fromInputWeight(value, unit), angleDeg: null }
+}
+
+/** Обратное преобразование: число, которое показывается в поле ввода и в чипе. */
+export function measureToDisplay(measure: Partial<SetMeasure>, unit: SetUnit): number | null {
+  if (unit === 'deg') return measure.angleDeg ?? null
+  return toDisplayWeight(measure.weightKg ?? null, unit)
+}
+
+export function roundForSetUnit(value: number, unit: SetUnit): number {
+  return unit === 'deg' ? Math.round(value) : roundForUnit(value, unit)
+}
+
+export function stepForSetUnit(unit: SetUnit): number {
+  return isWeightUnit(unit) ? stepForUnit(unit) : ANGLE_STEP_DEG
 }

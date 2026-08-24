@@ -1,4 +1,4 @@
-import type { FirstDayOfWeek, Id, Instant, LocalDate, WeightKg, WeightUnit } from './types'
+import type { FirstDayOfWeek, Id, Instant, LocalDate, SetUnit, WeightKg, WeightUnit } from './types'
 
 /** Сущности из §6 ТЗ. Мягкое удаление через `archivedAt`, слияние при импорте — по `updatedAt`. */
 
@@ -65,6 +65,10 @@ export interface WorkoutSet {
   readonly order: number
   /** Пустой вес — штатная ситуация: турник, брусья, планка. */
   readonly weightKg?: WeightKg | null
+  /** Угол наклона: заполнен только при `unit === 'deg'`, вес при этом пуст (FR-4.11). */
+  readonly angleDeg?: number | null
+  /** В чём вводили значение. Вес всё равно хранится в килограммах. */
+  readonly unit: SetUnit
   readonly reps: number
   readonly createdAt: Instant
 }

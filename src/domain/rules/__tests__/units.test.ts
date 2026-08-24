@@ -1,5 +1,17 @@
 import fc from 'fast-check'
-import { fromInputWeight, kgToLb, lbToKg, roundForUnit, stepForUnit, toDisplayWeight } from '../units'
+import {
+  ANGLE_STEP_DEG,
+  fromInputWeight,
+  kgToLb,
+  lbToKg,
+  measureFromInput,
+  measureToDisplay,
+  roundForSetUnit,
+  roundForUnit,
+  stepForSetUnit,
+  stepForUnit,
+  toDisplayWeight,
+} from '../units'
 
 describe('kgToLb и lbToKg', () => {
   it('переводит килограммы в фунты', () => {
@@ -104,5 +116,41 @@ describe('stepForUnit — шаг кнопок «−» и «+» (§7.2)', () => {
   it('2.5 килограмма и 5 фунтов', () => {
     expect(stepForUnit('kg')).toBe(2.5)
     expect(stepForUnit('lb')).toBe(5)
+  })
+})
+
+describe('единица подхода: килограммы, фунты и градусы (FR-4.11)', () => {
+  it('вес раскладывается в килограммы, угол — в своё поле', () => {
+    expect(measureFromInput(82.5, 'kg')).toEqual({ weightKg: 82.5, angleDeg: null })
+    expect(measureFromInput(180, 'lb')).toMatchObject({ angleDeg: null })
+    expect(measureFromInput(180, 'lb').weightKg).toBeCloseTo(81.6, 1)
+    expect(measureFromInput(45, 'deg')).toEqual({ weightKg: null, angleDeg: 45 })
+  })
+
+  it('пустое поле остаётся пустым в любой единице', () => {
+    expect(measureFromInput(null, 'kg')).toEqual({ weightKg: null, angleDeg: null })
+    expect(measureFromInput(null, 'deg')).toEqual({ weightKg: null, angleDeg: null })
+  })
+
+  it('показ возвращает то же число, что вводили', () => {
+    expect(measureToDisplay(measureFromInput(82.5, 'kg'), 'kg')).toBe(82.5)
+    expect(measureToDisplay(measureFromInput(180, 'lb'), 'lb')).toBe(180)
+    expect(measureToDisplay(measureFromInput(45, 'deg'), 'deg')).toBe(45)
+  })
+
+  it('угол не выдаёт себя за вес и наоборот', () => {
+    expect(measureToDisplay({ weightKg: 80, angleDeg: null }, 'deg')).toBeNull()
+    expect(measureToDisplay({ weightKg: null, angleDeg: 45 }, 'kg')).toBeNull()
+  })
+
+  it('шаг кнопок: 2.5 кг, 5 фунтов, 5 градусов', () => {
+    expect(stepForSetUnit('kg')).toBe(2.5)
+    expect(stepForSetUnit('lb')).toBe(5)
+    expect(stepForSetUnit('deg')).toBe(ANGLE_STEP_DEG)
+  })
+
+  it('угол округляется до целого: половин градуса на скамье не бывает', () => {
+    expect(roundForSetUnit(44.6, 'deg')).toBe(45)
+    expect(roundForSetUnit(82.4, 'kg')).toBe(82.5)
   })
 })

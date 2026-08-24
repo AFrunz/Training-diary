@@ -194,6 +194,59 @@ describe('ProgramScreen', () => {
     expect(await fixture.ports.programs.list({ includeArchived: true })).toHaveLength(1)
   })
 
+  describe('переименование (FR-3.1.3)', () => {
+    it('поле показывает текущее название', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      expect(await screen.findByTestId('program-name-input')).toHaveProp('value', 'Грудь + трицепс')
+    })
+
+    it('новое название сохраняется по завершении ввода', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      fireEvent.changeText(await screen.findByTestId('program-name-input'), 'День А')
+      fireEvent(screen.getByTestId('program-name-input'), 'submitEditing')
+
+      await waitFor(async () => {
+        expect((await fixture.ports.programs.byId(fixture.programId))?.name).toBe('День А')
+      })
+      expect(await screen.findByTestId('header-title')).toHaveTextContent('День А')
+    })
+
+    it('пустое название не сохраняется, поле возвращается к прежнему', async () => {
+      const fixture = await seed()
+      renderScreen(fixture)
+
+      fireEvent.changeText(await screen.findByTestId('program-name-input'), '   ')
+      fireEvent(screen.getByTestId('program-name-input'), 'blur')
+
+      await waitFor(() => {
+        expect(screen.getByTestId('program-name-input')).toHaveProp('value', 'Грудь + трицепс')
+      })
+      expect((await fixture.ports.programs.byId(fixture.programId))?.name).toBe('Грудь + трицепс')
+    })
+
+    it('проведённая тренировка сохраняет прежнее название (FR-3.5)', async () => {
+      const fixture = await seed()
+      const workoutId = await fixture.services.createWorkout({
+        date: localDate('2026-08-11'),
+        programId: fixture.programId,
+      })
+      renderScreen(fixture)
+
+      fireEvent.changeText(await screen.findByTestId('program-name-input'), 'День А')
+      fireEvent(screen.getByTestId('program-name-input'), 'submitEditing')
+
+      await waitFor(async () => {
+        expect((await fixture.ports.programs.byId(fixture.programId))?.name).toBe('День А')
+      })
+      const workout = await fixture.ports.workouts.byId(workoutId)
+      expect(workout?.workout.programName).toBe('Грудь + трицепс')
+    })
+  })
+
   it('пустой состав показывает подсказку вместо списка', async () => {
     const { services, ports } = createTestServices()
     const programId = await services.createProgram({ name: 'Пустая' })

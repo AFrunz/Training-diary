@@ -1,35 +1,61 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import type { Id, WeightUnit } from '../../../domain/model/types'
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import type { WorkoutSet } from '../../../domain/model/entities'
+import type { Id, SetUnit, WeightUnit } from '../../../domain/model/types'
+import { SET_UNITS } from '../../../domain/model/types'
 import { formatSet } from '../../../domain/rules/format'
-import { fromInputWeight, roundForUnit, stepForUnit, toDisplayWeight } from '../../../domain/rules/units'
+import {
+  fromInputWeight,
+  measureFromInput,
+  measureToDisplay,
+  roundForSetUnit,
+  stepForSetUnit,
+} from '../../../domain/rules/units'
+import { validateSet } from '../../../domain/validation/rules'
 import { Icon } from '../../components/Icon'
+import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
 import { numFont, palette, radii, uiFont } from '../../theme/tokens'
 
 /**
- * Шит добавления подхода (фрейм «04 · Добавление подхода»). Начальные значения
- * приходят из сценария suggestNextSet, запись идёт сразу в базу — без черновиков
- * и кнопки «Сохранить» (ARCHITECTURE.md §4).
+ * Шит подхода (фреймы «04 · Добавление подхода» и «04b · Правка подхода»).
+ *
+ * Добавление берёт начальные значения из сценария suggestNextSet, правка —
+ * из самого подхода. Запись идёт сразу в базу, без черновиков (ARCHITECTURE.md §4).
  */
 
 export interface AddSetSheetProps {
   readonly workoutId: Id
   readonly itemId: Id
   readonly exerciseName: string
-  /** Номер подхода: количество уже записанных плюс один. */
+  /** Номер подхода: при добавлении — следующий, при правке — номер правимого. */
   readonly setNumber: number
+  /** Правимый подход; без него шит добавляет новый (FR-4.4.1). */
+  readonly editing?: WorkoutSet | null
+  /** Подход прошлой тренировки под тем же номером — подсказка под полями (FR-4.10). */
+  readonly previousSet?: WorkoutSet | null
+  /** Единица из настроек: с неё начинается новый подход (FR-7.5). */
   readonly unit: WeightUnit
   readonly onClose: () => void
 }
 
 interface Draft {
-  readonly weight: string
+  readonly value: string
   readonly reps: string
+  readonly unit: SetUnit
 }
 
 /** Пустая строка и мусор считаются отсутствующим значением: вес необязателен. */
@@ -42,49 +68,75 @@ const parseNumber = (value: string): number | null => {
 
 const showNumber = (value: number | null): string => (value === null ? '' : String(value))
 
+const UNIT_LABEL: Record<SetUnit, TranslationKey> = {
+  kg: 'set.unitKg',
+  lb: 'set.unitLb',
+  deg: 'set.unitDeg',
+}
+
 export function AddSetSheet({
   workoutId,
   itemId,
   exerciseName,
   setNumber,
+  editing = null,
+  previousSet = null,
   unit,
   onClose,
 }: AddSetSheetProps) {
   const services = useServices()
-  const queryClient = useQueryClient()
   const insets = useSafeAreaInsets()
   const { colors } = useTheme()
-  const { t } = useT()
+  const { t, locale } = useT()
+
+  const isEditing = editing !== null
 
   const suggestion = useQuery({
     queryKey: ['set-suggestion', workoutId, itemId],
     queryFn: () => services.suggestNextSet({ workoutId, itemId }),
+    // при правке подсказка не нужна: значения приходят из самого подхода
+    enabled: !isEditing,
   })
 
-  const [draft, setDraft] = useState<Draft | null>(null)
+  const [draft, setDraft] = useState<Draft | null>(
+    editing
+      ? {
+          value: showNumber(measureToDisplay(editing, editing.unit)),
+          reps: String(editing.reps),
+          unit: editing.unit,
+        }
+      : null,
+  )
 
   useEffect(() => {
     const suggested = suggestion.data
     if (!suggested || draft !== null) return
     setDraft({
-      weight: showNumber(toDisplayWeight(suggested.weightKg, unit)),
+      value: showNumber(suggested.value),
       reps: suggested.reps > 0 ? String(suggested.reps) : '',
+      unit: suggested.unit,
     })
-  }, [suggestion.data, draft, unit])
+  }, [suggestion.data, draft])
 
-  const weightText = draft?.weight ?? ''
+  const valueText = draft?.value ?? ''
   const repsText = draft?.reps ?? ''
-  const weightValue = parseNumber(weightText)
+  const setUnit = draft?.unit ?? unit
+  const value = parseNumber(valueText)
   const repsValue = parseNumber(repsText)
-  const step = stepForUnit(unit)
+  const step = stepForSetUnit(setUnit)
 
   const patch = (next: Partial<Draft>) =>
-    setDraft((current) => ({ weight: current?.weight ?? '', reps: current?.reps ?? '', ...next }))
+    setDraft((current) => ({
+      value: current?.value ?? '',
+      reps: current?.reps ?? '',
+      unit: current?.unit ?? unit,
+      ...next,
+    }))
 
   /** Шаг вниз до нуля очищает поле: подход без веса — штатный случай. */
-  const bumpWeight = (delta: number) => {
-    const next = roundForUnit((weightValue ?? 0) + delta, unit)
-    patch({ weight: next > 0 ? String(next) : '' })
+  const bump = (delta: number) => {
+    const next = roundForSetUnit((value ?? 0) + delta, setUnit)
+    patch({ value: next > 0 ? String(next) : '' })
   }
 
   const bumpReps = (delta: number) => {
@@ -92,32 +144,49 @@ export function AddSetSheet({
     patch({ reps: next > 0 ? String(next) : '' })
   }
 
-  const canSubmit =
-    repsValue !== null && Number.isInteger(repsValue) && repsValue > 0 && (weightValue ?? 0) >= 0
+  /**
+   * Килограммы и фунты — одна и та же величина, поэтому число пересчитывается.
+   * Градусы — другая: при переключении на них и с них поле очищается.
+   */
+  const switchUnit = (next: SetUnit) => {
+    if (next === setUnit) return
+    if (next === 'deg' || setUnit === 'deg') {
+      patch({ unit: next, value: '' })
+      return
+    }
+    const converted =
+      value === null ? null : measureToDisplay({ weightKg: fromInputWeight(value, setUnit) }, next)
+    patch({ unit: next, value: showNumber(converted) })
+  }
+
+  // те же правила, что и в сценарии: отрицательный вес и угол «больше вертикали»
+  // не должны доезжать до записи, поэтому кнопка гаснет
+  const canSubmit = validateSet({ ...measureFromInput(value, setUnit), reps: repsValue ?? 0 }).ok
 
   const submit = useMutation({
     mutationFn: async () => {
       if (repsValue === null) return
-      await services.addSet({
-        workoutId,
-        itemId,
-        weightKg: fromInputWeight(weightValue, unit),
-        reps: repsValue,
-      })
+      const input = { workoutId, itemId, value, unit: setUnit, reps: repsValue }
+      if (editing) await services.editSet({ ...input, setId: editing.id })
+      else await services.addSet(input)
     },
-    onSuccess: async () => {
-      // кэш целиком сбрасывает общий обработчик мутаций: подсказка следующего
-      // подхода зависит от только что записанного (FR-4.4)
-      onClose()
-    },
+    // кэш целиком сбрасывает общий обработчик мутаций: подсказка следующего
+    // подхода зависит от только что записанного (FR-4.4)
+    onSuccess: onClose,
   })
 
-  const previous = suggestion.data
-  const hint =
-    previous && previous.source !== 'empty' && previous.source !== 'program-target'
-      ? t('set.previous', {
-          value: formatSet({ weightKg: previous.weightKg, reps: previous.reps }, unit),
-        })
+  const remove = useMutation({
+    mutationFn: async () => {
+      if (!editing) return
+      await services.deleteSet({ workoutId, itemId, setId: editing.id })
+    },
+    onSuccess: onClose,
+  })
+
+  const hint = previousSet
+    ? t('set.previous', { value: formatSet(previousSet, unit, locale) })
+    : suggestion.data?.previous
+      ? t('set.previous', { value: formatSet(suggestion.data.previous, unit, locale) })
       : null
 
   /**
@@ -136,7 +205,6 @@ export function AddSetSheet({
     </Pressable>
   )
 
-
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose} testID="add-set-sheet">
       <View style={styles.root}>
@@ -148,93 +216,151 @@ export function AddSetSheet({
           style={[StyleSheet.absoluteFill, styles.scrim, { backgroundColor: palette.dark.bg }]}
         />
 
-        <View
-          style={[
-            styles.sheet,
-            // жестовая полоса устройства: без этого кнопка уезжает под системное меню
-            { backgroundColor: colors.surface, paddingBottom: 20 + insets.bottom },
-          ]}
+        {/* без этого клавиатура закрывает и поля, и кнопку записи */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.avoider}
         >
-          <View style={styles.grabberWrap}>
-            <View style={[styles.grabber, { backgroundColor: colors.border }]} />
-          </View>
-
-          <View style={styles.titles}>
-            <Text testID="add-set-title" style={[styles.title, { color: colors.textPrimary }]}>
-              {exerciseName}
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              {t('set.number', { number: setNumber })}
-            </Text>
-          </View>
-
-          <View style={styles.steppers}>
-            <View style={styles.stepper}>
-              <Text style={[styles.label, { color: colors.textMuted }]}>
-                {t(unit === 'kg' ? 'set.weight' : 'set.weightLb')}
-              </Text>
-              <View style={styles.controls}>
-                {roundButton('minus', 'set-weight-minus', () => bumpWeight(-step))}
-                <TextInput
-                  testID="set-weight-input"
-                  value={weightText}
-                  onChangeText={(value) => patch({ weight: value })}
-                  keyboardType="numeric"
-                  style={[styles.value, { color: colors.textPrimary }]}
-                />
-                {roundButton('plus', 'set-weight-plus', () => bumpWeight(step))}
-              </View>
-            </View>
-
-            <View style={styles.stepper}>
-              <Text style={[styles.label, { color: colors.textMuted }]}>{t('set.reps')}</Text>
-              <View style={styles.controls}>
-                {roundButton('minus', 'set-reps-minus', () => bumpReps(-1))}
-                <TextInput
-                  testID="set-reps-input"
-                  value={repsText}
-                  onChangeText={(value) => patch({ reps: value })}
-                  keyboardType="number-pad"
-                  style={[styles.value, { color: colors.textPrimary }]}
-                />
-                {roundButton('plus', 'set-reps-plus', () => bumpReps(1))}
-              </View>
-            </View>
-          </View>
-
-
-          {hint ? (
-            <Text testID="set-hint" style={[styles.hint, { color: colors.textMuted }]}>
-              {hint}
-            </Text>
-          ) : null}
-
-          <Pressable
-            testID="set-submit"
-            accessibilityRole="button"
-            accessibilityState={{ disabled: !canSubmit }}
-            disabled={!canSubmit || submit.isPending}
-            onPress={() => submit.mutate()}
+          <View
             style={[
-              styles.submit,
-              { backgroundColor: colors.accent, opacity: canSubmit ? 1 : 0.5 },
+              styles.sheet,
+              // жестовая полоса устройства: без этого кнопка уезжает под системное меню
+              { backgroundColor: colors.surface, paddingBottom: 20 + insets.bottom },
             ]}
           >
-            <Text style={[styles.submitLabel, { color: colors.onAccent }]}>{t('set.submit')}</Text>
-          </Pressable>
-        </View>
+            <View style={styles.grabberWrap}>
+              <View style={[styles.grabber, { backgroundColor: colors.border }]} />
+            </View>
+
+            <View style={styles.titles}>
+              <Text testID="add-set-title" style={[styles.title, { color: colors.textPrimary }]}>
+                {isEditing ? t('set.editTitle') : exerciseName}
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                {isEditing
+                  ? t('set.editSubtitle', { exercise: exerciseName, number: setNumber })
+                  : t('set.number', { number: setNumber })}
+              </Text>
+            </View>
+
+            <View style={styles.steppers}>
+              <View style={styles.stepper}>
+                <View style={styles.labelRow}>
+                  <Text style={[styles.label, { color: colors.textMuted }]}>
+                    {t(setUnit === 'deg' ? 'set.angle' : 'set.weight')}
+                  </Text>
+
+                  <View style={[styles.segment, { backgroundColor: colors.surface2 }]}>
+                    {SET_UNITS.map((option) => (
+                      <Pressable
+                        key={option}
+                        testID={`set-unit-${option}`}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: option === setUnit }}
+                        onPress={() => switchUnit(option)}
+                        style={[
+                          styles.segmentChip,
+                          option === setUnit
+                            ? { backgroundColor: colors.surface, borderColor: colors.border }
+                            : styles.segmentChipPlain,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.segmentLabel,
+                            { color: option === setUnit ? colors.textPrimary : colors.textMuted },
+                          ]}
+                        >
+                          {t(UNIT_LABEL[option])}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.controls}>
+                  {roundButton('minus', 'set-weight-minus', () => bump(-step))}
+                  <TextInput
+                    testID="set-weight-input"
+                    value={valueText}
+                    onChangeText={(next) => patch({ value: next })}
+                    keyboardType="numeric"
+                    style={[styles.value, { color: colors.textPrimary }]}
+                  />
+                  {roundButton('plus', 'set-weight-plus', () => bump(step))}
+                </View>
+              </View>
+
+              <View style={styles.stepper}>
+                <View style={styles.labelRow}>
+                  <Text style={[styles.label, { color: colors.textMuted }]}>{t('set.reps')}</Text>
+                </View>
+
+                <View style={styles.controls}>
+                  {roundButton('minus', 'set-reps-minus', () => bumpReps(-1))}
+                  <TextInput
+                    testID="set-reps-input"
+                    value={repsText}
+                    onChangeText={(next) => patch({ reps: next })}
+                    keyboardType="number-pad"
+                    style={[styles.value, { color: colors.textPrimary }]}
+                  />
+                  {roundButton('plus', 'set-reps-plus', () => bumpReps(1))}
+                </View>
+              </View>
+            </View>
+
+            {hint ? (
+              <Text testID="set-hint" style={[styles.hint, { color: colors.textMuted }]}>
+                {hint}
+              </Text>
+            ) : null}
+
+            <View style={styles.actions}>
+              {isEditing ? (
+                <Pressable
+                  testID="set-delete"
+                  accessibilityRole="button"
+                  onPress={() => remove.mutate()}
+                  disabled={remove.isPending}
+                  style={[styles.deleteButton, { borderColor: colors.danger }]}
+                >
+                  <Icon name="trash-2" size={15} color={colors.danger} />
+                  <Text style={[styles.deleteLabel, { color: colors.danger }]}>{t('common.delete')}</Text>
+                </Pressable>
+              ) : null}
+
+              <Pressable
+                testID="set-submit"
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !canSubmit }}
+                disabled={!canSubmit || submit.isPending}
+                onPress={() => submit.mutate()}
+                style={[
+                  styles.submit,
+                  { backgroundColor: colors.accent, opacity: canSubmit ? 1 : 0.5 },
+                ]}
+              >
+                <Text style={[styles.submitLabel, { color: colors.onAccent }]}>
+                  {isEditing ? t('common.save') : t('set.submit')}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   )
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, justifyContent: 'flex-end' },
+  root: { flex: 1 },
+  avoider: { flex: 1, justifyContent: 'flex-end' },
   scrim: { opacity: 0.7 },
   sheet: {
     borderTopLeftRadius: radii.lg,
     borderTopRightRadius: radii.lg,
-    gap: 22,
+    gap: 18,
     paddingTop: 12,
     paddingHorizontal: 20,
   },
@@ -245,12 +371,36 @@ const styles = StyleSheet.create({
   subtitle: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
   steppers: { flexDirection: 'row', gap: 14 },
   stepper: { flex: 1, gap: 6 },
+  // одинаковая высота строк подписи держит оба степпера на одной линии
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 26 },
   label: { fontFamily: uiFont('500'), fontSize: 11, fontWeight: '500' },
+  segment: { flexDirection: 'row', alignItems: 'center', borderRadius: radii.pill, padding: 2 },
+  segmentChip: {
+    borderRadius: radii.pill,
+    borderWidth: 1,
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+  },
+  // прозрачная рамка держит ширину: без неё выбор единицы дёргает ряд
+  segmentChipPlain: { borderWidth: 1, borderColor: 'transparent' },
+  segmentLabel: { fontFamily: uiFont('600'), fontSize: 10, fontWeight: '600' },
   controls: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   round: { width: 38, height: 38, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
   // вес и повторы — числа: Space Grotesk и в поле ввода, и в быстрых чипах
   value: { fontFamily: numFont('700'), flex: 1, fontSize: 26, fontWeight: '700', textAlign: 'center', padding: 0 },
   hint: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
-  submit: { borderRadius: radii.md, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
+  actions: { flexDirection: 'row', gap: 12 },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+  },
+  deleteLabel: { fontFamily: uiFont('600'), fontSize: 14, fontWeight: '600' },
+  submit: { flex: 1, borderRadius: radii.md, paddingVertical: 14, alignItems: 'center', justifyContent: 'center' },
   submitLabel: { fontFamily: uiFont('700'), fontSize: 15, fontWeight: '700' },
 })

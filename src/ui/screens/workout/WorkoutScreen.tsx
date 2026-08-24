@@ -67,7 +67,8 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
   const { colors } = useTheme()
   const { t, locale } = useT()
 
-  const [openItemId, setOpenItemId] = useState<Id | null>(null)
+  /** Открытый шит: добавление подхода к упражнению либо правка записанного. */
+  const [sheet, setSheet] = useState<{ itemId: Id; setId?: Id } | null>(null)
   const [now, setNow] = useState(() => Date.now())
 
   // счётчик обновляется раз в минуту: в формате «1 ч 12 мин» чаще незачем
@@ -83,7 +84,9 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
       if (!aggregate) return null
       const program = await services.ports.programs.byIdWithItems(aggregate.workout.programId)
       const settings = await services.ports.settings.get()
-      return { aggregate, program, settings }
+      // подходы прошлой тренировки: они стоят над сегодняшними (FR-4.10)
+      const previous = await services.previousSets(workoutId)
+      return { aggregate, program, settings, previous }
     },
   })
 
@@ -124,7 +127,11 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
   const targetOf = (exerciseId: Id) =>
     data.program?.items.find((item) => item.exerciseId === exerciseId) ?? null
 
-  const openItem = openItemId ? items.find((item) => item.id === openItemId) ?? null : null
+  const openItem = sheet ? items.find((item) => item.id === sheet.itemId) ?? null : null
+  const editingSet = openItem?.sets.find((set) => set.id === sheet?.setId) ?? null
+  const openPrevious = openItem ? data.previous[openItem.id] ?? [] : []
+  // номер подхода: правится существующий или добавляется следующий
+  const openSetNumber = editingSet ? editingSet.order + 1 : (openItem?.sets.length ?? 0) + 1
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
@@ -156,6 +163,12 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
         </View>
 
         <View style={styles.list}>
+          {items.length > 0 ? (
+            <Text testID="workout-sets-hint" style={[styles.setsHint, { color: colors.textMuted }]}>
+              {t('workout.setsHint')}
+            </Text>
+          ) : null}
+
           {items.map((item, index) => {
             const target = targetOf(item.exerciseId)
             return (
@@ -165,15 +178,13 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
                 name={item.exerciseName}
                 targetSets={target?.targetSets ?? null}
                 targetReps={target?.targetReps ?? null}
-                sets={item.sets.map((set) => ({
-                  id: set.id,
-                  weightKg: set.weightKg ?? null,
-                  reps: set.reps,
-                }))}
+                sets={item.sets}
+                previousSets={data.previous[item.id] ?? []}
                 done={item.completedAt !== null && item.completedAt !== undefined}
                 unit={unit}
                 onToggleDone={(next) => toggleDone.mutate({ itemId: item.id, done: next })}
-                onAddSet={() => setOpenItemId(item.id)}
+                onAddSet={() => setSheet({ itemId: item.id })}
+                onEditSet={(setId) => setSheet({ itemId: item.id, setId: setId as Id })}
                 onOpenHistory={() => onOpenHistory?.(item.exerciseId)}
               />
             )
@@ -200,9 +211,11 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
           workoutId={workoutId}
           itemId={openItem.id}
           exerciseName={openItem.exerciseName}
-          setNumber={openItem.sets.length + 1}
+          setNumber={openSetNumber}
+          editing={editingSet}
+          previousSet={openPrevious[openSetNumber - 1] ?? null}
           unit={unit}
-          onClose={() => setOpenItemId(null)}
+          onClose={() => setSheet(null)}
         />
       ) : null}
     </View>
@@ -227,6 +240,8 @@ const styles = StyleSheet.create({
   elapsed: { fontFamily: numFont('700'), fontSize: 30, fontWeight: '700' },
   startedAt: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },
   list: { gap: 8, paddingHorizontal: 16, paddingTop: 14 },
+  // пояснение к парам подходов: без него верхний ряд читается как «сегодняшний»
+  setsHint: { fontFamily: uiFont('500'), fontSize: 11, fontWeight: '500' },
   addExerciseSection: { paddingHorizontal: 16, paddingTop: 12 },
   addExerciseButton: {
     flexDirection: 'row',

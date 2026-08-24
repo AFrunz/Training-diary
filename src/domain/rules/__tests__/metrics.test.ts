@@ -1,6 +1,12 @@
 import { localDate } from '../../model/types'
 import type { DateRange, LocalDate } from '../../model/types'
-import { averageOrNull, countEligibleWeeks, epley1RM, workoutsPerWeek } from '../metrics'
+import {
+  averageOrNull,
+  countEligibleWeeks,
+  epley1RM,
+  exerciseVolume,
+  workoutsPerWeek,
+} from '../metrics'
 
 const d = (s: string) => localDate(s)
 const range = (from: string, to: string): DateRange => ({ from: d(from), to: d(to) })
@@ -188,5 +194,39 @@ describe('workoutsPerWeek', () => {
       firstDayOfWeek: 1,
     })
     expect(result).toBe(2)
+  })
+})
+
+describe('exerciseVolume — объём упражнения (FR-5.5)', () => {
+  it('складывает вес, умноженный на повторы', () => {
+    const volume = exerciseVolume([
+      { weightKg: 80, reps: 8 },
+      { weightKg: 82.5, reps: 6 },
+    ])
+    expect(volume.weightKg).toBe(80 * 8 + 82.5 * 6)
+  })
+
+  it('упражнение без веса считается повторами', () => {
+    const volume = exerciseVolume([
+      { weightKg: null, reps: 12 },
+      { weightKg: null, reps: 10 },
+    ])
+    expect(volume).toEqual({ weightKg: null, reps: 22 })
+  })
+
+  it('нулевой вес — это отсутствие веса, а не нулевой тоннаж', () => {
+    expect(exerciseVolume([{ weightKg: 0, reps: 20 }])).toEqual({ weightKg: null, reps: 20 })
+  })
+
+  it('смешанное упражнение отдаёт и тоннаж, и повторы подходов без веса', () => {
+    const volume = exerciseVolume([
+      { weightKg: 20, reps: 10 },
+      { weightKg: null, reps: 12 },
+    ])
+    expect(volume).toEqual({ weightKg: 200, reps: 12 })
+  })
+
+  it('без подходов объёма нет', () => {
+    expect(exerciseVolume([])).toEqual({ weightKg: null, reps: 0 })
   })
 })

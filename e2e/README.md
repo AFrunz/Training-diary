@@ -35,8 +35,11 @@ maestro test e2e/full-cycle.yaml # один
 | `program-option-{название}` | выбор программы при создании тренировки |
 | `workout-timer` | счётчик времени в шапке тренировки |
 | `item-checkbox-{index}` · `add-set-{index}` · `open-history-{index}` · `item-target-{index}` | упражнение в тренировке |
+| `set-chip-{index}-{номер}` · `set-previous-{index}-{номер}` · `set-missing-{index}-{номер}` | пары подходов: сегодняшний (тап открывает правку), прошлой тренировки, пустая рамка вместо недоделанного |
+| `workout-sets-hint` | пояснение «сверху — прошлая тренировка, снизу — сегодняшняя» |
 | `set-weight-input` · `set-reps-input` · `set-submit` | шит добавления подхода |
-| `set-weight-minus` · `set-weight-plus` · `set-reps-minus` · `set-reps-plus` | степперы шита: вес шагает на 2.5 кг, повторы — на единицу |
+| `set-unit-kg` · `set-unit-lb` · `set-unit-deg` · `set-delete` | единица подхода и удаление в режиме правки |
+| `set-weight-minus` · `set-weight-plus` · `set-reps-minus` · `set-reps-plus` | степперы шита: вес шагает на 2.5 кг, фунты — на 5, угол — на 5° |
 | `workouts-screen` · `workouts-empty` · `workout-card-{YYYY-MM-DD}` · `workout-donut-{YYYY-MM-DD}` | список тренировок |
 | `filter-chip-all` · `filter-chip-{название программы}` | фильтры списка тренировок |
 | `active-workout-card` | закреплённая незавершённая тренировка сегодня |
@@ -52,10 +55,11 @@ maestro test e2e/full-cycle.yaml # один
 | `backups-screen` · `backups-row-{N}` · `backups-row-{N}-subtitle` · `backups-restore-{N}` | список автобэкапов: строка копии и восстановление |
 | `backups-create` · `backups-empty` | «снять копию сейчас» и пустое состояние списка копий |
 | `header-back` | стрелка «назад» в шапке экрана |
-| `program-screen` · `program-item-{index}` · `program-item-remove-{index}` | экран программы: состав |
+| `program-screen` · `program-name-input` · `program-item-{index}` · `program-item-remove-{index}` | экран программы: название и состав |
 | `program-item-up-{index}` · `program-item-down-{index}` | порядок в составе: у первой строки недоступна «вверх», у последней — «вниз» |
 | `program-color-{ключ палитры}` · `program-add-exercise` · `program-duplicate` · `program-archive` | экран программы: цвет и действия |
 | `exercise-history-screen` · `history-record-weight-value` · `history-record-weight-note` | история упражнения: рекорд веса |
+| `history-volume` · `history-volume-value` | история упражнения: объём за всё время |
 | `history-metric-weight` · `history-metric-oneRm` · `history-chart` · `history-bar-peak-{index}` | история упражнения: график |
 | `history-workout-{index}` · `history-delta-{index}` | история упражнения: раскладка по тренировкам |
 
@@ -141,7 +145,7 @@ Maestro сопоставляет `id` и текст **регулярным вы�
 | `settings-preferences.yaml` | единицы веса, тема, секции настроек | FR-7.4, FR-7.5 |
 | `program-edit.yaml` | порядок стрелками, дублирование через экран создания, снапшот состава у проведённой тренировки | FR-3.5, FR-3.6 |
 | `exercise-history.yaml` | рекорды, дельты и график истории | FR-5.2, FR-5.3 |
-| `workout-session.yaml` | проведение тренировки от создания до завершения | FR-4.1, FR-4.4, FR-4.5 |
+| `workout-session.yaml` | проведение тренировки: подходы, правка по тапу, угол вместо веса, удаление | FR-4.1, FR-4.4, FR-4.4.1, FR-4.5, FR-4.11 |
 
 `absence-regularity.yaml` пока не запускается: экран отсутствия в приложении
 уже есть, но сам сценарий написан под выбор дня в календаре, а даты вводятся

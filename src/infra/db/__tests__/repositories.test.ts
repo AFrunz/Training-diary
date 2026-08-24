@@ -37,6 +37,7 @@ const item = (over: Partial<WorkoutItem> & Pick<WorkoutItem, 'id' | 'workoutId'>
 
 const set = (over: Partial<WorkoutSet> & Pick<WorkoutSet, 'id' | 'workoutItemId'>): WorkoutSet => ({
   order: 0,
+  unit: 'kg',
   weightKg: 80,
   reps: 8,
   createdAt: at('2026-08-11T15:40:00Z'),
@@ -160,7 +161,7 @@ describe('WorkoutRepo — чтение', () => {
     expect(found.map((w) => w.date)).toEqual(['2026-08-01', '2026-08-15', '2026-08-31'])
   })
 
-  it('lastSetOf берёт подход из самой свежей тренировки', async () => {
+  it('previousSetsOf берёт подходы ближайшей более ранней тренировки целиком', async () => {
     const repos = await setup()
     await repos.workouts.insert(workout({ id: id('w-old'), date: d('2026-08-03') }), [
       item({ id: id('wi-old'), workoutId: id('w-old') }),
@@ -170,13 +171,17 @@ describe('WorkoutRepo — чтение', () => {
     await repos.workouts.insert(workout({ id: id('w-new'), date: d('2026-08-07') }), [
       item({ id: id('wi-new'), workoutId: id('w-new') }),
     ])
-    await repos.workouts.addSet(set({ id: id('ws-new'), workoutItemId: id('wi-new'), weightKg: 80, reps: 8 }))
+    await repos.workouts.addSet(set({ id: id('ws-new-1'), workoutItemId: id('wi-new'), order: 0, weightKg: 80, reps: 8 }))
+    await repos.workouts.addSet(set({ id: id('ws-new-2'), workoutItemId: id('wi-new'), order: 1, weightKg: 82.5, reps: 6 }))
 
-    const last = await repos.workouts.lastSetOf(id('e-1'))
-    expect(last!.weightKg).toBe(80)
+    const previous = await repos.workouts.previousSetsOf(id('e-1'), {
+      before: d('2026-08-11'),
+      exceptWorkoutId: id('w-today'),
+    })
+    expect(previous.map((s) => s.weightKg)).toEqual([80, 82.5])
   })
 
-  it('lastSetOf умеет исключать текущую тренировку', async () => {
+  it('более поздние тренировки прошлыми не считаются', async () => {
     const repos = await setup()
     await repos.workouts.insert(workout({ id: id('w-old'), date: d('2026-08-03') }), [
       item({ id: id('wi-old'), workoutId: id('w-old') }),
@@ -187,13 +192,70 @@ describe('WorkoutRepo — чтение', () => {
     ])
     await repos.workouts.addSet(set({ id: id('ws-now'), workoutItemId: id('wi-now'), weightKg: 82.5, reps: 6 }))
 
-    const last = await repos.workouts.lastSetOf(id('e-1'), { exceptWorkoutId: id('w-now') })
-    expect(last!.weightKg).toBe(75)
+    const previous = await repos.workouts.previousSetsOf(id('e-1'), {
+      before: d('2026-08-11'),
+      exceptWorkoutId: id('w-now'),
+    })
+    expect(previous.map((s) => s.weightKg)).toEqual([75])
   })
 
-  it('упражнение без истории — null', async () => {
+  it('тренировка без подходов этого упражнения пропускается', async () => {
     const repos = await setup()
-    expect(await repos.workouts.lastSetOf(id('e-2'))).toBeNull()
+    await repos.workouts.insert(workout({ id: id('w-old'), date: d('2026-08-03') }), [
+      item({ id: id('wi-old'), workoutId: id('w-old') }),
+    ])
+    await repos.workouts.addSet(set({ id: id('ws-old'), workoutItemId: id('wi-old'), weightKg: 75, reps: 8 }))
+    // 7 августа упражнение было в плане, но подходов не записали
+    await repos.workouts.insert(workout({ id: id('w-skip'), date: d('2026-08-07') }), [
+      item({ id: id('wi-skip'), workoutId: id('w-skip') }),
+    ])
+
+    const previous = await repos.workouts.previousSetsOf(id('e-1'), {
+      before: d('2026-08-11'),
+      exceptWorkoutId: id('w-today'),
+    })
+    expect(previous.map((s) => s.weightKg)).toEqual([75])
+  })
+
+  it('упражнение без истории — пустой список', async () => {
+    const repos = await setup()
+    expect(
+      await repos.workouts.previousSetsOf(id('e-2'), {
+        before: d('2026-08-11'),
+        exceptWorkoutId: id('w-today'),
+      }),
+    ).toEqual([])
+  })
+
+  it('единица и угол переживают обход базы', async () => {
+    const repos = await setup()
+    await repos.workouts.insert(workout({ id: id('w-1'), date: d('2026-08-11') }), [
+      item({ id: id('wi-1'), workoutId: id('w-1') }),
+    ])
+    await repos.workouts.addSet(
+      set({ id: id('ws-1'), workoutItemId: id('wi-1'), weightKg: null, angleDeg: 45, unit: 'deg', reps: 15 }),
+    )
+
+    const stored = (await repos.workouts.byId(id('w-1')))!.items[0]!.sets[0]!
+    expect(stored).toMatchObject({ unit: 'deg', angleDeg: 45, weightKg: null })
+  })
+
+  it('правка подхода переписывает значения, удаление убирает строку', async () => {
+    const repos = await setup()
+    await repos.workouts.insert(workout({ id: id('w-1'), date: d('2026-08-11') }), [
+      item({ id: id('wi-1'), workoutId: id('w-1') }),
+    ])
+    const stored = set({ id: id('ws-1'), workoutItemId: id('wi-1'), weightKg: 80, reps: 8 })
+    await repos.workouts.addSet(stored)
+
+    await repos.workouts.updateSet({ ...stored, weightKg: 85, reps: 5 })
+    expect((await repos.workouts.byId(id('w-1')))!.items[0]!.sets[0]).toMatchObject({
+      weightKg: 85,
+      reps: 5,
+    })
+
+    await repos.workouts.removeSet(id('ws-1'))
+    expect((await repos.workouts.byId(id('w-1')))!.items[0]!.sets).toEqual([])
   })
 })
 
