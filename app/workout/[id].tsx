@@ -11,6 +11,7 @@ export default function WorkoutRoute() {
         workoutId={makeId(id)}
         onBack={() => router.back()}
         onOpenHistory={(exerciseId) => router.push(`/exercise/${exerciseId}`)}
+        onDeleted={() => router.back()}
       />
     </Screen>
   );

@@ -56,7 +56,7 @@ Calculation rules know nothing about React Native or the database, so they run a
 
 ## Tests
 
-692 tests across four levels plus 12 end-to-end Maestro flows:
+701 tests across four levels plus 12 end-to-end Maestro flows:
 
 ```sh
 npm test              # everything

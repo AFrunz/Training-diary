@@ -6,6 +6,7 @@ import { computeCompletion } from '../../../domain/rules/completion'
 import { weekdayOf } from '../../../domain/rules/dates'
 import { computeDuration } from '../../../domain/rules/duration'
 import { formatDuration, formatElapsed } from '../../../domain/rules/format'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { Donut } from '../../components/Donut'
 import { ExerciseRow } from '../../components/ExerciseRow'
 import { Icon } from '../../components/Icon'
@@ -28,6 +29,8 @@ export interface WorkoutScreenProps {
   readonly onBack?: () => void
   readonly onAddExercise?: () => void
   readonly onOpenHistory?: (exerciseId: Id) => void
+  /** Куда уходить после удаления тренировки: её экрана больше нет (FR-4.7). */
+  readonly onDeleted?: () => void
 }
 
 const MINUTE_MS = 60_000
@@ -61,7 +64,13 @@ const formatWorkoutDate = (date: LocalDate, t: Translate): string => {
   })
 }
 
-export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory }: WorkoutScreenProps) {
+export function WorkoutScreen({
+  workoutId,
+  onBack,
+  onAddExercise,
+  onOpenHistory,
+  onDeleted,
+}: WorkoutScreenProps) {
   const services = useServices()
   const queryClient = useQueryClient()
   const { colors } = useTheme()
@@ -69,6 +78,7 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
 
   /** Открытый шит: добавление подхода к упражнению либо правка записанного. */
   const [sheet, setSheet] = useState<{ itemId: Id; setId?: Id } | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [now, setNow] = useState(() => Date.now())
 
   // счётчик обновляется раз в минуту: в формате «1 ч 12 мин» чаще незачем
@@ -96,6 +106,16 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
     mutationFn: (input: { itemId: Id; done: boolean }) =>
       services.toggleItemDone({ workoutId, itemId: input.itemId, done: input.done }),
     onSuccess: invalidate,
+  })
+
+  const remove = useMutation({
+    mutationFn: () => services.deleteWorkout(workoutId),
+    onSuccess: () => {
+      setConfirmDelete(false)
+      // сначала уводим с экрана: тренировки больше нет, запрос вернёт пустоту
+      onDeleted?.()
+      return invalidate()
+    },
   })
 
   const data = workout.data
@@ -139,6 +159,17 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
         title={entity.programName}
         subtitle={formatWorkoutDate(entity.date, t)}
         onBack={onBack}
+        action={
+          <Pressable
+            testID="workout-delete"
+            accessibilityRole="button"
+            accessibilityLabel={t('workout.delete')}
+            onPress={() => setConfirmDelete(true)}
+            style={[styles.headerAction, { backgroundColor: colors.surface2 }]}
+          >
+            <Icon name="trash-2" size={17} color={colors.danger} />
+          </Pressable>
+        }
       />
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -218,6 +249,17 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
           onClose={() => setSheet(null)}
         />
       ) : null}
+
+      <ConfirmDialog
+        testID="delete-workout"
+        visible={confirmDelete}
+        title={t('workout.deleteTitle')}
+        message={t('workout.deleteMessage')}
+        confirmLabel={t('common.delete')}
+        destructive
+        onConfirm={() => remove.mutate()}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </View>
   )
 }
@@ -225,6 +267,7 @@ export function WorkoutScreen({ workoutId, onBack, onAddExercise, onOpenHistory 
 const styles = StyleSheet.create({
   root: { flex: 1 },
   content: { paddingBottom: 24 },
+  headerAction: { width: 34, height: 34, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
   timerSection: { paddingHorizontal: 16, paddingTop: 10 },
   timerBlock: {
     flexDirection: 'row',

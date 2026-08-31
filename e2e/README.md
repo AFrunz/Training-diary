@@ -34,6 +34,7 @@ maestro test e2e/full-cycle.yaml # один
 | `calendar-create-workout` · `calendar-continue-workout` · `legend-absence` | карточка «сегодня» и легенда календаря |
 | `program-option-{название}` | выбор программы при создании тренировки |
 | `workout-timer` | счётчик времени в шапке тренировки |
+| `workout-delete` · `delete-workout-confirm` · `delete-workout-cancel` | удаление тренировки и диалог подтверждения |
 | `item-checkbox-{index}` · `add-set-{index}` · `open-history-{index}` · `item-target-{index}` | упражнение в тренировке |
 | `set-chip-{index}-{номер}` · `set-previous-{index}-{номер}` · `set-missing-{index}-{номер}` | пары подходов: сегодняшний (тап открывает правку), прошлой тренировки, пустая рамка вместо недоделанного |
 | `workout-sets-hint` | пояснение «сверху — прошлая тренировка, снизу — сегодняшняя» |

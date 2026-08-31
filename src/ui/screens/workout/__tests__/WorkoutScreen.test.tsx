@@ -210,6 +210,62 @@ describe('WorkoutScreen', () => {
   })
 })
 
+describe('WorkoutScreen — удаление тренировки (FR-4.7)', () => {
+  it('удаляет тренировку вместе с подходами и уводит с экрана', async () => {
+    const fixture = await seed()
+    await fixture.services.addSet({
+      workoutId: fixture.workoutId,
+      itemId: fixture.ports.state.workoutItems[0]!.id,
+      value: 80,
+      unit: 'kg',
+      reps: 8,
+    })
+    const onDeleted = jest.fn()
+    renderWithProviders(<WorkoutScreen workoutId={fixture.workoutId} onDeleted={onDeleted} />, {
+      services: fixture.services,
+    })
+
+    fireEvent.press(await screen.findByTestId('workout-delete'))
+    fireEvent.press(await screen.findByTestId('delete-workout-confirm'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.workouts).toHaveLength(0)
+    })
+    expect(fixture.ports.state.workoutItems).toHaveLength(0)
+    expect(fixture.ports.state.workoutSets).toHaveLength(0)
+    expect(onDeleted).toHaveBeenCalled()
+  })
+
+  it('без подтверждения ничего не удаляется', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('workout-delete'))
+    expect(screen.getByTestId('delete-workout-title')).toHaveTextContent('Удалить тренировку?')
+
+    fireEvent.press(screen.getByTestId('delete-workout-cancel'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('delete-workout-title')).toBeNull()
+    })
+    expect(fixture.ports.state.workouts).toHaveLength(1)
+  })
+
+  it('справочник упражнений при удалении не страдает', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('workout-delete'))
+    fireEvent.press(await screen.findByTestId('delete-workout-confirm'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.workouts).toHaveLength(0)
+    })
+    expect(fixture.ports.state.exercises).toHaveLength(2)
+    expect(fixture.ports.state.programs).toHaveLength(1)
+  })
+})
+
 describe('WorkoutScreen — прошлая тренировка рядом с сегодняшней (FR-4.10)', () => {
   /** Та же программа неделей раньше: два подхода жима. */
   const seedPrevious = async (fixture: Fixture) => {

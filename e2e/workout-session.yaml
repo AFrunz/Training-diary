@@ -127,3 +127,18 @@ name: Проведение тренировки — подходы, отметк
     id: 'workout-donut-${output.today}'
 - assertVisible: '3/3'
 - assertNotVisible: 'не завершена'
+
+# Тренировку можно удалить целиком — например, если начал её по ошибке (FR-4.7)
+- tapOn:
+    id: 'workout-card-${output.today}'
+- tapOn:
+    id: 'workout-delete'
+- assertVisible: 'Удалить тренировку?'
+- tapOn:
+    id: 'delete-workout-cancel'
+- tapOn:
+    id: 'workout-delete'
+- tapOn:
+    id: 'delete-workout-confirm'
+- assertVisible:
+    id: 'workouts-empty'
