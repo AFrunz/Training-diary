@@ -1,21 +1,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native'
+import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { WorkoutSet } from '../../../domain/model/entities'
 import type { Id, SetUnit, WeightUnit } from '../../../domain/model/types'
 import { SET_UNITS } from '../../../domain/model/types'
 import { formatSet } from '../../../domain/rules/format'
 import {
+  MAX_ANGLE_DEG,
+  MIN_ANGLE_DEG,
   fromInputWeight,
   measureFromInput,
   measureToDisplay,
@@ -24,6 +17,7 @@ import {
 } from '../../../domain/rules/units'
 import { validateSet } from '../../../domain/validation/rules'
 import { Icon } from '../../components/Icon'
+import { KeyboardAvoider } from '../../components/KeyboardAvoider'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
@@ -133,9 +127,17 @@ export function AddSetSheet({
       ...next,
     }))
 
-  /** Шаг вниз до нуля очищает поле: подход без веса — штатный случай. */
+  /**
+   * У веса шаг вниз до нуля очищает поле: подход без веса — штатный случай.
+   * У угла ноль — настоящее значение (горизонтальная скамья), а минус — декалайн,
+   * поэтому там значение просто упирается в границы диапазона.
+   */
   const bump = (delta: number) => {
     const next = roundForSetUnit((value ?? 0) + delta, setUnit)
+    if (setUnit === 'deg') {
+      patch({ value: String(Math.min(MAX_ANGLE_DEG, Math.max(MIN_ANGLE_DEG, next))) })
+      return
+    }
     patch({ value: next > 0 ? String(next) : '' })
   }
 
@@ -217,10 +219,7 @@ export function AddSetSheet({
         />
 
         {/* без этого клавиатура закрывает и поля, и кнопку записи */}
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.avoider}
-        >
+        <KeyboardAvoider style={styles.avoider}>
           <View
             style={[
               styles.sheet,
@@ -347,7 +346,7 @@ export function AddSetSheet({
               </Pressable>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </KeyboardAvoider>
       </View>
     </Modal>
   )
@@ -355,7 +354,7 @@ export function AddSetSheet({
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  avoider: { flex: 1, justifyContent: 'flex-end' },
+  avoider: { justifyContent: 'flex-end' },
   scrim: { opacity: 0.7 },
   sheet: {
     borderTopLeftRadius: radii.lg,

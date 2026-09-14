@@ -120,15 +120,19 @@ describe('validateSet', () => {
     expect(validateSet({ reps: 1 })).toEqual(ok)
   })
 
-  it('угол наклона от нуля до вертикали (FR-4.11)', () => {
+  it('скамья наклоняется в обе стороны: угол от −90 до 90 (FR-4.11)', () => {
     expect(validateSet({ angleDeg: 45, reps: 15 })).toEqual(ok)
+    // ноль — это горизонтальная скамья, а не «пусто»
     expect(validateSet({ angleDeg: 0, reps: 15 })).toEqual(ok)
+    // минус — декалайн
+    expect(validateSet({ angleDeg: -15, reps: 15 })).toEqual(ok)
     expect(validateSet({ angleDeg: 90, reps: 15 })).toEqual(ok)
+    expect(validateSet({ angleDeg: -90, reps: 15 })).toEqual(ok)
   })
 
-  it('отрицательный и запредельный угол отклоняются', () => {
-    expect(validateSet({ angleDeg: -10, reps: 15 })).toEqual(fail('angle-out-of-range'))
+  it('запредельный угол отклоняется', () => {
     expect(validateSet({ angleDeg: 91, reps: 15 })).toEqual(fail('angle-out-of-range'))
+    expect(validateSet({ angleDeg: -91, reps: 15 })).toEqual(fail('angle-out-of-range'))
     expect(validateSet({ angleDeg: Number.NaN, reps: 15 })).toEqual(fail('angle-out-of-range'))
   })
 })

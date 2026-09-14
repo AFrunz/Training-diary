@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { PROGRAM_PALETTE } from '../../../app/usecases/library'
 import type { Id } from '../../../domain/model/types'
 import { Icon } from '../../components/Icon'
+import { KeyboardAvoider } from '../../components/KeyboardAvoider'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
@@ -94,7 +95,7 @@ export function NewProgramScreen({
   }
 
   return (
-    <View testID="new-program-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
+    <KeyboardAvoider testID="new-program-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
       <ScreenHeader title={t('program.new')} onBack={onBack} />
 
       <ScrollView contentContainerStyle={styles.body}>
@@ -210,7 +211,7 @@ export function NewProgramScreen({
           setPickerOpen(false)
         }}
       />
-    </View>
+    </KeyboardAvoider>
   )
 }
 

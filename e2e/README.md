@@ -36,6 +36,7 @@ maestro test e2e/full-cycle.yaml # один
 | `workout-timer` | счётчик времени в шапке тренировки |
 | `workout-delete` · `delete-workout-confirm` · `delete-workout-cancel` | удаление тренировки и диалог подтверждения |
 | `item-checkbox-{index}` · `add-set-{index}` · `open-history-{index}` · `item-target-{index}` | упражнение в тренировке |
+| `add-exercise` | добавить упражнение сверх программы: открывает тот же шит выбора (FR-4.6) |
 | `set-chip-{index}-{номер}` · `set-previous-{index}-{номер}` · `set-missing-{index}-{номер}` | пары подходов: сегодняшний (тап открывает правку), прошлой тренировки, пустая рамка вместо недоделанного |
 | `workout-sets-hint` | пояснение «сверху — прошлая тренировка, снизу — сегодняшняя» |
 | `set-weight-input` · `set-reps-input` · `set-submit` | шит добавления подхода |
@@ -60,9 +61,8 @@ maestro test e2e/full-cycle.yaml # один
 | `program-item-up-{index}` · `program-item-down-{index}` | порядок в составе: у первой строки недоступна «вверх», у последней — «вниз» |
 | `program-color-{ключ палитры}` · `program-add-exercise` · `program-duplicate` · `program-archive` | экран программы: цвет и действия |
 | `exercise-history-screen` · `history-record-weight-value` · `history-record-weight-note` | история упражнения: рекорд веса |
-| `history-volume` · `history-volume-value` | история упражнения: объём за всё время |
-| `history-metric-weight` · `history-metric-oneRm` · `history-chart` · `history-bar-peak-{index}` | история упражнения: график |
-| `history-workout-{index}` · `history-delta-{index}` | история упражнения: раскладка по тренировкам |
+| `history-metric-weight` · `history-metric-oneRm` · `history-metric-volume` · `history-chart` · `history-bar-peak-{index}` | история упражнения: график и его метрики |
+| `history-workout-{index}` · `history-delta-{index}` · `history-volume-delta-{index}` | история упражнения: раскладка по тренировкам и плашки изменений |
 
 Ключи палитры программ — `prog-red`, `prog-orange`, `prog-amber`, `prog-green`,
 `prog-teal`, `prog-blue`, `prog-violet`, `prog-pink` (§7.3 ТЗ).

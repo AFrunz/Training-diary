@@ -54,7 +54,13 @@ export interface SetMeasure {
 }
 
 export const ANGLE_STEP_DEG = 5
+
+/**
+ * Скамья наклоняется в обе стороны: 30° — жим под углом вверх, −15° — декалайн,
+ * 0° — горизонталь. Ноль здесь настоящее значение, а не «пусто».
+ */
 export const MAX_ANGLE_DEG = 90
+export const MIN_ANGLE_DEG = -90
 
 /** Введённое число раскладывается по полям подхода согласно выбранной единице. */
 export function measureFromInput(value: number | null, unit: SetUnit): SetMeasure {

@@ -1,6 +1,6 @@
 import type { Id, LocalDate, WeightKg } from '../model/types'
 import { daysBetween } from '../rules/dates'
-import { MAX_ANGLE_DEG } from '../rules/units'
+import { MAX_ANGLE_DEG, MIN_ANGLE_DEG } from '../rules/units'
 
 /**
  * Проверки ввода. Возвращают код ошибки, а не готовый текст: тексты живут в словаре
@@ -30,7 +30,7 @@ export const MAX_REPS = 999
 export const MAX_WEIGHT_KG = 1000
 export const MAX_ABSENCE_DAYS = 365
 
-export { MAX_ANGLE_DEG }
+export { MAX_ANGLE_DEG, MIN_ANGLE_DEG }
 
 const ok: ValidationResult = { ok: true }
 const fail = (code: ValidationCode): ValidationResult => ({ ok: false, code })
@@ -79,8 +79,10 @@ export function validateSet(set: {
 
   const angle = set.angleDeg ?? null
   if (angle !== null) {
-    // отрицательный наклон и «больше вертикали» — это опечатка, а не настройка тренажёра
-    if (!Number.isFinite(angle) || angle < 0 || angle > MAX_ANGLE_DEG) return fail('angle-out-of-range')
+    // наклон бывает и отрицательным (декалайн), но «больше вертикали» — опечатка
+    if (!Number.isFinite(angle) || angle < MIN_ANGLE_DEG || angle > MAX_ANGLE_DEG) {
+      return fail('angle-out-of-range')
+    }
   }
   return ok
 }

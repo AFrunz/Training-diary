@@ -128,9 +128,19 @@ name: Проведение тренировки — подходы, отметк
 - assertVisible: '3/3'
 - assertNotVisible: 'не завершена'
 
-# Тренировку можно удалить целиком — например, если начал её по ошибке (FR-4.7)
+# Завершённую тренировку можно дополнить упражнением сверх программы (FR-4.6)
 - tapOn:
     id: 'workout-card-${output.today}'
+- tapOn:
+    id: 'add-exercise'
+- tapOn:
+    id: 'exercise-row-Планка'
+- tapOn:
+    id: 'exercise-picker-done'
+- assertVisible:
+    id: 'item-checkbox-3'
+
+# Тренировку можно удалить целиком — например, если начал её по ошибке (FR-4.7)
 - tapOn:
     id: 'workout-delete'
 - assertVisible: 'Удалить тренировку?'

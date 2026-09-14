@@ -7,6 +7,7 @@ import { PROGRAM_PALETTE } from '../../../app/usecases/library'
 import type { Id } from '../../../domain/model/types'
 import { localDate } from '../../../domain/model/types'
 import { Icon } from '../../components/Icon'
+import { KeyboardAvoider } from '../../components/KeyboardAvoider'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { ExercisePickerSheet } from '../library/ExercisePickerSheet'
 import { useT } from '../../i18n/I18nProvider'
@@ -159,7 +160,7 @@ export function ProgramScreen({
   }
 
   return (
-    <View testID="program-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
+    <KeyboardAvoider testID="program-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
       <ScreenHeader
         title={program.name}
         subtitle={t('program.subtitle', {
@@ -354,7 +355,7 @@ export function ProgramScreen({
         }}
         onClose={() => setPickerOpen(false)}
       />
-    </View>
+    </KeyboardAvoider>
   )
 }
 

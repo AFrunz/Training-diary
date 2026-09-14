@@ -79,20 +79,18 @@ describe('ExerciseHistoryScreen', () => {
     expect(screen.queryByTestId('history-chart')).toBeNull()
   })
 
-  it('дельта к прошлому разу: прибавка и «без изменений»', async () => {
+  it('дельта к прошлому разу: прибавка в весе', async () => {
     const fixture = await seed()
     await fixture.addWorkout('2026-07-26', [[77.5, 8]])
-    await fixture.addWorkout('2026-08-02', [[80, 6]])
-    await fixture.addWorkout('2026-08-11', [[80, 8]])
+    await fixture.addWorkout('2026-08-02', [[80, 8]])
 
     renderScreen(fixture)
 
     // список идёт от свежих к старым
-    expect(await screen.findByTestId('history-workout-0')).toHaveTextContent(/11 августа/)
-    expect(screen.getByTestId('history-delta-0')).toHaveTextContent('без изменений')
-    expect(screen.getByTestId('history-delta-1')).toHaveTextContent('+2.5 кг')
+    expect(await screen.findByTestId('history-workout-0')).toHaveTextContent(/2 августа/)
+    expect(screen.getByTestId('history-delta-0')).toHaveTextContent('+2.5 кг')
     // у самой первой тренировки сравнивать не с чем
-    expect(screen.queryByTestId('history-delta-2')).toBeNull()
+    expect(screen.queryByTestId('history-delta-1')).toBeNull()
   })
 
   it('подходы без веса выводятся как «× 12»', async () => {
@@ -143,19 +141,23 @@ describe('ExerciseHistoryScreen', () => {
   })
 })
 
-describe('ExerciseHistoryScreen — объём упражнения (FR-5.5)', () => {
-  it('складывает вес на повторы за все тренировки', async () => {
+describe('ExerciseHistoryScreen — объём (FR-5.5)', () => {
+  it('объём — третья метрика графика рядом с весом и 1ПМ', async () => {
     const fixture = await seed()
-    await fixture.addWorkout('2026-08-04', [
+    await fixture.addWorkout('2026-08-04', [[80, 8]])
+    await fixture.addWorkout('2026-08-11', [
       [80, 8],
       [80, 6],
     ])
-    await fixture.addWorkout('2026-08-11', [[82.5, 6]])
 
     renderScreen(fixture)
 
-    // 80×8 + 80×6 + 82.5×6 = 1615
-    expect(await screen.findByTestId('history-volume-value')).toHaveTextContent('1615 кг')
+    fireEvent.press(await screen.findByTestId('history-metric-volume'))
+
+    // пик — свежая тренировка: 80×8 + 80×6 = 1120
+    await waitFor(() => expect(screen.getByText('1120')).toBeTruthy())
+    // отдельной карточки «за всё время» больше нет
+    expect(screen.queryByTestId('history-volume')).toBeNull()
   })
 
   it('у упражнения без веса объём считается повторами', async () => {
@@ -167,16 +169,82 @@ describe('ExerciseHistoryScreen — объём упражнения (FR-5.5)', (
 
     renderScreen(fixture)
 
-    expect(await screen.findByTestId('history-volume-value')).toHaveTextContent('22 повтора')
+    fireEvent.press(await screen.findByTestId('history-metric-volume'))
+
+    await waitFor(() => expect(screen.getByText('22')).toBeTruthy())
   })
 
-  it('объём показывается в единицах из настроек', async () => {
+  it('объём в графике переводится в единицы из настроек', async () => {
     const fixture = await seed()
     await fixture.addWorkout('2026-08-11', [[100, 10]])
     await fixture.ports.settings.set({ ...fixture.ports.state.settings, unit: 'lb' })
 
     renderScreen(fixture)
 
-    expect(await screen.findByTestId('history-volume-value')).toHaveTextContent('2205 lb')
+    fireEvent.press(await screen.findByTestId('history-metric-volume'))
+
+    // 1000 кг = 2205 фунтов
+    await waitFor(() => expect(screen.getByText('2205')).toBeTruthy())
+  })
+})
+
+describe('ExerciseHistoryScreen — плашки изменений (FR-5.5)', () => {
+  it('вес прежний, но объём вырос — плашка объёма вместо «без изменений»', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [[80, 8]])
+    await fixture.addWorkout('2026-08-11', [
+      [80, 8],
+      [80, 8],
+    ])
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('history-volume-delta-0')).toHaveTextContent('объём +640 кг')
+    expect(screen.queryByTestId('history-delta-0')).toBeNull()
+  })
+
+  it('выросли и вес, и объём — две плашки', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [[80, 8]])
+    await fixture.addWorkout('2026-08-11', [[82.5, 8]])
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('history-delta-0')).toHaveTextContent('+2.5 кг')
+    expect(screen.getByTestId('history-volume-delta-0')).toHaveTextContent('объём +20 кг')
+  })
+
+  it('«без изменений» — только когда не сдвинулись ни вес, ни объём', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [[80, 8]])
+    await fixture.addWorkout('2026-08-11', [[80, 8]])
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('history-delta-0')).toHaveTextContent('без изменений')
+    expect(screen.queryByTestId('history-volume-delta-0')).toBeNull()
+  })
+
+  it('объём упал — плашка со знаком минус', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [
+      [80, 8],
+      [80, 8],
+    ])
+    await fixture.addWorkout('2026-08-11', [[80, 8]])
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('history-volume-delta-0')).toHaveTextContent('объём −640 кг')
+  })
+
+  it('у упражнения без веса объём сравнивается повторами', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [[null, 10]])
+    await fixture.addWorkout('2026-08-11', [[null, 12]])
+
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('history-volume-delta-0')).toHaveTextContent('объём +2 повтора')
   })
 })

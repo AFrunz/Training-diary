@@ -11,6 +11,7 @@ import { Donut } from '../../components/Donut'
 import { ExerciseRow } from '../../components/ExerciseRow'
 import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
+import { ExercisePickerSheet } from '../library/ExercisePickerSheet'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
@@ -27,6 +28,7 @@ import { AddSetSheet } from './AddSetSheet'
 export interface WorkoutScreenProps {
   readonly workoutId: Id
   readonly onBack?: () => void
+  /** Своя навигация вместо шита выбора: по умолчанию упражнение выбирается прямо здесь. */
   readonly onAddExercise?: () => void
   readonly onOpenHistory?: (exerciseId: Id) => void
   /** Куда уходить после удаления тренировки: её экрана больше нет (FR-4.7). */
@@ -78,6 +80,7 @@ export function WorkoutScreen({
 
   /** Открытый шит: добавление подхода к упражнению либо правка записанного. */
   const [sheet, setSheet] = useState<{ itemId: Id; setId?: Id } | null>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [now, setNow] = useState(() => Date.now())
 
@@ -105,6 +108,25 @@ export function WorkoutScreen({
   const toggleDone = useMutation({
     mutationFn: (input: { itemId: Id; done: boolean }) =>
       services.toggleItemDone({ workoutId, itemId: input.itemId, done: input.done }),
+    onSuccess: invalidate,
+  })
+
+  /**
+   * Упражнения сверх программы (FR-4.6). Шит отдаёт весь выбор, включая уже
+   * добавленные, поэтому пишутся только новые — повтор сценарий отклонит.
+   * Завершённая тренировка не исключение: дополнить её можно задним числом.
+   */
+  const addExercises = useMutation({
+    mutationFn: async (exerciseIds: readonly Id[]) => {
+      // состав перечитывается из базы: между открытием шита и «Готово» он мог измениться
+      const aggregate = await services.ports.workouts.byId(workoutId)
+      const present = new Set((aggregate?.items ?? []).map((item) => item.exerciseId))
+
+      for (const exerciseId of exerciseIds) {
+        if (present.has(exerciseId)) continue
+        await services.addAdHocExercise({ workoutId, exerciseId })
+      }
+    },
     onSuccess: invalidate,
   })
 
@@ -226,7 +248,7 @@ export function WorkoutScreen({
           <Pressable
             testID="add-exercise"
             accessibilityRole="button"
-            onPress={onAddExercise}
+            onPress={() => (onAddExercise ? onAddExercise() : setPickerOpen(true))}
             style={[styles.addExerciseButton, { borderColor: colors.border }]}
           >
             <Icon name="plus" size={15} color={colors.textSecondary} />
@@ -249,6 +271,16 @@ export function WorkoutScreen({
           onClose={() => setSheet(null)}
         />
       ) : null}
+
+      <ExercisePickerSheet
+        visible={pickerOpen}
+        selectedIds={items.map((item) => item.exerciseId)}
+        onDone={(exerciseIds) => {
+          setPickerOpen(false)
+          addExercises.mutate(exerciseIds)
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
 
       <ConfirmDialog
         testID="delete-workout"

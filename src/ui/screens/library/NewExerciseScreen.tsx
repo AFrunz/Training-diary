@@ -5,6 +5,7 @@ import type { Id } from '../../../domain/model/types'
 import { validateExerciseName } from '../../../domain/validation/rules'
 import type { ValidationCode } from '../../../domain/validation/rules'
 import { Icon } from '../../components/Icon'
+import { KeyboardAvoider } from '../../components/KeyboardAvoider'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
@@ -75,7 +76,7 @@ export function NewExerciseScreen({ onBack, onCreated }: NewExerciseScreenProps)
   }
 
   return (
-    <View testID="new-exercise-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
+    <KeyboardAvoider testID="new-exercise-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
       <ScreenHeader title={t('exercise.new')} onBack={onBack} />
 
       <ScrollView contentContainerStyle={styles.body}>
@@ -184,7 +185,7 @@ export function NewExerciseScreen({ onBack, onCreated }: NewExerciseScreenProps)
           </Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoider>
   )
 }
 

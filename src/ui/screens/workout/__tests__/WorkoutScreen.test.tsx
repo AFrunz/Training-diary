@@ -210,6 +210,66 @@ describe('WorkoutScreen', () => {
   })
 })
 
+describe('WorkoutScreen — упражнение сверх программы (FR-4.6)', () => {
+  /** Упражнение, которого нет в программе тренировки. */
+  const seedExtra = async (fixture: Fixture) => {
+    const pressId = await fixture.services.createExercise({ name: 'Французский жим' })
+    return pressId
+  }
+
+  it('выбранное в шите упражнение появляется в тренировке', async () => {
+    const fixture = await seed()
+    await seedExtra(fixture)
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('add-exercise'))
+    fireEvent.press(await screen.findByTestId('exercise-row-Французский жим'))
+    fireEvent.press(screen.getByTestId('exercise-picker-done'))
+
+    expect(await screen.findByText('Французский жим')).toBeTruthy()
+    const items = fixture.ports.state.workoutItems.filter(
+      (item) => item.workoutId === fixture.workoutId,
+    )
+    expect(items).toHaveLength(3)
+    expect(items.at(-1)).toMatchObject({ isAdHoc: true })
+  })
+
+  it('уже добавленное упражнение не дублируется', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('add-exercise'))
+    // «Жим лёжа» уже в тренировке и отмечен — «Готово» не должно его продублировать
+    fireEvent.press(await screen.findByTestId('exercise-picker-done'))
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('exercise-picker')).toBeNull()
+    })
+    expect(
+      fixture.ports.state.workoutItems.filter((item) => item.workoutId === fixture.workoutId),
+    ).toHaveLength(2)
+  })
+
+  it('завершённую тренировку тоже можно дополнить', async () => {
+    const fixture = await seed()
+    await seedExtra(fixture)
+    for (const item of [...fixture.ports.state.workoutItems]) {
+      await fixture.services.toggleItemDone({ workoutId: fixture.workoutId, itemId: item.id, done: true })
+    }
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('add-exercise'))
+    fireEvent.press(await screen.findByTestId('exercise-row-Французский жим'))
+    fireEvent.press(screen.getByTestId('exercise-picker-done'))
+
+    expect(await screen.findByText('Французский жим')).toBeTruthy()
+    // бублик пересчитался: добавленное упражнение ещё не отмечено
+    await waitFor(() => {
+      expect(screen.getByTestId('workout-donut')).toHaveTextContent('2/3')
+    })
+  })
+})
+
 describe('WorkoutScreen — удаление тренировки (FR-4.7)', () => {
   it('удаляет тренировку вместе с подходами и уводит с экрана', async () => {
     const fixture = await seed()

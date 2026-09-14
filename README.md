@@ -22,7 +22,7 @@ To track how working weights grow for every exercise, and to see your consistenc
 - **Per-set units** — kilograms, pounds or degrees of bench incline; tap a set to edit or delete it
 - **Programs** — training days with free-form names, their own colour and exercise list
 - **Library** of 40 preloaded exercises with search and grouping by muscle
-- **Exercise history**: records, all-time volume, a weight progression chart, sets broken down with the delta since last time
+- **Exercise history**: records, a progress chart by max weight, 1RM and volume, sets broken down with the delta since last time
 - **Statistics** for a month or a year: consistency, average duration, completion rate, week streaks
 - **Your data stays yours**: export and import as one file, rotating auto-backups, full wipe
 - Russian and English, light and dark themes, kilograms and pounds
@@ -56,7 +56,7 @@ Calculation rules know nothing about React Native or the database, so they run a
 
 ## Tests
 
-701 tests across four levels plus 12 end-to-end Maestro flows:
+714 tests across four levels plus 12 end-to-end Maestro flows:
 
 ```sh
 npm test              # everything

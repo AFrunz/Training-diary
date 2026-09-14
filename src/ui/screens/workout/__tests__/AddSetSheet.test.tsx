@@ -234,6 +234,48 @@ describe('AddSetSheet — единица подхода (FR-4.11)', () => {
     expect(screen.getByTestId('set-weight-input').props.value).toBe('')
   })
 
+  it('нулевой и отрицательный угол записываются: скамья бывает горизонтальной и с уклоном вниз', async () => {
+    const fixture = await seed()
+    renderSheet(fixture)
+    await waitForSuggestion()
+
+    fireEvent.press(screen.getByTestId('set-unit-deg'))
+    fireEvent.changeText(screen.getByTestId('set-weight-input'), '-15')
+    fireEvent.changeText(screen.getByTestId('set-reps-input'), '15')
+    fireEvent.press(screen.getByTestId('set-submit'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.workoutSets).toHaveLength(1)
+    })
+    expect(fixture.ports.state.workoutSets[0]).toMatchObject({ unit: 'deg', angleDeg: -15 })
+  })
+
+  it('кнопка «−» доводит угол до нуля и уходит в минус, а не очищает поле', async () => {
+    const fixture = await seed()
+    renderSheet(fixture)
+    await waitForSuggestion()
+
+    fireEvent.press(screen.getByTestId('set-unit-deg'))
+    fireEvent.changeText(screen.getByTestId('set-weight-input'), '5')
+
+    fireEvent.press(screen.getByTestId('set-weight-minus'))
+    expect(screen.getByTestId('set-weight-input').props.value).toBe('0')
+
+    fireEvent.press(screen.getByTestId('set-weight-minus'))
+    expect(screen.getByTestId('set-weight-input').props.value).toBe('-5')
+  })
+
+  it('у веса шаг вниз по-прежнему очищает поле: подход без веса штатный', async () => {
+    const fixture = await seed()
+    renderSheet(fixture)
+    await waitForSuggestion()
+
+    fireEvent.changeText(screen.getByTestId('set-weight-input'), '2.5')
+    fireEvent.press(screen.getByTestId('set-weight-minus'))
+
+    expect(screen.getByTestId('set-weight-input').props.value).toBe('')
+  })
+
   it('запредельный угол не уходит в запись: кнопка неактивна', async () => {
     const fixture = await seed()
     renderSheet(fixture)

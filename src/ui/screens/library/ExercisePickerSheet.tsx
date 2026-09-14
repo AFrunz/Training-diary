@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { Id } from '../../../domain/model/types'
 import { Icon } from '../../components/Icon'
+import { KeyboardAvoider } from '../../components/KeyboardAvoider'
 import { useT } from '../../i18n/I18nProvider'
 import { useTheme } from '../../theme/ThemeProvider'
 import { numFont, radii, uiFont } from '../../theme/tokens'
@@ -75,112 +76,117 @@ export function ExercisePickerSheet({
         style={[styles.scrim, { backgroundColor: colors.textPrimary }]}
       />
 
-      <View
-        style={[
-          styles.sheet,
-          { backgroundColor: colors.surface, paddingBottom: 20 + insets.bottom },
-        ]}
-      >
-        <View style={styles.handleRow}>
-          <View style={[styles.handle, { backgroundColor: colors.border }]} />
-        </View>
-
-        <View style={styles.titleRow}>
-          <View style={styles.titleLeft}>
-            <Text style={[styles.title, { color: colors.textPrimary }]}>{t('library.addExercises')}</Text>
-            <View
-              testID="exercise-picker-counter"
-              accessibilityLabel={t('library.selected', { count: selected.length })}
-              style={[styles.counter, { backgroundColor: colors.accentSoft }]}
-            >
-              <Text style={[styles.counterLabel, { color: colors.accent }]}>{selected.length}</Text>
-            </View>
+      {/* без этого клавиатура поиска закрывает и список, и кнопку «Готово» */}
+      <KeyboardAvoider style={styles.avoider}>
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: colors.surface, paddingBottom: 20 + insets.bottom },
+          ]}
+        >
+          <View style={styles.handleRow}>
+            <View style={[styles.handle, { backgroundColor: colors.border }]} />
           </View>
 
-          <Pressable
-            testID="exercise-picker-done"
-            accessibilityRole="button"
-            onPress={() => onDone(selected)}
-          >
-            <Text style={[styles.done, { color: colors.accent }]}>{t('common.done')}</Text>
-          </Pressable>
-        </View>
-
-        <View style={[styles.searchField, { backgroundColor: colors.surface2 }]}>
-          <Icon name="search" size={17} color={colors.textMuted} />
-          <TextInput
-            testID="exercise-picker-search"
-            value={query}
-            onChangeText={setQuery}
-            placeholder={t('library.searchInLibrary')}
-            placeholderTextColor={colors.textMuted}
-            style={[styles.searchInput, { color: colors.textPrimary }]}
-          />
-        </View>
-
-        <ScrollView contentContainerStyle={styles.list}>
-          {sections.map((section) => (
-            <View key={section.group} style={styles.group}>
-              <Text
-                testID={`picker-group-${section.group}`}
-                style={[styles.caption, { color: colors.textMuted }]}
+          <View style={styles.titleRow}>
+            <View style={styles.titleLeft}>
+              <Text style={[styles.title, { color: colors.textPrimary }]}>{t('library.addExercises')}</Text>
+              <View
+                testID="exercise-picker-counter"
+                accessibilityLabel={t('library.selected', { count: selected.length })}
+                style={[styles.counter, { backgroundColor: colors.accentSoft }]}
               >
-                {muscleGroupLabel(section.group, t).toUpperCase()}
-              </Text>
-
-              <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                {section.items.map((summary, index) => {
-                  const checked = selected.includes(summary.exercise.id)
-                  return (
-                    <View key={summary.exercise.id}>
-                      {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
-                      <Pressable
-                        testID={`exercise-row-${summary.exercise.name}`}
-                        accessibilityRole="checkbox"
-                        accessibilityState={{ checked }}
-                        onPress={() => toggle(summary.exercise.id)}
-                        style={styles.row}
-                      >
-                        <View
-                          style={[
-                            styles.checkbox,
-                            checked
-                              ? { backgroundColor: colors.accent, borderColor: colors.accent }
-                              : { borderColor: colors.border },
-                          ]}
-                        >
-                          {checked ? <Icon name="check" size={14} color={colors.onAccent} /> : null}
-                        </View>
-
-                        <Text style={[styles.name, { color: colors.textPrimary }]}>{summary.exercise.name}</Text>
-                        <Text style={[styles.value, { color: colors.textMuted }]}>
-                          {formatRecord(summary, unit, locale)}
-                        </Text>
-                      </Pressable>
-                    </View>
-                  )
-                })}
+                <Text style={[styles.counterLabel, { color: colors.accent }]}>{selected.length}</Text>
               </View>
             </View>
-          ))}
 
-          <Pressable
-            testID="exercise-picker-create"
-            accessibilityRole="button"
-            onPress={onCreateExercise}
-            style={[styles.createNew, { backgroundColor: colors.accentSoft }]}
-          >
-            <Icon name="plus" size={16} color={colors.accent} />
-            <Text style={[styles.createNewLabel, { color: colors.accent }]}>{t('library.notFound')}</Text>
-          </Pressable>
-        </ScrollView>
-      </View>
+            <Pressable
+              testID="exercise-picker-done"
+              accessibilityRole="button"
+              onPress={() => onDone(selected)}
+            >
+              <Text style={[styles.done, { color: colors.accent }]}>{t('common.done')}</Text>
+            </Pressable>
+          </View>
+
+          <View style={[styles.searchField, { backgroundColor: colors.surface2 }]}>
+            <Icon name="search" size={17} color={colors.textMuted} />
+            <TextInput
+              testID="exercise-picker-search"
+              value={query}
+              onChangeText={setQuery}
+              placeholder={t('library.searchInLibrary')}
+              placeholderTextColor={colors.textMuted}
+              style={[styles.searchInput, { color: colors.textPrimary }]}
+            />
+          </View>
+
+          <ScrollView contentContainerStyle={styles.list}>
+            {sections.map((section) => (
+              <View key={section.group} style={styles.group}>
+                <Text
+                  testID={`picker-group-${section.group}`}
+                  style={[styles.caption, { color: colors.textMuted }]}
+                >
+                  {muscleGroupLabel(section.group, t).toUpperCase()}
+                </Text>
+
+                <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                  {section.items.map((summary, index) => {
+                    const checked = selected.includes(summary.exercise.id)
+                    return (
+                      <View key={summary.exercise.id}>
+                        {index > 0 ? <View style={[styles.divider, { backgroundColor: colors.border }]} /> : null}
+                        <Pressable
+                          testID={`exercise-row-${summary.exercise.name}`}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked }}
+                          onPress={() => toggle(summary.exercise.id)}
+                          style={styles.row}
+                        >
+                          <View
+                            style={[
+                              styles.checkbox,
+                              checked
+                                ? { backgroundColor: colors.accent, borderColor: colors.accent }
+                                : { borderColor: colors.border },
+                            ]}
+                          >
+                            {checked ? <Icon name="check" size={14} color={colors.onAccent} /> : null}
+                          </View>
+
+                          <Text style={[styles.name, { color: colors.textPrimary }]}>{summary.exercise.name}</Text>
+                          <Text style={[styles.value, { color: colors.textMuted }]}>
+                            {formatRecord(summary, unit, locale)}
+                          </Text>
+                        </Pressable>
+                      </View>
+                    )
+                  })}
+                </View>
+              </View>
+            ))}
+
+            <Pressable
+              testID="exercise-picker-create"
+              accessibilityRole="button"
+              onPress={onCreateExercise}
+              style={[styles.createNew, { backgroundColor: colors.accentSoft }]}
+            >
+              <Icon name="plus" size={16} color={colors.accent} />
+              <Text style={[styles.createNewLabel, { color: colors.accent }]}>{t('library.notFound')}</Text>
+            </Pressable>
+          </ScrollView>
+        </View>
+      </KeyboardAvoider>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   overlay: { ...StyleSheet.absoluteFill, justifyContent: 'flex-end' },
+  // шит прижат к низу внутри поднимающегося контейнера
+  avoider: { justifyContent: 'flex-end' },
   // затемнение из макета — тот же тёмный тон, что и основной текст, с прозрачностью
   scrim: { ...StyleSheet.absoluteFill, opacity: 0.7 },
   sheet: {

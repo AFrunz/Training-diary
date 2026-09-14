@@ -8,6 +8,7 @@ import type { Id, LocalDate } from '../../../domain/model/types'
 import { localDate } from '../../../domain/model/types'
 import { addDays, daysBetween } from '../../../domain/rules/dates'
 import { Chip } from '../../components/Chip'
+import { KeyboardAvoider } from '../../components/KeyboardAvoider'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
@@ -64,7 +65,7 @@ export function NewAbsenceScreen({ date, onBack, onCreated }: NewAbsenceScreenPr
   const canSave = isDate(from) && isDate(to)
 
   return (
-    <View testID="new-absence-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
+    <KeyboardAvoider testID="new-absence-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
       <ScreenHeader title={t('absence.new')} onBack={onBack} />
 
       <ScrollView contentContainerStyle={styles.body}>
@@ -140,7 +141,7 @@ export function NewAbsenceScreen({ date, onBack, onCreated }: NewAbsenceScreenPr
           </Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoider>
   )
 }
 

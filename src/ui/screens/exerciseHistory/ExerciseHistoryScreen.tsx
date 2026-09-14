@@ -29,7 +29,7 @@ const CHART_COLUMNS = 7
 const BAR_MAX_HEIGHT = 90
 const BAR_MIN_HEIGHT = 8
 
-type Metric = 'weight' | 'oneRm'
+type Metric = 'weight' | 'oneRm' | 'volume'
 
 interface HistorySet {
   readonly id: Id
@@ -45,6 +45,27 @@ interface HistoryEntry {
   readonly sets: readonly HistorySet[]
   readonly maxWeightKg: number | null
   readonly best1RM: number | null
+  /** Объём тренировки: тоннаж, а у подходов без веса — повторы (FR-5.5). */
+  readonly volume: ExerciseVolume
+}
+
+/**
+ * Насколько объём отличается от прошлого раза. Сравниваются только однородные
+ * тренировки: если в одной вес был, а в другой нет, сравнивать нечего.
+ */
+interface VolumeDelta {
+  readonly kind: 'weight' | 'reps'
+  readonly value: number
+}
+
+const volumeDelta = (entry: ExerciseVolume, previous: ExerciseVolume): VolumeDelta | null => {
+  if (entry.weightKg !== null && previous.weightKg !== null) {
+    return { kind: 'weight', value: entry.weightKg - previous.weightKg }
+  }
+  if (entry.weightKg === null && previous.weightKg === null) {
+    return { kind: 'reps', value: entry.reps - previous.reps }
+  }
+  return null
 }
 
 interface WeightRecord {
@@ -67,8 +88,6 @@ interface HistoryView {
   readonly entries: readonly HistoryEntry[]
   readonly weightRecord: WeightRecord | null
   readonly repsRecord: RepsRecord | null
-  /** Объём за всё время: тоннаж, а у упражнений без веса — повторы (FR-5.5). */
-  readonly volume: ExerciseVolume
 }
 
 const maxOrNull = (values: readonly (number | null)[]): number | null => {
@@ -155,6 +174,7 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
           sets,
           maxWeightKg: maxOrNull(sets.map((set) => set.weightKg)),
           best1RM: maxOrNull(sets.map((set) => epley1RM(set.weightKg, set.reps))),
+          volume: exerciseVolume(sets),
         })
       }
 
@@ -165,7 +185,6 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
         entries,
         weightRecord: findWeightRecord(entries),
         repsRecord: findRepsRecord(entries),
-        volume: exerciseVolume(entries.flatMap((entry) => entry.sets)),
       }
     },
   })
@@ -174,7 +193,7 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
     return <View testID="exercise-history-screen" style={[styles.root, { backgroundColor: colors.bg }]} />
   }
 
-  const { exercise, unit, today, entries, weightRecord, repsRecord, volume } = data
+  const { exercise, unit, today, entries, weightRecord, repsRecord } = data
 
   const formatDate = (date: LocalDate, short: boolean): string => {
     const [, month, day] = date.split('-')
@@ -188,8 +207,21 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
   const recordDate = (date: LocalDate): string =>
     date === today ? t('calendar.today').toLocaleLowerCase(locale) : formatDate(date, false)
 
-  const chartValue = (entry: HistoryEntry): number | null =>
-    metric === 'weight' ? entry.maxWeightKg : entry.best1RM
+  /**
+   * Объём считается в килограммах, пока вес есть хоть в одной тренировке;
+   * у турника и планки он выражается повторами — тогда и график в повторах.
+   */
+  const volumeInWeight = entries.some((entry) => entry.volume.weightKg !== null)
+
+  const chartValue = (entry: HistoryEntry): number | null => {
+    if (metric === 'weight') return entry.maxWeightKg
+    if (metric === 'oneRm') return entry.best1RM
+    return volumeInWeight ? entry.volume.weightKg : entry.volume.reps
+  }
+
+  /** Подпись пика: вес переводится в единицы настроек, повторы остаются числом. */
+  const peakLabel = (value: number): string =>
+    metric === 'volume' && !volumeInWeight ? String(value) : String(toDisplayWeight(value, unit))
 
   const columns = entries
     .map((entry) => ({ date: entry.date, value: chartValue(entry) }))
@@ -271,34 +303,6 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
             </View>
           </View>
 
-          <View
-            testID="history-volume"
-            style={[styles.card, styles.volumeCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            <View style={styles.volumeTexts}>
-              <View style={styles.volumeTitleRow}>
-                <Text style={[styles.volumeTitle, { color: colors.textPrimary }]}>
-                  {t('history.volume')}
-                </Text>
-                <View style={[styles.periodChip, { backgroundColor: colors.surface2 }]}>
-                  <Text style={[styles.periodLabel, { color: colors.textMuted }]}>
-                    {t('history.volumeAllTime')}
-                  </Text>
-                </View>
-              </View>
-
-              <Text style={[styles.volumeHint, { color: colors.textMuted }]}>
-                {t(volume.weightKg === null ? 'history.volumeRepsHint' : 'history.volumeHint')}
-              </Text>
-            </View>
-
-            <Text testID="history-volume-value" style={[styles.volumeValue, { color: colors.textPrimary }]}>
-              {volume.weightKg === null
-                ? count('reps', volume.reps)
-                : formatWeight(volume.weightKg, unit, locale)}
-            </Text>
-          </View>
-
           <View style={[styles.card, styles.chartCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.chartHeader}>
               <Text style={[styles.chartTitle, { color: colors.textPrimary }]}>{t('history.dynamics')}</Text>
@@ -308,6 +312,7 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
                   [
                     ['weight', t('history.metricMaxWeight')],
                     ['oneRm', t('history.metricOneRM')],
+                    ['volume', t('history.volume')],
                   ] as const
                 ).map(([value, label]) => (
                   <Pressable
@@ -346,7 +351,7 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
                   <View key={column.date} style={styles.barColumn}>
                     {isPeak ? (
                       <Text testID={`history-bar-peak-${index}`} style={[styles.barPeak, { color: colors.accent }]}>
-                        {String(toDisplayWeight(column.value, unit))}
+                        {peakLabel(column.value)}
                       </Text>
                     ) : null}
 
@@ -375,6 +380,14 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
                 previous && previous.maxWeightKg !== null && entry.maxWeightKg !== null
                   ? entry.maxWeightKg - previous.maxWeightKg
                   : null
+              const volume = previous ? volumeDelta(entry.volume, previous.volume) : null
+
+              /**
+               * «Без изменений» — только когда не сдвинулись ни вес, ни объём:
+               * те же килограммы при большем числе подходов — это всё-таки рост.
+               */
+              const unchanged =
+                previous !== undefined && (delta ?? 0) === 0 && (volume?.value ?? 0) === 0
 
               return (
                 <View
@@ -387,28 +400,63 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
                       {formatDate(entry.date, false)}
                     </Text>
 
-                    {delta === null ? null : (
-                      <View
-                        testID={`history-delta-${index}`}
-                        style={[
-                          styles.deltaChip,
-                          { backgroundColor: delta > 0 ? colors.accentSoft : colors.surface2 },
-                        ]}
-                      >
-                        <Text
+                    <View style={styles.deltaRow}>
+                      {unchanged ? (
+                        <View testID={`history-delta-${index}`} style={[styles.deltaChip, { backgroundColor: colors.surface2 }]}>
+                          <Text style={[styles.deltaLabel, { color: colors.textMuted }]}>
+                            {t('history.noChange')}
+                          </Text>
+                        </View>
+                      ) : null}
+
+                      {!unchanged && delta !== null && delta !== 0 ? (
+                        <View
+                          testID={`history-delta-${index}`}
                           style={[
-                            styles.deltaLabel,
-                            { color: delta > 0 ? colors.accent : colors.textMuted },
+                            styles.deltaChip,
+                            { backgroundColor: delta > 0 ? colors.accentSoft : colors.surface2 },
                           ]}
                         >
-                          {delta === 0
-                            ? t('history.noChange')
-                            : t(delta > 0 ? 'history.deltaUp' : 'history.deltaDown', {
-                                value: formatWeight(Math.abs(delta), unit, locale),
-                              })}
-                        </Text>
-                      </View>
-                    )}
+                          <Text
+                            style={[
+                              styles.deltaLabel,
+                              { color: delta > 0 ? colors.accent : colors.textMuted },
+                            ]}
+                          >
+                            {t(delta > 0 ? 'history.deltaUp' : 'history.deltaDown', {
+                              value: formatWeight(Math.abs(delta), unit, locale),
+                            })}
+                          </Text>
+                        </View>
+                      ) : null}
+
+                      {/* объём двигается и без прибавки в весе: лишний подход тоже прогресс */}
+                      {!unchanged && volume !== null && volume.value !== 0 ? (
+                        <View
+                          testID={`history-volume-delta-${index}`}
+                          style={[
+                            styles.deltaChip,
+                            { backgroundColor: volume.value > 0 ? colors.accentSoft : colors.surface2 },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.deltaLabel,
+                              { color: volume.value > 0 ? colors.accent : colors.textMuted },
+                            ]}
+                          >
+                            {t('history.volumeDelta', {
+                              value: t(volume.value > 0 ? 'history.deltaUp' : 'history.deltaDown', {
+                                value:
+                                  volume.kind === 'weight'
+                                    ? formatWeight(Math.abs(volume.value), unit, locale)
+                                    : count('reps', Math.abs(volume.value)),
+                              }),
+                            })}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
                   </View>
 
                   <View style={styles.setsRow}>
@@ -443,16 +491,6 @@ const styles = StyleSheet.create({
   recordValue: { fontSize: 22, fontFamily: numFont('700'), fontWeight: '700' },
   recordNote: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
 
-  // объём отдельной широкой карточкой: тремя в ряд значение уже не помещается
-  volumeCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
-  volumeTexts: { flex: 1, gap: 3 },
-  volumeTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  volumeTitle: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
-  periodChip: { borderRadius: radii.pill, paddingVertical: 2, paddingHorizontal: 8 },
-  periodLabel: { fontSize: 10, fontFamily: uiFont('600'), fontWeight: '600' },
-  volumeHint: { fontSize: 11, fontFamily: uiFont('500'), fontWeight: '500' },
-  volumeValue: { fontSize: 22, fontFamily: numFont('700'), fontWeight: '700' },
-
   chartCard: { padding: 16, gap: 14 },
   chartHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   chartTitle: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
@@ -477,6 +515,8 @@ const styles = StyleSheet.create({
   workoutCard: { padding: 14, gap: 10 },
   workoutTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   workoutDate: { fontSize: 14, fontFamily: uiFont('600'), fontWeight: '600' },
+  // плашек может быть две: вес и объём меняются независимо
+  deltaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1, flexWrap: 'wrap', justifyContent: 'flex-end' },
   deltaChip: { borderRadius: radii.pill, paddingVertical: 3, paddingHorizontal: 8 },
   deltaLabel: { fontSize: 11, fontFamily: uiFont('600'), fontWeight: '600' },
   setsRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 7 },
