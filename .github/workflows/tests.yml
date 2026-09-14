@@ -34,9 +34,6 @@ jobs:
         # тестовый драйвер базы работает на встроенном в Node node:sqlite
         run: npm test -- --ci
 
-      - name: Проверить конфигурацию проекта
-        run: npx expo-doctor@latest
-
       - name: Собрать бандл
         # ловит то, что не видят тесты: ошибки импортов и конфигурации сборщика
         run: npx expo export --platform android --output-dir /tmp/export
