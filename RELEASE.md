@@ -37,6 +37,19 @@ npx expo-doctor@latest
 ломал нативную сборку ошибкой `tryGetMutableBuffer` — на бандле и тестах это
 никак не проявлялось.
 
+### Версии GitHub Actions
+
+Все действия в workflow должны работать на **Node 24**: GitHub принудительно
+запускает на нём и те, что собраны под Node 20, и старые от этого падают. Так
+однажды встала сборка релиза — на шаге `android-actions/setup-android@v3`,
+хотя типы и тесты прошли. Если в логе видно предупреждение «Node.js 20 is
+deprecated… being forced to run on Node.js 24», поднимите названные действия.
+Проверить, на чём собрано действие, можно не заглядывая в CI:
+
+```sh
+curl -s https://raw.githubusercontent.com/<owner>/<repo>/<tag>/action.yml | grep using:
+```
+
 ## Как выпустить версию
 
 Всё делается из панели GitHub, править файлы заранее не нужно.
