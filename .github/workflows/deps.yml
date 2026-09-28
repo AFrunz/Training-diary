@@ -1,13 +1,18 @@
 name: Зависимости
 
-# expo-doctor сверяет версии пакетов со списком, который живёт в реестре Expo,
-# а не в репозитории. Поэтому проверка краснеет сама по себе — на коммите,
-# который ничего не менял, просто вышли патчи SDK. В гейте на каждый пуш ей не
-# место: она про окружение, а не про изменение. Раз в неделю — в самый раз.
+# Expo выпускает патчи SDK едва ли не каждую неделю, поэтому проверка версий
+# краснела бы постоянно и ни о чём: это рутина, а не поломка. Прогон ничего не
+# роняет — он заводит одну задачу со списком отставших пакетов и сам её
+# закрывает, когда версии догнали. Всё, что действительно ломает сборку, ловят
+# типы, тесты и бандл на каждом пуше.
 on:
   schedule:
     - cron: '0 6 * * 1'
   workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   doctor:
@@ -25,5 +30,68 @@ jobs:
       - name: Установить зависимости
         run: npm ci
 
-      - name: Проверить конфигурацию проекта
-        run: npx expo-doctor@latest
+      - name: Сверить версии с ожиданиями SDK
+        id: check
+        # отставание версий — штатный исход и роняет не прогон, а задачу ниже;
+        # а вот если сама проверка сломалась, это уже красный прогон
+        run: |
+          set +e
+          raw=$(npx expo install --check 2>&1)
+          status=$?
+          set -e
+
+          echo "$raw"
+          outdated=$(printf '%s\n' "$raw" | grep -E 'expected version:' || true)
+
+          if [ $status -eq 0 ]; then
+            echo 'outdated=no' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -z "$outdated" ]; then
+            echo '::error::expo install --check не смог сверить версии, дело не в отставании'
+            exit 1
+          fi
+
+          echo 'outdated=yes' >> "$GITHUB_OUTPUT"
+          {
+            echo 'report<<REPORT'
+            # из вывода берутся только строки про версии: остальное — шум npm
+            printf '%s\n' "$outdated" | sed 's/^ *//'
+            echo 'REPORT'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Завести или обновить задачу
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: Версии пакетов отстали от Expo SDK
+          OUTDATED: ${{ steps.check.outputs.outdated }}
+          REPORT: ${{ steps.check.outputs.report }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          existing=$(gh issue list --state open --search "in:title \"$TITLE\"" --json number --jq '.[0].number // empty')
+
+          if [ "$OUTDATED" = "no" ]; then
+            if [ -n "$existing" ]; then
+              gh issue close "$existing" --comment "Версии догнали ожидания SDK: $RUN_URL"
+            fi
+            echo "Всё в тон SDK" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # аргументы в одинарных кавычках: обратные кавычки разметки иначе
+          # выполнились бы как команда и текст бы пропал
+          body=$(printf '%s\n\n```\n%s\n```\n\n%s\n\n```sh\nnpx expo install --fix\n```\n\n%s\n\n%s\n' \
+            'Проверка версий на стороне Expo, а не репозитория: список ожидаемых версий живёт в реестре и меняется сам по себе.' \
+            "$REPORT" \
+            'Догнать:' \
+            'Если команда падает на конфликте зависимостей, `@react-native/jest-preset` нужно поднять вручную вместе с `react-native` — подробности в RELEASE.md.' \
+            "Прогон: $RUN_URL")
+
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body "$body"
+            echo "Обновлена задача #$existing" >> "$GITHUB_STEP_SUMMARY"
+          else
+            gh issue create --title "$TITLE" --body "$body"
+            echo "Заведена задача" >> "$GITHUB_STEP_SUMMARY"
+          fi
