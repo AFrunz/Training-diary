@@ -14,7 +14,11 @@ const sheet = (onClose = jest.fn(), visible = true) => {
 
 describe('BottomSheet', () => {
   beforeEach(() => jest.useFakeTimers())
-  afterEach(() => jest.useRealTimers())
+  afterEach(() => {
+    // анимация шторки планирует кадры: без уборки они утекают в следующий тест
+    jest.clearAllTimers()
+    jest.useRealTimers()
+  })
 
   it('показывает содержимое и ручку', () => {
     sheet()
