@@ -20,6 +20,7 @@ To track how working weights grow for every exercise, and to see your consistenc
 - **Workout screen** with a live timer, sets and completion checkmarks; weight is optional — for pull-ups and planks
 - **Last workout right above this one**: every set is paired with the same-numbered set from last time, and a new set is prefilled from it
 - **Per-set units** — kilograms, pounds or degrees of bench incline; tap a set to edit or delete it
+- **Finish a workout even with exercises left unchecked**, and fix the start and end time afterwards
 - **Programs** — training days with free-form names, their own colour and exercise list
 - **Library** of 40 preloaded exercises with search and grouping by muscle
 - **Exercise history**: records, a progress chart by max weight, 1RM and volume, sets broken down with the delta since last time
@@ -56,7 +57,7 @@ Calculation rules know nothing about React Native or the database, so they run a
 
 ## Tests
 
-714 tests across four levels plus 12 end-to-end Maestro flows:
+759 tests across four levels plus 12 end-to-end Maestro flows:
 
 ```sh
 npm test              # everything

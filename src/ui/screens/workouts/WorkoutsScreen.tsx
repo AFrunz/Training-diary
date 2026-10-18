@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { WorkoutAggregate } from '../../../app/ports'
 import type { Id, LocalDate } from '../../../domain/model/types'
 import type { CompletionResult } from '../../../domain/rules/completion'
-import { computeCompletion } from '../../../domain/rules/completion'
+import { computeCompletion, isWorkoutFinished } from '../../../domain/rules/completion'
 import { addDays, toLocalDate } from '../../../domain/rules/dates'
 import { computeDuration } from '../../../domain/rules/duration'
 import { formatDuration, formatElapsed } from '../../../domain/rules/format'
@@ -55,6 +55,8 @@ export interface WorkoutCardData {
   readonly startedAt: number
   readonly completion: CompletionResult
   readonly durationMs: number | null
+  /** Закрыта ли тренировка: отметками на всём либо вручную (FR-4.12). */
+  readonly finished: boolean
 }
 
 const toCard = (aggregate: WorkoutAggregate, timeZone: string): WorkoutCardData => {
@@ -81,6 +83,7 @@ const toCard = (aggregate: WorkoutAggregate, timeZone: string): WorkoutCardData 
     startedAt: workout.startedAt,
     completion,
     durationMs: duration.ms,
+    finished: isWorkoutFinished({ manualFinishedAt: workout.manualFinishedAt ?? null, completion }),
   }
 }
 
@@ -121,7 +124,7 @@ export function WorkoutsScreen({ onCreateWorkout, onOpenWorkout }: WorkoutsScree
 
   const visible = programFilter === null ? workouts : workouts.filter((w) => w.programId === programFilter)
   // активная — сегодняшняя, в которой отмечены не все упражнения (§5.2)
-  const active = visible.find((w) => w.date === today && w.completion.done < w.completion.total) ?? null
+  const active = visible.find((w) => w.date === today && !w.finished) ?? null
   const past = visible.filter((w) => w.id !== active?.id)
 
   const dotColor = (key: string): string => PROGRAM_DOT[key] ?? colors.textMuted
@@ -234,11 +237,11 @@ export function WorkoutsScreen({ onCreateWorkout, onOpenWorkout }: WorkoutsScree
                       duration: formatDuration(workout.durationMs, locale),
                     })}
                   </Text>
-                  {workout.completion.done < workout.completion.total ? (
+                  {workout.finished ? null : (
                     <Text style={[styles.cardNote, { color: colors.textMuted }]}>
                       {t('workout.notFinished')}
                     </Text>
-                  ) : null}
+                  )}
                 </View>
                 <Donut
                   testID={`workout-donut-${workout.date}`}

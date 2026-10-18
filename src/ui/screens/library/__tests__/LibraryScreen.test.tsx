@@ -110,3 +110,50 @@ describe('Библиотека', () => {
     expect(within(row).getByText('последний раз 11 авг')).toBeTruthy()
   })
 })
+
+describe('LibraryScreen — архив программ (FR-3.8)', () => {
+  it('архивные программы лежат за отдельным чипом, а не в общем списке', async () => {
+    const { services } = createTestServices()
+    await services.createProgram({ name: 'Грудь + трицепс' })
+    const oldId = await services.createProgram({ name: 'Старая программа' })
+    await services.archiveProgram(oldId)
+
+    render(<LibraryScreen />, { services })
+    fireEvent.press(await screen.findByTestId('library-segment-programs'))
+
+    expect(await screen.findByTestId('program-row-Грудь + трицепс')).toBeTruthy()
+    expect(screen.queryByTestId('program-row-Старая программа')).toBeNull()
+
+    fireEvent.press(screen.getByTestId('library-programs-archived'))
+
+    expect(await screen.findByTestId('program-row-Старая программа')).toBeTruthy()
+    expect(screen.queryByTestId('program-row-Грудь + трицепс')).toBeNull()
+  })
+
+  it('пустой архив объясняет, что в него попадает', async () => {
+    const { services } = createTestServices()
+    await services.createProgram({ name: 'Грудь + трицепс' })
+
+    render(<LibraryScreen />, { services })
+    fireEvent.press(await screen.findByTestId('library-segment-programs'))
+    fireEvent.press(screen.getByTestId('library-programs-archived'))
+
+    expect(await screen.findByTestId('library-empty')).toHaveTextContent(
+      'В архиве пустоСюда попадают программы, убранные из списка',
+    )
+  })
+
+  it('архивная программа открывается и возвращается в работу', async () => {
+    const { services } = createTestServices()
+    const programId = await services.createProgram({ name: 'Старая программа' })
+    await services.archiveProgram(programId)
+    const onOpenProgram = jest.fn()
+
+    render(<LibraryScreen onOpenProgram={onOpenProgram} />, { services })
+    fireEvent.press(await screen.findByTestId('library-segment-programs'))
+    fireEvent.press(screen.getByTestId('library-programs-archived'))
+    fireEvent.press(await screen.findByTestId('program-row-Старая программа'))
+
+    expect(onOpenProgram).toHaveBeenCalledWith(programId)
+  })
+})

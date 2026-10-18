@@ -1,7 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { WorkoutSet } from '../../../domain/model/entities'
 import type { Id, SetUnit, WeightUnit } from '../../../domain/model/types'
 import { SET_UNITS } from '../../../domain/model/types'
@@ -16,13 +15,13 @@ import {
   stepForSetUnit,
 } from '../../../domain/rules/units'
 import { validateSet } from '../../../domain/validation/rules'
+import { BottomSheet } from '../../components/BottomSheet'
 import { Icon } from '../../components/Icon'
-import { KeyboardAvoider } from '../../components/KeyboardAvoider'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
 import { useTheme } from '../../theme/ThemeProvider'
-import { numFont, palette, radii, uiFont } from '../../theme/tokens'
+import { numFont, radii, uiFont } from '../../theme/tokens'
 
 /**
  * Шит подхода (фреймы «04 · Добавление подхода» и «04b · Правка подхода»).
@@ -79,7 +78,6 @@ export function AddSetSheet({
   onClose,
 }: AddSetSheetProps) {
   const services = useServices()
-  const insets = useSafeAreaInsets()
   const { colors } = useTheme()
   const { t, locale } = useT()
 
@@ -208,163 +206,126 @@ export function AddSetSheet({
   )
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose} testID="add-set-sheet">
-      <View style={styles.root}>
-        <Pressable
-          testID="add-set-scrim"
-          accessibilityRole="button"
-          accessibilityLabel={t('common.cancel')}
-          onPress={onClose}
-          style={[StyleSheet.absoluteFill, styles.scrim, { backgroundColor: palette.dark.bg }]}
-        />
+    <BottomSheet visible onClose={onClose} testID="add-set-sheet">
+      <View style={styles.titles}>
+        <Text testID="add-set-title" style={[styles.title, { color: colors.textPrimary }]}>
+          {isEditing ? t('set.editTitle') : exerciseName}
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          {isEditing
+            ? t('set.editSubtitle', { exercise: exerciseName, number: setNumber })
+            : t('set.number', { number: setNumber })}
+        </Text>
+      </View>
 
-        {/* без этого клавиатура закрывает и поля, и кнопку записи */}
-        <KeyboardAvoider style={styles.avoider}>
-          <View
-            style={[
-              styles.sheet,
-              // жестовая полоса устройства: без этого кнопка уезжает под системное меню
-              { backgroundColor: colors.surface, paddingBottom: 20 + insets.bottom },
-            ]}
-          >
-            <View style={styles.grabberWrap}>
-              <View style={[styles.grabber, { backgroundColor: colors.border }]} />
-            </View>
+      <View style={styles.steppers}>
+        <View style={styles.stepper}>
+          <View style={styles.labelRow}>
+            <Text style={[styles.label, { color: colors.textMuted }]}>
+              {t(setUnit === 'deg' ? 'set.angle' : 'set.weight')}
+            </Text>
 
-            <View style={styles.titles}>
-              <Text testID="add-set-title" style={[styles.title, { color: colors.textPrimary }]}>
-                {isEditing ? t('set.editTitle') : exerciseName}
-              </Text>
-              <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                {isEditing
-                  ? t('set.editSubtitle', { exercise: exerciseName, number: setNumber })
-                  : t('set.number', { number: setNumber })}
-              </Text>
-            </View>
-
-            <View style={styles.steppers}>
-              <View style={styles.stepper}>
-                <View style={styles.labelRow}>
-                  <Text style={[styles.label, { color: colors.textMuted }]}>
-                    {t(setUnit === 'deg' ? 'set.angle' : 'set.weight')}
-                  </Text>
-
-                  <View style={[styles.segment, { backgroundColor: colors.surface2 }]}>
-                    {SET_UNITS.map((option) => (
-                      <Pressable
-                        key={option}
-                        testID={`set-unit-${option}`}
-                        accessibilityRole="button"
-                        accessibilityState={{ selected: option === setUnit }}
-                        onPress={() => switchUnit(option)}
-                        style={[
-                          styles.segmentChip,
-                          option === setUnit
-                            ? { backgroundColor: colors.surface, borderColor: colors.border }
-                            : styles.segmentChipPlain,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.segmentLabel,
-                            { color: option === setUnit ? colors.textPrimary : colors.textMuted },
-                          ]}
-                        >
-                          {t(UNIT_LABEL[option])}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                </View>
-
-                <View style={styles.controls}>
-                  {roundButton('minus', 'set-weight-minus', () => bump(-step))}
-                  <TextInput
-                    testID="set-weight-input"
-                    value={valueText}
-                    onChangeText={(next) => patch({ value: next })}
-                    keyboardType="numeric"
-                    style={[styles.value, { color: colors.textPrimary }]}
-                  />
-                  {roundButton('plus', 'set-weight-plus', () => bump(step))}
-                </View>
-              </View>
-
-              <View style={styles.stepper}>
-                <View style={styles.labelRow}>
-                  <Text style={[styles.label, { color: colors.textMuted }]}>{t('set.reps')}</Text>
-                </View>
-
-                <View style={styles.controls}>
-                  {roundButton('minus', 'set-reps-minus', () => bumpReps(-1))}
-                  <TextInput
-                    testID="set-reps-input"
-                    value={repsText}
-                    onChangeText={(next) => patch({ reps: next })}
-                    keyboardType="number-pad"
-                    style={[styles.value, { color: colors.textPrimary }]}
-                  />
-                  {roundButton('plus', 'set-reps-plus', () => bumpReps(1))}
-                </View>
-              </View>
-            </View>
-
-            {hint ? (
-              <Text testID="set-hint" style={[styles.hint, { color: colors.textMuted }]}>
-                {hint}
-              </Text>
-            ) : null}
-
-            <View style={styles.actions}>
-              {isEditing ? (
+            <View style={[styles.segment, { backgroundColor: colors.surface2 }]}>
+              {SET_UNITS.map((option) => (
                 <Pressable
-                  testID="set-delete"
+                  key={option}
+                  testID={`set-unit-${option}`}
                   accessibilityRole="button"
-                  onPress={() => remove.mutate()}
-                  disabled={remove.isPending}
-                  style={[styles.deleteButton, { borderColor: colors.danger }]}
+                  accessibilityState={{ selected: option === setUnit }}
+                  onPress={() => switchUnit(option)}
+                  style={[
+                    styles.segmentChip,
+                    option === setUnit
+                      ? { backgroundColor: colors.surface, borderColor: colors.border }
+                      : styles.segmentChipPlain,
+                  ]}
                 >
-                  <Icon name="trash-2" size={15} color={colors.danger} />
-                  <Text style={[styles.deleteLabel, { color: colors.danger }]}>{t('common.delete')}</Text>
+                  <Text
+                    style={[
+                      styles.segmentLabel,
+                      { color: option === setUnit ? colors.textPrimary : colors.textMuted },
+                    ]}
+                  >
+                    {t(UNIT_LABEL[option])}
+                  </Text>
                 </Pressable>
-              ) : null}
-
-              <Pressable
-                testID="set-submit"
-                accessibilityRole="button"
-                accessibilityState={{ disabled: !canSubmit }}
-                disabled={!canSubmit || submit.isPending}
-                onPress={() => submit.mutate()}
-                style={[
-                  styles.submit,
-                  { backgroundColor: colors.accent, opacity: canSubmit ? 1 : 0.5 },
-                ]}
-              >
-                <Text style={[styles.submitLabel, { color: colors.onAccent }]}>
-                  {isEditing ? t('common.save') : t('set.submit')}
-                </Text>
-              </Pressable>
+              ))}
             </View>
           </View>
-        </KeyboardAvoider>
+
+          <View style={styles.controls}>
+            {roundButton('minus', 'set-weight-minus', () => bump(-step))}
+            <TextInput
+              testID="set-weight-input"
+              value={valueText}
+              onChangeText={(next) => patch({ value: next })}
+              keyboardType="numeric"
+              style={[styles.value, { color: colors.textPrimary }]}
+            />
+            {roundButton('plus', 'set-weight-plus', () => bump(step))}
+          </View>
+        </View>
+
+        <View style={styles.stepper}>
+          <View style={styles.labelRow}>
+            <Text style={[styles.label, { color: colors.textMuted }]}>{t('set.reps')}</Text>
+          </View>
+
+          <View style={styles.controls}>
+            {roundButton('minus', 'set-reps-minus', () => bumpReps(-1))}
+            <TextInput
+              testID="set-reps-input"
+              value={repsText}
+              onChangeText={(next) => patch({ reps: next })}
+              keyboardType="number-pad"
+              style={[styles.value, { color: colors.textPrimary }]}
+            />
+            {roundButton('plus', 'set-reps-plus', () => bumpReps(1))}
+          </View>
+        </View>
       </View>
-    </Modal>
+
+      {hint ? (
+        <Text testID="set-hint" style={[styles.hint, { color: colors.textMuted }]}>
+          {hint}
+        </Text>
+      ) : null}
+
+      <View style={styles.actions}>
+        {isEditing ? (
+          <Pressable
+            testID="set-delete"
+            accessibilityRole="button"
+            onPress={() => remove.mutate()}
+            disabled={remove.isPending}
+            style={[styles.deleteButton, { borderColor: colors.danger }]}
+          >
+            <Icon name="trash-2" size={15} color={colors.danger} />
+            <Text style={[styles.deleteLabel, { color: colors.danger }]}>{t('common.delete')}</Text>
+          </Pressable>
+        ) : null}
+
+        <Pressable
+          testID="set-submit"
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !canSubmit }}
+          disabled={!canSubmit || submit.isPending}
+          onPress={() => submit.mutate()}
+          style={[
+            styles.submit,
+            { backgroundColor: colors.accent, opacity: canSubmit ? 1 : 0.5 },
+          ]}
+        >
+          <Text style={[styles.submitLabel, { color: colors.onAccent }]}>
+            {isEditing ? t('common.save') : t('set.submit')}
+          </Text>
+        </Pressable>
+      </View>
+    </BottomSheet>
   )
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  avoider: { justifyContent: 'flex-end' },
-  scrim: { opacity: 0.7 },
-  sheet: {
-    borderTopLeftRadius: radii.lg,
-    borderTopRightRadius: radii.lg,
-    gap: 18,
-    paddingTop: 12,
-    paddingHorizontal: 20,
-  },
-  grabberWrap: { alignItems: 'center' },
-  grabber: { width: 40, height: 4, borderRadius: radii.pill },
   titles: { gap: 2 },
   title: { fontFamily: uiFont('700'), fontSize: 18, fontWeight: '700' },
   subtitle: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500' },

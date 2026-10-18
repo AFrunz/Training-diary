@@ -30,14 +30,21 @@ describe('ввод и клавиатура', () => {
     .map((path) => ({ name: path.slice(UI_ROOT.length + 1), source: readFileSync(path, 'utf8') }))
     .filter(({ name }) => name !== 'components/KeyboardAvoider.tsx')
 
-  it('экраны с полем ввода оборачиваются в KeyboardAvoider', () => {
+  it('экраны с полем ввода поднимаются над клавиатурой', () => {
     const offenders = files
       .filter(({ source }) => source.includes('<TextInput'))
       .filter(({ name }) => !HEADER_SEARCH_ONLY.includes(name))
-      .filter(({ source }) => !source.includes('<KeyboardAvoider'))
+      // шторка поднимается сама: KeyboardAvoider у неё внутри
+      .filter(({ source }) => !source.includes('<KeyboardAvoider') && !source.includes('<BottomSheet'))
       .map(({ name }) => name)
 
     expect(offenders).toEqual([])
+  })
+
+  it('шторка и правда поднимается: иначе послабление выше ничего не стоит', () => {
+    const sheet = files.find(({ name }) => name === 'components/BottomSheet.tsx')
+
+    expect(sheet?.source).toContain('<KeyboardAvoider')
   })
 
   it('KeyboardAvoidingView напрямую не используется: поведение задаётся в одном месте', () => {

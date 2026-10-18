@@ -133,8 +133,11 @@ export const loadExerciseSummaries = async (ports: Ports): Promise<readonly Exer
   })
 }
 
-export const loadProgramSummaries = async (ports: Ports): Promise<readonly ProgramSummary[]> => {
-  const programs = await ports.programs.list()
+export const loadProgramSummaries = async (
+  ports: Ports,
+  options?: { readonly includeArchived?: boolean },
+): Promise<readonly ProgramSummary[]> => {
+  const programs = await ports.programs.list(options)
   const details = await Promise.all(programs.map((program) => ports.programs.byIdWithItems(program.id)))
   return programs.map((program, index) => ({
     program,
@@ -199,11 +202,12 @@ export const useExerciseSummaries = () => {
   })
 }
 
-export const useProgramSummaries = () => {
+export const useProgramSummaries = (options?: { readonly includeArchived?: boolean }) => {
   const { ports } = useServices()
+  const includeArchived = options?.includeArchived ?? false
   return useQuery({
-    queryKey: ['library', 'programs'],
-    queryFn: () => loadProgramSummaries(ports),
+    queryKey: ['library', 'programs', includeArchived],
+    queryFn: () => loadProgramSummaries(ports, { includeArchived }),
   })
 }
 

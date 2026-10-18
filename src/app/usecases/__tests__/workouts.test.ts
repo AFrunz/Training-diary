@@ -10,6 +10,7 @@ import {
   deleteWorkout,
   editSet,
   editWorkoutTimes,
+  finishWorkout,
   previousSets,
   suggestNextSet,
   toggleItemDone,
@@ -549,5 +550,49 @@ describe('suggestNextSet — предзаполнение полей (FR-4.4)', 
       value: null,
       source: 'empty',
     })
+  })
+})
+
+describe('finishWorkout — закрыть, не отмечая всё (FR-4.12)', () => {
+  it('проставляет ручное время окончания и не трогает отметки', async () => {
+    const ports = setup()
+    const workoutId = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    ports.clock.advance(45 * 60_000)
+
+    await finishWorkout(ports)(workoutId)
+
+    const workout = (await ports.workouts.byId(workoutId))!
+    expect(workout.workout.manualFinishedAt).toBe(ports.clock.now())
+    expect(workout.items.every((item) => !item.completedAt)).toBe(true)
+  })
+
+  it('повторное завершение не сдвигает уже проставленное время', async () => {
+    const ports = setup()
+    const workoutId = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    await finishWorkout(ports)(workoutId)
+    const first = (await ports.workouts.byId(workoutId))!.workout.manualFinishedAt
+
+    ports.clock.advance(20 * 60_000)
+    await finishWorkout(ports)(workoutId)
+
+    expect((await ports.workouts.byId(workoutId))!.workout.manualFinishedAt).toBe(first)
+  })
+
+  it('у тренировки задним числом конец не уезжает раньше начала', async () => {
+    const ports = setup()
+    // тренировка заведена сегодня, но числится прошлой неделей
+    const workoutId = await createWorkout(ports)({ date: TODAY, programId: id('p-1') })
+    const workout = (await ports.workouts.byId(workoutId))!.workout
+    await ports.workouts.update({ ...workout, startedAt: at('2026-12-31T10:00:00Z') })
+
+    await finishWorkout(ports)(workoutId)
+
+    const updated = (await ports.workouts.byId(workoutId))!.workout
+    expect(updated.manualFinishedAt).toBe(updated.startedAt)
+  })
+
+  it('несуществующая тренировка — NotFound', async () => {
+    const ports = setup()
+    await expect(finishWorkout(ports)(id('нет-такой'))).rejects.toMatchObject({ name: 'NotFound' })
   })
 })

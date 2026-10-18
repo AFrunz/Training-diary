@@ -1,5 +1,5 @@
 import { instant } from '../../model/types'
-import { computeCompletion } from '../completion'
+import { computeCompletion, isWorkoutFinished } from '../completion'
 import type { CompletionItem } from '../completion'
 
 const at = instant(Date.parse('2026-08-11T16:00:00Z'))
@@ -86,5 +86,33 @@ describe('computeCompletion — вырожденные случаи', () => {
     const r = computeCompletion(items)
     expect(r.total).toBe(6)
     expect(r.tone).toBe('warning')
+  })
+})
+
+describe('isWorkoutFinished (FR-4.12)', () => {
+  const done = (at: number | null) => ({ completedAt: at === null ? null : instant(at), setCount: 1 })
+
+  it('все упражнения отмечены — завершена', () => {
+    const completion = computeCompletion([done(1), done(2)])
+    expect(isWorkoutFinished({ manualFinishedAt: null, completion })).toBe(true)
+  })
+
+  it('отмечены не все — ещё идёт', () => {
+    const completion = computeCompletion([done(1), done(null)])
+    expect(isWorkoutFinished({ manualFinishedAt: null, completion })).toBe(false)
+  })
+
+  it('ручное окончание закрывает тренировку с любой долей выполненного', () => {
+    const completion = computeCompletion([done(null), done(null)])
+    expect(isWorkoutFinished({ manualFinishedAt: instant(5), completion })).toBe(true)
+  })
+
+  it('пустая тренировка сама по себе не завершена', () => {
+    expect(isWorkoutFinished({ manualFinishedAt: null, completion: computeCompletion([]) })).toBe(false)
+  })
+
+  it('поля окончания может не быть вовсе', () => {
+    const completion = computeCompletion([done(null)])
+    expect(isWorkoutFinished({ completion })).toBe(false)
   })
 })

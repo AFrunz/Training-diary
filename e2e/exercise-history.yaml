@@ -74,7 +74,7 @@ name: История упражнения — рекорд, подходы и 1�
 
 # График переключается на 1ПМ: пик перестаёт быть рабочим весом
 - assertVisible:
-    id: 'history-bar-peak-1'
+    id: 'history-bar-value-1'
     text: '80'
 - tapOn:
     id: 'history-metric-oneRm'
@@ -84,5 +84,5 @@ name: История упражнения — рекорд, подходы и 1�
 - assertVisible:
     id: 'history-chart'
 - assertNotVisible:
-    id: 'history-bar-peak-1'
+    id: 'history-bar-value-1'
     text: '80'

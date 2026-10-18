@@ -143,6 +143,12 @@ export function ProgramScreen({
     },
   })
 
+  /** Возврат из архива оставляет на экране: программа тут же снова рабочая. */
+  const unarchive = useMutation({
+    mutationFn: () => services.unarchiveProgram(programId),
+    onSuccess: invalidate,
+  })
+
   if (!data) return <View testID="program-screen" style={[styles.root, { backgroundColor: colors.bg }]} />
 
   const { program, items, workoutCount } = data
@@ -171,6 +177,15 @@ export function ProgramScreen({
       />
 
       <ScrollView contentContainerStyle={styles.content}>
+        {program.archivedAt ? (
+          <View testID="program-archived-note" style={[styles.archivedNote, { backgroundColor: colors.surface2 }]}>
+            <Icon name="archive" size={15} color={colors.textMuted} />
+            <Text style={[styles.archivedLabel, { color: colors.textSecondary }]}>
+              {t('program.archivedNote')}
+            </Text>
+          </View>
+        ) : null}
+
         <View style={styles.block}>
           <Text style={[styles.blockLabel, { color: colors.textMuted }]}>{t('program.name')}</Text>
 
@@ -334,15 +349,27 @@ export function ProgramScreen({
             </Text>
           </Pressable>
 
-          <Pressable
-            testID="program-archive"
-            accessibilityRole="button"
-            onPress={() => archive.mutate()}
-            style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
-          >
-            <Icon name="archive" size={15} color={colors.danger} />
-            <Text style={[styles.actionLabel, { color: colors.danger }]}>{t('program.archive')}</Text>
-          </Pressable>
+          {program.archivedAt ? (
+            <Pressable
+              testID="program-unarchive"
+              accessibilityRole="button"
+              onPress={() => unarchive.mutate()}
+              style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <Icon name="upload" size={15} color={colors.accent} />
+              <Text style={[styles.actionLabel, { color: colors.accent }]}>{t('program.unarchive')}</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              testID="program-archive"
+              accessibilityRole="button"
+              onPress={() => archive.mutate()}
+              style={[styles.actionButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <Icon name="archive" size={15} color={colors.danger} />
+              <Text style={[styles.actionLabel, { color: colors.danger }]}>{t('program.archive')}</Text>
+            </Pressable>
+          )}
         </View>
       </ScrollView>
 
@@ -362,6 +389,16 @@ export function ProgramScreen({
 const styles = StyleSheet.create({
   root: { flex: 1 },
   content: { paddingTop: 8, paddingHorizontal: 20, paddingBottom: 24, gap: 18 },
+
+  archivedNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: radii.md,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  archivedLabel: { fontSize: 12, fontFamily: uiFont('500'), fontWeight: '500', flexShrink: 1 },
 
   block: { gap: 9 },
   blockLabel: { fontSize: 12, fontFamily: uiFont('600'), fontWeight: '600' },

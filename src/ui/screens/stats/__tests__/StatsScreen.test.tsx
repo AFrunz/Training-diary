@@ -240,3 +240,30 @@ describe('экран статистики', () => {
     expect(shorter).toHaveStyle({ height: 22 })
   })
 })
+
+describe('StatsScreen — тап по столбику недели (FR-6.3)', () => {
+  it('показывает число тренировок за выбранную неделю', async () => {
+    const { services, ports } = createTestServices()
+    seedWorkouts(ports, [{ date: '2026-08-03' }, { date: '2026-08-05' }])
+    renderWithProviders(<StatsScreen />, { services })
+
+    await screen.findByTestId('stats-chart')
+    expect(screen.queryByTestId('stat-bar-value-0')).toBeNull()
+
+    fireEvent.press(screen.getByTestId('stat-column-0'))
+
+    expect(screen.getByTestId('stat-bar-value-0')).toBeTruthy()
+  })
+
+  it('повторный тап убирает число', async () => {
+    const { services, ports } = createTestServices()
+    seedWorkouts(ports, [{ date: '2026-08-03' }])
+    renderWithProviders(<StatsScreen />, { services })
+
+    await screen.findByTestId('stats-chart')
+    fireEvent.press(screen.getByTestId('stat-column-0'))
+    fireEvent.press(screen.getByTestId('stat-column-0'))
+
+    expect(screen.queryByTestId('stat-bar-value-0')).toBeNull()
+  })
+})

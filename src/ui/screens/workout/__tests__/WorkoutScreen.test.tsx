@@ -396,3 +396,54 @@ describe('WorkoutScreen — предзаполнение при повторно
     expect(screen.getByTestId('set-reps-input').props.value).toBe('8')
   })
 })
+
+describe('WorkoutScreen — завершение и время (FR-4.7, FR-4.12)', () => {
+  it('тренировку можно завершить, не отмечая всё: счётчик замирает', async () => {
+    jest.useFakeTimers()
+    jest.setSystemTime(new Date(STARTED_AT))
+
+    try {
+      const fixture = await seed()
+      fixture.ports.clock.set(instant(STARTED_AT + 40 * 60_000))
+      renderScreen(fixture)
+
+      fireEvent.press(await screen.findByTestId('workout-finish'))
+
+      await waitFor(() => {
+        expect(fixture.ports.state.workouts[0]?.manualFinishedAt).toBe(STARTED_AT + 40 * 60_000)
+      })
+      // отметки не тронуты: доля выполненного остаётся честной
+      expect(fixture.ports.state.workoutItems.every((item) => !item.completedAt)).toBe(true)
+      await waitFor(() => {
+        expect(screen.getByTestId('workout-timer')).toHaveTextContent('40 мин')
+      })
+      expect(screen.getByTestId('workout-donut')).toHaveTextContent('0/2')
+
+      await act(async () => {
+        jest.runOnlyPendingTimers()
+      })
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
+  it('у завершённой тренировки вместо кнопки — отметка о завершении', async () => {
+    const fixture = await seed()
+    await fixture.services.finishWorkout(fixture.workoutId)
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('workout-finished')).toBeTruthy()
+    expect(screen.queryByTestId('workout-finish')).toBeNull()
+  })
+
+  it('время правится через счётчик — в том числе у завершённой', async () => {
+    const fixture = await seed()
+    await fixture.services.finishWorkout(fixture.workoutId)
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('workout-times'))
+
+    expect(await screen.findByTestId('workout-time-start')).toBeTruthy()
+    expect(screen.getByTestId('workout-time-finish')).toBeTruthy()
+  })
+})

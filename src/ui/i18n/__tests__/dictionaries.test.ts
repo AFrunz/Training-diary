@@ -48,6 +48,9 @@ describe('в компонентах нет захардкоженных стро
    * разработчика под него не подпадают: пользователь их не видит.
    */
   const isUiString = (line: string): boolean => {
+    // строки блочного комментария: там и кавычки, и кириллица — дело обычное
+    if (/^\s*(\/\*|\*)/.test(line)) return false
+
     const code = line.split('//')[0] ?? ''
     if (/throw new \w*Error\(/.test(code)) return false
     return /['"`][^'"`]*[а-яё][^'"`]*['"`]/i.test(code)

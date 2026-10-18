@@ -248,3 +248,109 @@ describe('ExerciseHistoryScreen — плашки изменений (FR-5.5)', (
     expect(await screen.findByTestId('history-volume-delta-0')).toHaveTextContent('объём +2 повтора')
   })
 })
+
+describe('ExerciseHistoryScreen — тап по столбику графика (FR-5.2)', () => {
+  it('число показывается у выбранного столбика, а не только у пика', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [[75, 8]])
+    await fixture.addWorkout('2026-08-11', [[82.5, 6]])
+
+    renderScreen(fixture)
+
+    // до тапа видно только пик
+    expect(await screen.findByTestId('history-bar-value-1')).toHaveTextContent('82.5')
+    expect(screen.queryByTestId('history-bar-value-0')).toBeNull()
+
+    fireEvent.press(screen.getByTestId('history-bar-0'))
+
+    expect(screen.getByTestId('history-bar-value-0')).toHaveTextContent('75')
+  })
+
+  it('повторный тап снимает выбор', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-04', [[75, 8]])
+    await fixture.addWorkout('2026-08-11', [[82.5, 6]])
+
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('history-bar-0'))
+    fireEvent.press(screen.getByTestId('history-bar-0'))
+
+    expect(screen.queryByTestId('history-bar-value-0')).toBeNull()
+  })
+})
+
+describe('ExerciseHistoryScreen — правка упражнения (FR-2.5)', () => {
+  it('группа мышц показывается переводом, а не ключом', async () => {
+    const { services, ports } = createTestServices()
+    const exerciseId = await services.createExercise({ name: 'Тяга блока', muscleGroup: 'back' })
+
+    renderWithProviders(<ExerciseHistoryScreen exerciseId={exerciseId} />, { services })
+
+    // в базе лежит ключ 'back', на экране — перевод
+    expect(await screen.findByTestId('header-subtitle')).toHaveTextContent('Спина · 0 тренировок')
+    expect(ports.state.exercises[0]?.muscleGroup).toBe('back')
+  })
+
+  it('упражнение переименовывается из шита', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('exercise-edit'))
+    fireEvent.changeText(await screen.findByTestId('exercise-name-input'), 'Жим штанги лёжа')
+    fireEvent.press(screen.getByTestId('exercise-save'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.exercises[0]?.name).toBe('Жим штанги лёжа')
+    })
+    expect(await screen.findByTestId('header-title')).toHaveTextContent('Жим штанги лёжа')
+  })
+
+  it('группа мышц меняется там же', async () => {
+    const fixture = await seed()
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('exercise-edit'))
+    fireEvent.press(await screen.findByTestId('muscle-group-back'))
+    fireEvent.press(screen.getByTestId('exercise-save'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.exercises[0]?.muscleGroup).toBe('back')
+    })
+  })
+
+  it('удаление спрашивает подтверждение и уводит с экрана', async () => {
+    const fixture = await seed()
+    const onDeleted = jest.fn()
+    renderWithProviders(
+      <ExerciseHistoryScreen exerciseId={fixture.exerciseId} onDeleted={onDeleted} />,
+      { services: fixture.services },
+    )
+
+    fireEvent.press(await screen.findByTestId('exercise-edit'))
+    fireEvent.press(await screen.findByTestId('exercise-delete'))
+    expect(await screen.findByTestId('delete-exercise-title')).toBeTruthy()
+
+    fireEvent.press(screen.getByTestId('delete-exercise-confirm'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.exercises).toHaveLength(0)
+    })
+    expect(onDeleted).toHaveBeenCalled()
+  })
+
+  it('использованное упражнение уходит в архив, а история остаётся (FR-2.4)', async () => {
+    const fixture = await seed()
+    await fixture.addWorkout('2026-08-11', [[80, 8]])
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('exercise-edit'))
+    fireEvent.press(await screen.findByTestId('exercise-delete'))
+    fireEvent.press(await screen.findByTestId('delete-exercise-confirm'))
+
+    await waitFor(() => {
+      expect(fixture.ports.state.exercises[0]?.archivedAt).not.toBeNull()
+    })
+    expect(fixture.ports.state.workoutSets).toHaveLength(1)
+  })
+})

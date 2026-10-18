@@ -6,10 +6,12 @@ import {
   createExercise,
   createProgram,
   duplicateProgram,
+  editExercise,
   removeExercise,
   renameProgram,
   setProgramItems,
   suggestProgramColor,
+  unarchiveProgram,
 } from '../library'
 import { createWorkout } from '../workouts'
 
@@ -346,5 +348,97 @@ describe('archiveProgram', () => {
     await archiveProgram(ports)(programId)
 
     expect(await ports.workouts.byId(workoutId)).not.toBeNull()
+  })
+})
+
+describe('editExercise (FR-2.5)', () => {
+  it('меняет название и группу мышц', async () => {
+    const ports = setup()
+    const exerciseId = await createExercise(ports)({ name: 'Жим лёжа', muscleGroup: 'chest' })
+
+    await editExercise(ports)({ exerciseId, name: '  Жим штанги лёжа  ', muscleGroup: 'back' })
+
+    const exercise = (await ports.exercises.byId(exerciseId))!
+    expect(exercise.name).toBe('Жим штанги лёжа')
+    expect(exercise.muscleGroup).toBe('back')
+  })
+
+  it('своё прежнее имя не считается занятым', async () => {
+    const ports = setup()
+    const exerciseId = await createExercise(ports)({ name: 'Жим лёжа' })
+
+    await expect(
+      editExercise(ports)({ exerciseId, name: 'Жим лёжа', muscleGroup: 'chest' }),
+    ).resolves.toBeUndefined()
+  })
+
+  it('чужое имя занято — правка отклоняется', async () => {
+    const ports = setup()
+    await createExercise(ports)({ name: 'Приседания' })
+    const exerciseId = await createExercise(ports)({ name: 'Жим лёжа' })
+
+    await expect(
+      editExercise(ports)({ exerciseId, name: 'приседания' }),
+    ).rejects.toMatchObject({ code: 'name-duplicate' })
+    expect((await ports.exercises.byId(exerciseId))!.name).toBe('Жим лёжа')
+  })
+
+  it('без указания группы она остаётся прежней', async () => {
+    const ports = setup()
+    const exerciseId = await createExercise(ports)({ name: 'Жим лёжа', muscleGroup: 'chest' })
+
+    await editExercise(ports)({ exerciseId, name: 'Жим узким хватом' })
+
+    expect((await ports.exercises.byId(exerciseId))!.muscleGroup).toBe('chest')
+  })
+
+  it('группу можно и убрать', async () => {
+    const ports = setup()
+    const exerciseId = await createExercise(ports)({ name: 'Жим лёжа', muscleGroup: 'chest' })
+
+    await editExercise(ports)({ exerciseId, name: 'Жим лёжа', muscleGroup: null })
+
+    expect((await ports.exercises.byId(exerciseId))!.muscleGroup).toBeNull()
+  })
+
+  it('в проведённой тренировке остаётся прежнее название (FR-3.5)', async () => {
+    const ports = setup()
+    withExercises(ports)
+    const programId = await createProgram(ports)({ name: 'Грудь', exerciseIds: [id('e-1')] })
+    const workoutId = await createWorkout(ports)({ date: localDate('2026-08-11'), programId })
+
+    await editExercise(ports)({ exerciseId: id('e-1'), name: 'Другое название' })
+
+    expect((await ports.workouts.byId(workoutId))!.items[0]!.exerciseName).toBe('Жим лёжа')
+  })
+})
+
+describe('unarchiveProgram (FR-3.8)', () => {
+  it('возвращает программу в список действующих', async () => {
+    const ports = setup()
+    const programId = await createProgram(ports)({ name: 'Грудь' })
+    await archiveProgram(ports)(programId)
+
+    await unarchiveProgram(ports)(programId)
+
+    expect(await ports.programs.list()).toHaveLength(1)
+    expect((await ports.programs.byId(programId))!.archivedAt).toBeNull()
+  })
+
+  it('состав программы из архива возвращается нетронутым', async () => {
+    const ports = setup()
+    withExercises(ports)
+    const programId = await createProgram(ports)({ name: 'Грудь', exerciseIds: [id('e-1'), id('e-2')] })
+    await archiveProgram(ports)(programId)
+
+    await unarchiveProgram(ports)(programId)
+
+    const program = (await ports.programs.byIdWithItems(programId))!
+    expect(program.items.map((item) => item.exerciseId)).toEqual([id('e-1'), id('e-2')])
+  })
+
+  it('несуществующая программа — NotFound', async () => {
+    const ports = setup()
+    await expect(unarchiveProgram(ports)(id('нет-такой'))).rejects.toMatchObject({ name: 'NotFound' })
   })
 })

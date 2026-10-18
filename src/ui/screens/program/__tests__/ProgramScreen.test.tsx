@@ -257,3 +257,30 @@ describe('ProgramScreen', () => {
     expect(await ports.programs.byIdWithItems(programId)).toBeTruthy()
   })
 })
+
+describe('ProgramScreen — архив (FR-3.8)', () => {
+  it('у архивной программы вместо «В архив» — возврат', async () => {
+    const fixture = await seed()
+    await fixture.services.archiveProgram(fixture.programId)
+    renderScreen(fixture)
+
+    expect(await screen.findByTestId('program-unarchive')).toBeTruthy()
+    expect(screen.queryByTestId('program-archive')).toBeNull()
+    expect(screen.getByTestId('program-archived-note')).toBeTruthy()
+  })
+
+  it('возврат из архива возвращает программу в список действующих', async () => {
+    const fixture = await seed()
+    await fixture.services.archiveProgram(fixture.programId)
+    renderScreen(fixture)
+
+    fireEvent.press(await screen.findByTestId('program-unarchive'))
+
+    await waitFor(async () => {
+      expect(await fixture.ports.programs.list()).toHaveLength(1)
+    })
+    // экран остаётся открытым и снова предлагает архивацию
+    expect(await screen.findByTestId('program-archive')).toBeTruthy()
+    expect(screen.queryByTestId('program-archived-note')).toBeNull()
+  })
+})

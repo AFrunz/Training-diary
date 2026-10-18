@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { Exercise } from '../../../domain/model/entities'
@@ -9,7 +9,11 @@ import { EMPTY_VALUE, formatSet, formatWeight } from '../../../domain/rules/form
 import type { ExerciseVolume } from '../../../domain/rules/metrics'
 import { epley1RM, exerciseVolume } from '../../../domain/rules/metrics'
 import { toDisplayWeight } from '../../../domain/rules/units'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
+import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
+import { muscleGroupLabel } from '../library/data'
+import { ExerciseEditSheet } from './ExerciseEditSheet'
 import { useT } from '../../i18n/I18nProvider'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useServices } from '../../providers/ServicesProvider'
@@ -19,6 +23,8 @@ import { numFont, radii, uiFont } from '../../theme/tokens'
 export interface ExerciseHistoryScreenProps {
   readonly exerciseId: Id
   readonly onBack?: () => void
+  /** Куда уходить после удаления: экрана этого упражнения больше нет (FR-2.4). */
+  readonly onDeleted?: () => void
 }
 
 /** История упражнения не ограничена периодом: берём все тренировки. */
@@ -135,11 +141,27 @@ const monthKey = (prefix: 'date.monthGenitive' | 'date.monthShort', month: numbe
  * Данные собираются из портов: список тренировок за всё время, затем подходы
  * нужного упражнения из каждой. Вес показывается в единицах из настроек (FR-7.5).
  */
-export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScreenProps) {
-  const { ports } = useServices()
+export function ExerciseHistoryScreen({ exerciseId, onBack, onDeleted }: ExerciseHistoryScreenProps) {
+  const services = useServices()
+  const { ports } = services
+  const queryClient = useQueryClient()
   const { colors } = useTheme()
   const { t, count, locale } = useT()
   const [metric, setMetric] = useState<Metric>('weight')
+  /** Выбранный столбик графика: у него показывается число. */
+  const [selected, setSelected] = useState<LocalDate | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const remove = useMutation({
+    mutationFn: () => services.removeExercise(exerciseId),
+    onSuccess: () => {
+      setConfirmDelete(false)
+      // упражнения больше нет на этом экране — уходим назад, в библиотеку
+      onDeleted?.()
+      return queryClient.invalidateQueries()
+    },
+  })
 
   const { data } = useQuery<HistoryView | null>({
     queryKey: ['exercise-history', exerciseId],
@@ -232,14 +254,30 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
 
   const subtitle = exercise.muscleGroup
     ? t('history.subtitle', {
-        group: exercise.muscleGroup,
+        // в базе лежит ключ группы: на экране он переводится, как в библиотеке
+        group: muscleGroupLabel(exercise.muscleGroup, t),
         workouts: count('workouts', entries.length),
       })
     : count('workouts', entries.length)
 
   return (
     <View testID="exercise-history-screen" style={[styles.root, { backgroundColor: colors.bg }]}>
-      <ScreenHeader title={exercise.name} subtitle={subtitle} {...(onBack ? { onBack } : {})} />
+      <ScreenHeader
+        title={exercise.name}
+        subtitle={subtitle}
+        {...(onBack ? { onBack } : {})}
+        action={
+          <Pressable
+            testID="exercise-edit"
+            accessibilityRole="button"
+            accessibilityLabel={t('exercise.edit')}
+            onPress={() => setEditing(true)}
+            style={[styles.headerAction, { backgroundColor: colors.surface2 }]}
+          >
+            <Icon name="settings" size={17} color={colors.textSecondary} />
+          </Pressable>
+        }
+      />
 
       {entries.length === 0 ? (
         <View style={styles.content}>
@@ -342,30 +380,48 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
             <View testID="history-chart" style={styles.bars}>
               {columns.map((column, index) => {
                 const isPeak = peak !== null && column.value === peak
+                const isSelected = selected === column.date
                 const height =
                   peak === null || peak === 0
                     ? BAR_MIN_HEIGHT
                     : Math.max(BAR_MIN_HEIGHT, Math.round((column.value / peak) * BAR_MAX_HEIGHT))
 
                 return (
-                  <View key={column.date} style={styles.barColumn}>
-                    {isPeak ? (
-                      <Text testID={`history-bar-peak-${index}`} style={[styles.barPeak, { color: colors.accent }]}>
+                  // столбик нажимается: иначе число видно только у пика
+                  <Pressable
+                    key={column.date}
+                    testID={`history-bar-${index}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${formatDate(column.date, false)}: ${peakLabel(column.value)}`}
+                    onPress={() => setSelected(isSelected ? null : column.date)}
+                    style={styles.barColumn}
+                  >
+                    {isPeak || isSelected ? (
+                      <Text
+                        testID={`history-bar-value-${index}`}
+                        style={[
+                          styles.barPeak,
+                          { color: isSelected && !isPeak ? colors.textPrimary : colors.accent },
+                        ]}
+                      >
                         {peakLabel(column.value)}
                       </Text>
                     ) : null}
 
                     <View
-                      testID={`history-bar-${index}`}
+                      testID={`history-bar-shape-${index}`}
                       style={[
                         styles.bar,
-                        { height, backgroundColor: isPeak ? colors.accent : colors.accentSoft },
+                        {
+                          height,
+                          backgroundColor: isPeak || isSelected ? colors.accent : colors.accentSoft,
+                        },
                       ]}
                     />
                     <Text style={[styles.barDate, { color: colors.textMuted }]}>
                       {formatDate(column.date, true)}
                     </Text>
-                  </View>
+                  </Pressable>
                 )
               })}
             </View>
@@ -474,12 +530,36 @@ export function ExerciseHistoryScreen({ exerciseId, onBack }: ExerciseHistoryScr
           </View>
         </ScrollView>
       )}
+
+      {editing ? (
+        <ExerciseEditSheet
+          exercise={exercise}
+          onRequestDelete={() => {
+            setEditing(false)
+            setConfirmDelete(true)
+          }}
+          onClose={() => setEditing(false)}
+        />
+      ) : null}
+
+      <ConfirmDialog
+        testID="delete-exercise"
+        visible={confirmDelete}
+        title={t('exercise.deleteTitle')}
+        // использованное упражнение не стирается, а уходит в архив (FR-2.4)
+        message={t(entries.length > 0 ? 'exercise.archiveMessage' : 'exercise.deleteMessage')}
+        confirmLabel={t('common.delete')}
+        destructive
+        onConfirm={() => remove.mutate()}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  headerAction: { width: 34, height: 34, borderRadius: radii.pill, alignItems: 'center', justifyContent: 'center' },
   content: { paddingTop: 8, paddingHorizontal: 20, paddingBottom: 24, gap: 14 },
 
   card: { borderRadius: radii.lg, borderWidth: 1 },

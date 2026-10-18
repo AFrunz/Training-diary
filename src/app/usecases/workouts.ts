@@ -236,6 +236,24 @@ export const editWorkoutTimes = (p: Ports) => async (input: EditWorkoutTimesInpu
   })
 }
 
+/**
+ * Завершить тренировку, не отмечая всё подряд (FR-4.12). Проставляет ручное
+ * время окончания — то же поле, что правится вручную (FR-4.7), поэтому
+ * отметки остаются как есть и доля выполненного не врёт.
+ */
+export const finishWorkout = (p: Ports) => async (workoutId: Id): Promise<void> => {
+  const aggregate = await requireWorkout(p, workoutId)
+  if (aggregate.workout.manualFinishedAt) return
+
+  const now = p.clock.now()
+  await p.workouts.update({
+    ...aggregate.workout,
+    // конец раньше начала — бессмыслица: у тренировки задним числом берём начало
+    manualFinishedAt: now < aggregate.workout.startedAt ? aggregate.workout.startedAt : now,
+    updatedAt: now,
+  })
+}
+
 export const deleteWorkout = (p: Ports) => async (workoutId: Id): Promise<void> => {
   await requireWorkout(p, workoutId)
   await p.workouts.remove(workoutId)

@@ -7,7 +7,11 @@ export default function ExerciseHistoryRoute() {
   const { id } = useLocalSearchParams<{ id: string }>()
   return (
     <Screen>
-      <ExerciseHistoryScreen exerciseId={makeId(id)} onBack={() => router.back()} />
+      <ExerciseHistoryScreen
+        exerciseId={makeId(id)}
+        onBack={() => router.back()}
+        onDeleted={() => router.back()}
+      />
     </Screen>
   )
 }

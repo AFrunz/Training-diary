@@ -49,6 +49,8 @@ export function StatsScreen() {
 
   const [mode, setMode] = useState<StatsMode>('month')
   const [anchor, setAnchor] = useState<LocalDate>(today)
+  /** Выбранная неделя графика: у неё показывается число тренировок. */
+  const [selectedWeek, setSelectedWeek] = useState<string | null>(null)
 
   const period = useQuery({
     queryKey: ['stats', mode, mode === 'month' ? anchor.slice(0, 7) : anchor.slice(0, 4)],
@@ -198,7 +200,24 @@ export function StatsScreen() {
 
             <View testID="stats-chart" style={styles.plot}>
               {data.columns.map((column, index) => (
-                <View key={column.key} style={styles.column}>
+                // столбик нажимается: без подписи на каждом число недели не прочитать
+                <Pressable
+                  key={column.key}
+                  testID={`stat-column-${index}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={count('workouts', column.count)}
+                  onPress={() => setSelectedWeek(selectedWeek === column.key ? null : column.key)}
+                  style={styles.column}
+                >
+                  {selectedWeek === column.key ? (
+                    <Text
+                      testID={`stat-bar-value-${index}`}
+                      style={[styles.columnValue, { color: colors.textPrimary }]}
+                    >
+                      {column.count}
+                    </Text>
+                  ) : null}
+
                   {column.absent ? (
                     <View
                       testID={`stat-column-absent-${index}`}
@@ -207,7 +226,6 @@ export function StatsScreen() {
                   ) : (
                     <View
                       testID={`stat-bar-${index}`}
-                      accessibilityLabel={count('workouts', column.count)}
                       style={[
                         styles.bar,
                         {
@@ -226,7 +244,7 @@ export function StatsScreen() {
                   <Text style={[styles.columnLabel, { color: colors.textMuted }]}>
                     {column.absent ? t('stats.vacation') : columnLabel(column)}
                   </Text>
-                </View>
+                </Pressable>
               ))}
             </View>
           </View>
@@ -364,6 +382,8 @@ const styles = StyleSheet.create({
   column: { flex: 1, justifyContent: 'flex-end', alignItems: 'center', gap: 6 },
   bar: { alignSelf: 'stretch', borderRadius: 6 },
   vacation: { alignSelf: 'stretch', height: 26, borderRadius: 6 },
+  // число над столбиком появляется только у выбранного: иначе график зарастает
+  columnValue: { fontSize: 11, fontFamily: numFont('700'), fontWeight: '700' },
   columnLabel: { fontSize: 9, fontFamily: uiFont() },
 
   splitBar: { flexDirection: 'row', height: 12, borderRadius: radii.pill, overflow: 'hidden' },

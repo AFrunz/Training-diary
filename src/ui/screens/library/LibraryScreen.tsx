@@ -50,9 +50,11 @@ export function LibraryScreen({
   const [tab, setTab] = useState<LibraryTab>('exercises')
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<SortMode>('alphabet')
+  /** Архив программ лежит за отдельным чипом: обычно он не нужен (FR-3.8). */
+  const [archived, setArchived] = useState(false)
 
   const exercises = useExerciseSummaries()
-  const programs = useProgramSummaries()
+  const programs = useProgramSummaries({ includeArchived: archived })
 
   const sections = useMemo(() => {
     const all = exercises.data ?? []
@@ -61,25 +63,32 @@ export function LibraryScreen({
   }, [exercises.data, query, sort])
 
   const foundPrograms = useMemo(
-    () => (programs.data ?? []).filter((summary) => matchesQuery(summary.program.name, query)),
-    [programs.data, query],
+    () =>
+      (programs.data ?? [])
+        // список архивных и список действующих не смешиваются
+        .filter((summary) => Boolean(summary.program.archivedAt) === archived)
+        .filter((summary) => matchesQuery(summary.program.name, query)),
+    [programs.data, query, archived],
   )
 
   const isExercises = tab === 'exercises'
-  const total = isExercises ? (exercises.data ?? []).length : (programs.data ?? []).length
+  const total = isExercises ? (exercises.data ?? []).length : foundPrograms.length
   const shown = isExercises ? sections.length : foundPrograms.length
+
+  const emptyProgramsTitle = archived ? 'library.emptyArchive' : 'library.emptyPrograms'
+  const emptyProgramsHint = archived ? 'library.emptyArchiveHint' : 'library.emptyProgramsHint'
 
   const emptyTitle = query.trim().length > 0 && total > 0
     ? t('library.nothingFound')
     : isExercises
       ? t('library.emptyExercises')
-      : t('library.emptyPrograms')
+      : t(emptyProgramsTitle)
 
   const emptyHint = query.trim().length > 0 && total > 0
     ? t('library.nothingFoundHint')
     : isExercises
       ? t('library.emptyExercisesHint')
-      : t('library.emptyProgramsHint')
+      : t(emptyProgramsHint)
 
   const segment = (value: LibraryTab, label: string, testID: string) => {
     const active = tab === value
@@ -155,7 +164,22 @@ export function LibraryScreen({
             />
           ))}
         </View>
-      ) : null}
+      ) : (
+        <View style={styles.sortChips}>
+          <Chip
+            testID="library-programs-active"
+            label={t('library.programsActive')}
+            selected={!archived}
+            onPress={() => setArchived(false)}
+          />
+          <Chip
+            testID="library-programs-archived"
+            label={t('library.programsArchived')}
+            selected={archived}
+            onPress={() => setArchived(true)}
+          />
+        </View>
+      )}
 
       <ScrollView contentContainerStyle={styles.list}>
         {shown === 0 ? (

@@ -7,10 +7,12 @@ import {
   createExercise,
   createProgram,
   duplicateProgram,
+  editExercise,
   removeExercise,
   renameProgram,
   setProgramItems,
   suggestProgramColor,
+  unarchiveProgram,
 } from './usecases/library'
 import { seedPresetExercises } from './usecases/seed'
 import { monthStats, yearStats } from './usecases/stats'
@@ -22,6 +24,7 @@ import {
   deleteWorkout,
   editSet,
   editWorkoutTimes,
+  finishWorkout,
   previousSets,
   suggestNextSet,
   toggleItemDone,
@@ -42,16 +45,19 @@ export const createServices = (ports: Ports) => ({
   addAdHocExercise: addAdHocExercise(ports),
   editWorkoutTimes: editWorkoutTimes(ports),
   deleteWorkout: deleteWorkout(ports),
+  finishWorkout: finishWorkout(ports),
   suggestNextSet: suggestNextSet(ports),
   previousSets: previousSets(ports),
 
   createExercise: createExercise(ports),
+  editExercise: editExercise(ports),
   removeExercise: removeExercise(ports),
   createProgram: createProgram(ports),
   duplicateProgram: duplicateProgram(ports),
   renameProgram: renameProgram(ports),
   setProgramItems: setProgramItems(ports),
   archiveProgram: archiveProgram(ports),
+  unarchiveProgram: unarchiveProgram(ports),
   suggestProgramColor: suggestProgramColor(ports),
 
   seedPresetExercises: seedPresetExercises(ports),

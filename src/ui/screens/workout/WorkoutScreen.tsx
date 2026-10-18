@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import type { Id, Instant, LocalDate } from '../../../domain/model/types'
-import { computeCompletion } from '../../../domain/rules/completion'
+import { computeCompletion, isWorkoutFinished } from '../../../domain/rules/completion'
 import { weekdayOf } from '../../../domain/rules/dates'
 import { computeDuration } from '../../../domain/rules/duration'
 import { formatDuration, formatElapsed } from '../../../domain/rules/format'
@@ -12,6 +12,7 @@ import { ExerciseRow } from '../../components/ExerciseRow'
 import { Icon } from '../../components/Icon'
 import { ScreenHeader } from '../../components/ScreenHeader'
 import { ExercisePickerSheet } from '../library/ExercisePickerSheet'
+import { WorkoutTimesSheet } from './WorkoutTimesSheet'
 import type { TranslationKey } from '../../i18n/dictionaries'
 import { useT } from '../../i18n/I18nProvider'
 import { useServices } from '../../providers/ServicesProvider'
@@ -81,6 +82,7 @@ export function WorkoutScreen({
   /** Открытый шит: добавление подхода к упражнению либо правка записанного. */
   const [sheet, setSheet] = useState<{ itemId: Id; setId?: Id } | null>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [timesOpen, setTimesOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [now, setNow] = useState(() => Date.now())
 
@@ -130,6 +132,11 @@ export function WorkoutScreen({
     onSuccess: invalidate,
   })
 
+  const finish = useMutation({
+    mutationFn: () => services.finishWorkout(workoutId),
+    onSuccess: invalidate,
+  })
+
   const remove = useMutation({
     mutationFn: () => services.deleteWorkout(workoutId),
     onSuccess: () => {
@@ -158,10 +165,9 @@ export function WorkoutScreen({
     timeZone: services.ports.timeZone,
   })
 
-  // finishedAt проставляется с первой же отметки, поэтому «завершена» — это когда
-  // отмечены все упражнения: только тогда счётчик замирает на итоговой длительности
-  const isFinished =
-    Boolean(entity.manualFinishedAt) || (completion.total > 0 && completion.done === completion.total)
+  // finishedAt проставляется с первой же отметки, поэтому сама по себе она о
+  // завершении не говорит: решают отметки на всех упражнениях либо ручной конец
+  const isFinished = isWorkoutFinished({ manualFinishedAt: entity.manualFinishedAt ?? null, completion })
   const elapsed = isFinished
     ? formatDuration(duration.ms, locale)
     : formatElapsed(entity.startedAt, now, locale)
@@ -196,10 +202,17 @@ export function WorkoutScreen({
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.timerSection}>
-          <View style={[styles.timerBlock, { backgroundColor: colors.accentSoft }]}>
+          <Pressable
+            testID="workout-times"
+            accessibilityRole="button"
+            accessibilityLabel={t('workout.editTimes')}
+            onPress={() => setTimesOpen(true)}
+            style={[styles.timerBlock, { backgroundColor: colors.accentSoft }]}
+          >
             <View style={styles.timerLeft}>
               <View style={styles.timerValueRow}>
-                <View style={[styles.liveDot, { backgroundColor: colors.accent }]} />
+                {/* точка горит, пока тренировка идёт: у завершённой счётчик замер */}
+                {isFinished ? null : <View style={[styles.liveDot, { backgroundColor: colors.accent }]} />}
                 <Text testID="workout-timer" style={[styles.elapsed, { color: colors.accent }]}>
                   {elapsed}
                 </Text>
@@ -212,7 +225,7 @@ export function WorkoutScreen({
             </View>
 
             <Donut done={completion.done} total={completion.total} tone={completion.tone} />
-          </View>
+          </Pressable>
         </View>
 
         <View style={styles.list}>
@@ -257,6 +270,26 @@ export function WorkoutScreen({
             </Text>
           </Pressable>
         </View>
+
+        {/* тренировку закрывают и с пропущенными упражнениями: счётчик не должен идти до ночи */}
+        <View style={styles.finishSection}>
+          {isFinished ? (
+            <Text testID="workout-finished" style={[styles.finishedNote, { color: colors.textMuted }]}>
+              {t('workout.finished')}
+            </Text>
+          ) : (
+            <Pressable
+              testID="workout-finish"
+              accessibilityRole="button"
+              disabled={finish.isPending}
+              onPress={() => finish.mutate()}
+              style={[styles.finishButton, { backgroundColor: colors.accentSoft }]}
+            >
+              <Icon name="circle-check" size={16} color={colors.accent} />
+              <Text style={[styles.finishLabel, { color: colors.accent }]}>{t('workout.finish')}</Text>
+            </Pressable>
+          )}
+        </View>
       </ScrollView>
 
       {openItem ? (
@@ -269,6 +302,16 @@ export function WorkoutScreen({
           previousSet={openPrevious[openSetNumber - 1] ?? null}
           unit={unit}
           onClose={() => setSheet(null)}
+        />
+      ) : null}
+
+      {timesOpen ? (
+        <WorkoutTimesSheet
+          workoutId={workoutId}
+          startedAt={entity.manualStartedAt ?? entity.startedAt}
+          finishedAt={entity.manualFinishedAt ?? entity.finishedAt ?? null}
+          timeZone={services.ports.timeZone}
+          onClose={() => setTimesOpen(false)}
         />
       ) : null}
 
@@ -328,4 +371,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   addExerciseLabel: { fontFamily: uiFont('600'), fontSize: 14, fontWeight: '600' },
+  finishSection: { paddingHorizontal: 16, paddingTop: 10, alignItems: 'center' },
+  finishButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderRadius: radii.md,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+  },
+  finishLabel: { fontFamily: uiFont('600'), fontSize: 14, fontWeight: '600' },
+  finishedNote: { fontFamily: uiFont('500'), fontSize: 12, fontWeight: '500', paddingVertical: 6 },
 })

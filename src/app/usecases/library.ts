@@ -53,6 +53,38 @@ export const createExercise =
   }
 
 /**
+ * Правка упражнения (FR-2.5): название и группа мышц. Имя остаётся уникальным,
+ * своё прежнее из проверки исключается — иначе упражнение не сохранить без
+ * изменений. В проведённых тренировках лежит снапшот названия, история не
+ * переписывается задним числом.
+ */
+export const editExercise =
+  (p: Ports) =>
+  async (input: {
+    readonly exerciseId: Id
+    readonly name: string
+    /** `undefined` — не трогать, `null` — убрать группу. */
+    readonly muscleGroup?: string | null
+  }): Promise<void> => {
+    const exercise = await p.exercises.byId(input.exerciseId)
+    if (!exercise) throw new NotFound('exercise', input.exerciseId)
+
+    const existing = await p.exercises.list({ includeArchived: true })
+    const check = validateExerciseName(
+      input.name,
+      existing.filter((candidate) => candidate.id !== input.exerciseId).map((candidate) => candidate.name),
+    )
+    if (!check.ok) throw new ValidationFailed(check.code)
+
+    await p.exercises.update({
+      ...exercise,
+      name: input.name.trim(),
+      muscleGroup: input.muscleGroup === undefined ? exercise.muscleGroup ?? null : input.muscleGroup,
+      updatedAt: p.clock.now(),
+    })
+  }
+
+/**
  * Удаление упражнения (FR-2.4): использованное в тренировках только архивируется,
  * неиспользованное удаляется по-настоящему.
  */
@@ -165,4 +197,11 @@ export const archiveProgram = (p: Ports) => async (id: Id): Promise<void> => {
   const program = await p.programs.byId(id)
   if (!program) throw new NotFound('program', id)
   await p.programs.update({ ...program, archivedAt: p.clock.now(), updatedAt: p.clock.now() })
+}
+
+/** Возврат программы из архива (FR-3.8): состав и цвет всё это время лежали нетронутыми. */
+export const unarchiveProgram = (p: Ports) => async (id: Id): Promise<void> => {
+  const program = await p.programs.byId(id)
+  if (!program) throw new NotFound('program', id)
+  await p.programs.update({ ...program, archivedAt: null, updatedAt: p.clock.now() })
 }

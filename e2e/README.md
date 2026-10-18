@@ -33,7 +33,9 @@ maestro test e2e/full-cycle.yaml # один
 | `calendar-screen` · `calendar-day-{YYYY-MM-DD}` · `calendar-dot-{YYYY-MM-DD}` | день в календаре месяца и точка программы в нём |
 | `calendar-create-workout` · `calendar-continue-workout` · `legend-absence` | карточка «сегодня» и легенда календаря |
 | `program-option-{название}` | выбор программы при создании тренировки |
-| `workout-timer` | счётчик времени в шапке тренировки |
+| `workout-timer` · `workout-times` | счётчик времени в шапке тренировки; тап открывает правку времени |
+| `workout-time-start` · `workout-time-finish` · `workout-time-clear-finish` · `workout-times-save` | шторка времени: начало, конец, снятие конца, сохранение |
+| `workout-finish` · `workout-finished` | завершить тренировку с неотмеченными упражнениями и отметка о завершении |
 | `workout-delete` · `delete-workout-confirm` · `delete-workout-cancel` | удаление тренировки и диалог подтверждения |
 | `item-checkbox-{index}` · `add-set-{index}` · `open-history-{index}` · `item-target-{index}` | упражнение в тренировке |
 | `add-exercise` | добавить упражнение сверх программы: открывает тот же шит выбора (FR-4.6) |
@@ -49,7 +51,7 @@ maestro test e2e/full-cycle.yaml # один
 | `stats-mode-month` · `stats-mode-year` | сегмент «Месяц»/«Год» |
 | `stats-prev` · `stats-next` · `stats-period` | переключение периода |
 | `stat-workouts-value` · `stat-per-week-value` · `stat-duration-value` · `stat-completion-value` | значения плиток, «—» вместо нуля (FR-6.4) |
-| `stat-bar-{index}` · `stats-programs-bar` · `stats-streak` | график недель, распределение, серия |
+| `stat-column-{index}` · `stat-bar-{index}` · `stat-bar-value-{index}` · `stats-programs-bar` · `stats-streak` | график недель (тап по столбику показывает число), распределение, серия |
 | `settings-screen` · `settings-export` · `settings-import` · `settings-backups` · `settings-units` · `settings-language` | настройки |
 | `settings-export-subtitle` · `settings-wipe-subtitle` · `settings-language-value` | подсказки и значения строк настроек |
 | `settings-unit-kg` · `settings-unit-lb` · `settings-theme` · `settings-theme-value` | единицы веса и тема |
@@ -60,9 +62,19 @@ maestro test e2e/full-cycle.yaml # один
 | `program-screen` · `program-name-input` · `program-item-{index}` · `program-item-remove-{index}` | экран программы: название и состав |
 | `program-item-up-{index}` · `program-item-down-{index}` | порядок в составе: у первой строки недоступна «вверх», у последней — «вниз» |
 | `program-color-{ключ палитры}` · `program-add-exercise` · `program-duplicate` · `program-archive` | экран программы: цвет и действия |
+| `program-unarchive` · `program-archived-note` | возврат программы из архива и пояснение к архивной |
+| `library-programs-active` · `library-programs-archived` | чипы «Действующие» и «Архив» в разделе программ |
 | `exercise-history-screen` · `history-record-weight-value` · `history-record-weight-note` | история упражнения: рекорд веса |
-| `history-metric-weight` · `history-metric-oneRm` · `history-metric-volume` · `history-chart` · `history-bar-peak-{index}` | история упражнения: график и его метрики |
+| `exercise-edit` · `exercise-name-input` · `exercise-save` · `exercise-delete` | правка упражнения: шторка с названием и группой мышц |
+| `delete-exercise-confirm` · `delete-exercise-cancel` | подтверждение удаления упражнения |
+| `history-metric-weight` · `history-metric-oneRm` · `history-metric-volume` · `history-chart` · `history-bar-{index}` · `history-bar-value-{index}` | история упражнения: график, его метрики и тап по столбику |
 | `history-workout-{index}` · `history-delta-{index}` · `history-volume-delta-{index}` | история упражнения: раскладка по тренировкам и плашки изменений |
+
+Шторки снизу — `add-set-sheet`, `exercise-picker`, `workout-times-sheet`,
+`exercise-edit-sheet` — закрываются тремя способами: тапом по затемнению
+(`{id}-scrim`), протяжкой ручки вниз (`{id}-grabber`) и системной кнопкой
+«назад». Между нажатием и исчезновением шторка доигрывает выезд, поэтому
+`assertNotVisible` сразу после тапа может сработать раньше времени.
 
 Ключи палитры программ — `prog-red`, `prog-orange`, `prog-amber`, `prog-green`,
 `prog-teal`, `prog-blue`, `prog-violet`, `prog-pink` (§7.3 ТЗ).
