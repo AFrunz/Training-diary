@@ -32,7 +32,13 @@ jobs:
 
       - name: Прогнать тесты
         # тестовый драйвер базы работает на встроенном в Node node:sqlite
-        run: npm test -- --ci
+        run: npm test -- --ci --json --outputFile=jest-report.json
+
+      # логи Actions скачиваются только с токеном, а сводка видна всем:
+      # по красному прогону должно быть сразу понятно, что именно упало
+      - name: Показать упавшие тесты
+        if: failure()
+        run: node scripts/report-failed-tests.mjs jest-report.json >> "$GITHUB_STEP_SUMMARY"
 
       - name: Собрать бандл
         # ловит то, что не видят тесты: ошибки импортов и конфигурации сборщика
